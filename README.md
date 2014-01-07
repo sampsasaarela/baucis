@@ -7,7 +7,7 @@ Like Baucis and Philemon of old, this library provides REST to the weary travele
 
 Baucis uses [semver](http://semver.org).  Each new feature results in a minor version increase, each bug fix in a patch number increase.
 
-Baucis is tested with over 120 Mocha.js tests.
+Baucis is tested with over 140 Mocha.js tests.
 
 <a href="https://www.gittip.com/wprl/">Donations via gittip.com are appreciated.</a>
 

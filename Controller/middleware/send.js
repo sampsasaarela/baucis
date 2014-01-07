@@ -1,5 +1,8 @@
-// TODO false, documents, *
-send: function (request, response, next) {
+// __Module Definition__
+var mixin = module.exports = function () {
+  var controller = this;
+
+  controller.documents(false, function (request, response, next) {
     var ids;
     var location;
     var replacer;
@@ -54,4 +57,6 @@ send: function (request, response, next) {
 
     if (location) response.set('Location', location);
     response.json(documents);
-  }
+  });
+};
+

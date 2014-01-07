@@ -1,7 +1,15 @@
+// __Module Definition__
+var mixin = module.exports = function () {
+  var controller = this;
+
   // Apply various options based on controller parameters
-  controller: function (request, response, next) {
-    if (request.baucis.controller.get('select') && request.baucis.query) {
-      request.baucis.query.select(request.baucis.controller.get('select'));
-    }
+  controller.query(true, function (request, response, next) {
+    var select = request.baucis.controller.get('select');
+
+    if (!select) return next();
+    if (!request.baucis.query) return next();
+
+    request.baucis.query.select(select);
     next();
-  },
+  });
+};

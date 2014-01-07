@@ -1,5 +1,9 @@
-// Set the conditions used for finding/removing documents
-  conditions: function (request, response, next) {
+// __Module Definition__
+var mixin = module.exports = function () {
+  var controller = this;
+
+  // Set the conditions used for finding/removing documents
+  controller.request(false, function (request, response, next) {
     if (!request.query.conditions) return next();
 
     var conditions = request.query.conditions;
@@ -7,4 +11,5 @@
 
     request.baucis.conditions = conditions;
     next();
-  }
+  });
+};

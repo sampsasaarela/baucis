@@ -2,20 +2,44 @@
 
 // __Dependencies__
 var express = require('express');
-var middleware = require('../middleware');
+var middleware = require('requireindex')(__dirname);
 
 // __Private Module Members__
 
+var parseActivateParameters = function (stage, params) {
+  var options;
+  var argumentsArray = Array.prototype.slice.call(params);
+
+  // First, check for override.
+  if (typeof argumentsArray[0] === 'boolean') {
+    options = last(1, ['howMany', 'verbs', 'middleware'], argumentsArray);
+    options.override = argumentsArray[1];
+  }
+  // Override wasn't set.
+  else {
+    options = last(0, ['howMany', 'verbs', 'middleware'], argumentsArray);
+    options.override = false;
+  }
+
+  options.stage = stage;
+
+  return factor(options);
+}
+
+function exists (o) { return o !== undefined && o !== null }
+
 // Handle variable number of arguments
 function last (skip, names, values) {
+  console.log(values)
   var r = {};
   var position = names.length;
-  var count = Object.keys(values).filter(function (key) { return values[key] }).length - skip;
+  var count = values.filter(exists).length - skip;
 
-  if (count === 0) throw new Error('Too few arguments.');
+  if (count < 1) throw new Error('Too few arguments.');
 
   names.forEach(function (name) {
     var index = skip + count - position;
+    console.log('%s -> %s', name, values[index])
     position--;
     if (index >= skip) r[name] = values[index];
   });
@@ -23,43 +47,43 @@ function last (skip, names, values) {
   return r;
 }
 
+function isInvalidVerb (s) {
+  return /^head|get|put|post|del$/.exec(s) ? false : true;
+}
+
 // Parse middleware into an array of middleware definitions for each howMany and verb
-function factor (stage, options) {
-  if (!stage) throw new Error('Must supply stage.');
-
+function factor (options) {
   var factored = [];
+  var verbString = options.verbs;
+  var verbs;
 
-  if (options.verbs) {
-    options.verbs = options.verbs.toLowerCase();
-    options.verbs.split(/\s+/).forEach(function (verb) {
-      if (!/^head|get|put|post|del$/.exec(verb)) throw new Error('Unrecognized verb: ' + verb);
-    });
-  }
+  console.log(options)
 
+  if (!verbString || verbString === '*') verbString = 'head get post put del';
+  verbs = verbString.toLowerCase().split(/\s+/);
+
+  if (!options.stage) throw new Error('Must supply stage.');
+  if (verbs.some(isInvalidVerb)) throw new Exception('Unrecognized verb.');
   if (options.howMany && options.howMany !== 'instance' && options.howMany !== 'collection') {
     throw new Error('Unrecognized howMany: ' + options.howMany);
   }
-
   // Middleware function or array
-  if (Array.isArray(options.middleware) || typeof options.middleware === 'function') {
-    if (options.howMany !== 'collection') factored.push({ stage: stage, howMany: 'instance', verbs: options.verbs, middleware: options.middleware });
-    if (options.howMany !== 'instance') factored.push({ stage: stage, howMany: 'collection', verbs: options.verbs, middleware: options.middleware });
-    return factored;
+  if (!Array.isArray(options.middleware) && typeof options.middleware !== 'function') {
+    throw new Error('Middleware must be an array or function.');
+  }
+  // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
+  // this middleware is ignored.
+  if (options.stage === 'query' && options.verb === 'post') throw new Error('Query stage not executed for POST.');
+  // Check howMany is valid
+  if (options.howMany !== undefined && options.howMany !== 'instance' && options.howMany !== 'collection') {
+    throw new Error('Unrecognized howMany: "' + options.howMany + '".');
   }
 
-  // Middleware hash keyed on instance/collection, then verb
-  if (options.howMany) throw new Error('Specified instance/collection twice.');
-  if (options.verbs) throw new Error('Specified verbs twice.');
+  // TODO ignore implicitly added middleware that doesn't make sense
 
-  Object.keys(options.middleware).forEach(function (howManyKey) {
-    Object.keys(options.middleware[howManyKey]).map(function (verb) {
-      factored.push({
-        stage: stage,
-        howMany: howManyKey,
-        verbs: verb,
-        middleware: options.middleware[howManyKey][verb]
-      });
-    });
+  verbs.forEach(function (verb) {
+    if (options.howMany !== 'collection') factored.push({ stage: options.stage, howMany: 'instance', verb: verb, middleware: options.middleware, override: options.override });
+    if (options.howMany !== 'instance') factored.push({ stage: options.stage, howMany: 'collection', verb: verb, middleware: options.middleware, override: options.override });
   });
 
   return factored;
@@ -71,172 +95,97 @@ var mixin = module.exports = function () {
   // __Private Instance Members__
 
   var controller = this;
-  // Flags whether the custom middleware has been activated
-  var initialized = false;
-  // A hash for storing user middleware
-  var custom = {
-    "request":
-    { "instance": { "head": [], "get": [], "post": [], "put": [], "del": [] },
-     "collection": { "head": [], "get": [], "post": [], "put": [], "del": [] }
-    },
-    "query":
-    { "instance": { "head": [], "get": [], "post": [], "put": [], "del": [] },
-     "collection": { "head": [], "get": [], "post": [], "put": [], "del": [] }
-    },
-    "documents":
-    { "instance": { "head": [], "get": [], "post": [], "put": [], "del": [] },
-     "collection": { "head": [], "get": [], "post": [], "put": [], "del": [] }
-    }
+  var controllerForStage = {
+    request: express(),
+    query: express(),
+    documents: express()
   };
 
-  // A method used to register user middleware to be activated during intialization.
-  function register (stage, howMany, verbs, middleware) {
-    if (initialized) {
-      throw new Error("Can't add middleware after the controller has been activated.");
-    }
-
-    var options = last(1, ['howMany', 'verbs', 'middleware'], arguments);
-
-    // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
-    // this middleware is ignored.
-    if (stage === 'query' && options.verbs && options.verbs.indexOf('post') !== -1) {
-      throw new Error('Query stage not executed for POST.');
-    }
-
-    factor(stage, options).forEach(function (definition) {
-      var verbs = definition.verbs || 'head get post put del';
-      verbs.split(' ').forEach(function (verb) {
-        if (controller.get(verb) === false) return;
-        custom[definition.stage][definition.howMany][verb] = custom[definition.stage][definition.howMany][verb].concat(definition.middleware);
-      });
-    });
-  }
-
-  // Core function for activating middleware
-  function _activate (factored, override) {
-    if (initialized) throw new Error("Can't activate middleware after the controller has been activated.");
-
-    factored.forEach(function (definition) {
-      var verbs = definition.verbs || 'head get post put del';
-
-      verbs.split(' ').forEach(function (verb) {
-        if (!override && controller.get(verb) === false) return;
-
-        var path;
-
-        if (definition.howMany === 'instance') path = controller.get('basePathWithId');
-        else if (definition.howMany === 'collection') path = controller.get('basePath');
-        else throw new Error('Unrecognized howMany.');
-
-        controller[verb](path, definition.middleware);
-      });
-    });
-  }
-
-  // A method used to activate baucis middleware & user middleware that was
-  // previously registered.
-  function activate (stage, howMany, verbs, middleware) {
-    var options = last(1, ['howMany', 'verbs', 'middleware'], arguments);
-    _activate(factor(stage, options), false);
-  }
-
-  // A method used to activate middleware overriding any verb options
-  function activateOverride (stage, howMany, verbs, middleware) {
-    var options = last(1, ['howMany', 'verbs', 'middleware'], arguments);
-    _activate(factor(stage, options), true);
+  // A method used to activate middleware for a particular stage.
+  function activate (definition) {
+    // If override is not set, and the verb has been turned off, ignore the middleware
+    if (definition.override !== true && controller.get(definition.verb) === false) return;
+    var path = definition.howMany === 'instance' ? controller.get('basePathWithId') : controller.get('basePath');
+    controllerForStage[definition.stage][definition.verb](path, definition.middleware);
   }
 
   // __Public Instance Methods__
 
-  // A method used to register request-stage middleware.
-  controller.request = function (howMany, verbs, middleware) {
-    register('request', howMany, verbs, middleware);
+  // A method used to activate request-stage middleware.
+  controller.request = function (override, howMany, verbs, middleware) {
+    var definitions = parseActivateParameters('request', arguments);
+    definitions.forEach(activate);
     return controller;
   };
 
-  // A method used to register query-stage middleware.
-  controller.query = function (howMany, verbs, middleware) {
-    register('query', howMany, verbs, middleware);
+  // A method used to activate query-stage middleware.
+  controller.query = function (override, howMany, verbs, middleware) {
+    var definitions = parseActivateParameters('query', arguments);
+    definitions.forEach(activate);
     return controller;
   };
 
-  // A method used to register document-stage middleware.
-  controller.documents = function (howMany, verbs, middleware) {
-    register('documents', howMany, verbs, middleware);
+  // A method used to activate document-stage middleware.
+  controller.documents = function (override, howMany, verbs, middleware) {
+    var definitions = parseActivateParameters('documents', arguments);
+    definitions.forEach(activate);
     return controller;
   };
 
-  // A method used to intialize the controller and activate user middleware.  It
-  // may be called multiple times, but will trigger intialization only once.
-  controller.initialize = function () {
-    if (initialized) return controller;
+  // Middleware for parsing JSON POST/PUTs
+  controller.use(express.json());
+  // Middleware for parsing form POST/PUTs
+  controller.use(express.urlencoded());
 
-    // Delete any query instance POST middleware that was added implicitly.
-    custom.query.instance.post = [];
-    // Delete any query collection POST middleware that was added implicitly (POSTs don't have a query stage).
-    custom.query.collection.post = [];
-    // Delete any query collection PUT middleware that was added implicitly.
-    custom.query.collection.put = [];
+  // Activate stage controllers.
+  controller.use(controllerForStage.request);
+  controller.use(controllerForStage.query);
+  controller.use(controllerForStage.documents);
 
-    // __Initialization (Pre-Request-Stage) Middleware__
-    // Initialize baucis state
-    middleware.initialize.apply(controller, activate);
+  // __Request-Stage Middleware__
 
-    // Middleware for parsing JSON POST/PUTs
-    activateOverride('request', express.json());
+  // Initialize baucis state
+  middleware.initialize.apply(controller);
+  // Activate middleware to check for deprecated features
+  middleware.deprecated.apply(controller);
+  // Activate middleware that sets the Allow & Accept headers
+  middleware.allowHeader.apply(controller);
+  middleware.acceptHeader.apply(controller);
+  // Activate middleware that checks for correct Mongo _ids when applicable
+  middleware.validateId.apply(controller);
+  // Activate middleware that checks for disabled HTTP methods
+  middleware.checkMethodSupported.apply(controller);
+  // Activate middleware to set request.baucis.conditions for find/remove
+  middleware.setConditions.apply(controller);
+  // Also activate conditions middleware for update
+  // TODO // activate('request', 'instance', 'put', middleware.configure.conditions);
+  // Activate middleware to set request.baucis.count when query is present
+  // TODO // activate('request', 'get', middleware.configure.count);
 
-    // Middleware for parsing form POST/PUTs
-    activateOverride('request', express.urlencoded());
+  // __Query-Stage Middleware__
+  // The query will have been created (except for POST, which doesn't use a
+  // find or remove query).
 
-    // __Request-Stage Middleware__
+  // Activate middleware to build the query (except for POST requests).
+  middleware.buildQuery.apply(controller);
+  // Activate middleware to handle controller and query options.
+  middleware.applyControllerOptions.apply(controller);
+  middleware.applyQueryString.apply(controller);
 
-    // Activate middleware to check for deprecated features
-    middleware.deprecated.apply(controller, activate);
-    // Activate middleware that sets the Allow & Accept headers
-    middleware.allowHeader.apply(controller, activate);
-    middleware.acceptHeader.apply(controller, activate);
-    // Activate middleware that checks for correct Mongo _ids when applicable
-    activate('request', middleware.configure.checkId);
-    // Activate middleware that checks for disabled HTTP methods
-    activateOverride('request', middleware.configure.checkMethod);
-    // Activate middleware to set request.baucis.conditions for find/remove
-    activate('request', 'collection', 'head get del', middleware.configure.conditions);
-    // Also activate conditions middleware for update
-    activate('request', 'instance', 'put', middleware.configure.conditions);
-    // Activate middleware to set request.baucis.count when query is present
-    activate('request', 'get', middleware.configure.count);
-    // Next, activate the request-stage user middleware.
-    activate('request', custom['request']);
-    // Activate middleware to build the query (except for POST requests).
-    middleware.buildQuery.apply(controller, activate);
+  // __Document-Stage Middleware__
 
-    // __Query-Stage Middleware__
-    // The query will have been created (except for POST, which doesn't use a
-    // find or remove query).
+  // Activate middleware to execute the query.
+  middleware.execute.apply(controller);
+  // Activate some middleware that will set the Link header when that feature
+  // is enabled.  (This must come after exec or else the count is
+  // returned for all subsequqent executions of the query.)
+  middleware.linkHeader.apply(controller);
+  // Activate the middleware that sets the `Last-Modified` header when appropriate.
+  middleware.lastModified.apply(controller);
 
-    // Activate middleware to handle controller and query options.
-    activate('query', [ middleware.configure.controller, middleware.configure.query ]);
-    // Activate user middleware for the query-stage.
-    activate('query', custom['query']);
-    // Activate middleware to execute the query.
-    middleware.execute.apply(controller, activate);
+  // TODO this comes after documents-stage, correct?
+  // Activate the middleware that sends the resulting document(s) or count.
+  middleware.send.apply(controller);
 
-    // Activate some middleware that will set the Link header when that feature
-    // is enabled.  (This must come after exec or else the count is
-    // returned for all subsequqent executions of the query.)
-    middleware.linkHeader.apply(controller, activate);
-
-    // __Document-Stage Middleware__
-
-    // Activate the middleware that sets the `Last-Modified` header when appropriate.
-    middleware.lastModified.apply(controller, activate);
-    // Activate the the document-stage user middleware.
-    activate('documents', custom['documents']);
-    // Activate the middleware that sends the resulting document(s) or count.
-    middleware.send.apply(controller, activate);
-
-    delete custom;
-    initialized = true;
-    return controller;
-  };
+  return controller;
 };

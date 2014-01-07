@@ -6,9 +6,9 @@ var connect = require('connect');
 var validOperators = [ '$set', '$push', '$pull' ];
 
 // __Module Definition__
-var mixin = module.exports = function (activate) {
+var mixin = module.exports = function () {
   // Get the count for HEAD requests.
-  activate('query', 'head', function (request, response, next) {
+  this.query(false, 'head', function (request, response, next) {
     request.baucis.count = true;
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
@@ -18,7 +18,7 @@ var mixin = module.exports = function (activate) {
   });
 
   // Execute the find query for GET.
-  activate('query', 'get', function (request, response, next) {
+  this.query(false, 'get', function (request, response, next) {
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
       request.baucis.documents = documents;
@@ -27,7 +27,7 @@ var mixin = module.exports = function (activate) {
   });
 
   // Execute the remove query for DELETE.
-  activate('query', 'del', function (request, response, next) {
+  this.query(false, 'del', function (request, response, next) {
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
       if (!documents) return response.send(404);
@@ -47,7 +47,7 @@ var mixin = module.exports = function (activate) {
   });
 
   // Create the documents for a POST request.
-  activate('query', 'collection', 'post', function (request, response, next) {
+  this.query(false, 'collection', 'post', function (request, response, next) {
     var saved = [];
     var documents = request.body;
     var Model = request.baucis.controller.get('model');
@@ -96,7 +96,7 @@ var mixin = module.exports = function (activate) {
   });
 
   // Update the documents specified for a PUT request.
-  activate('query', 'instance', 'put', function (request, response, next) {
+  this.query(false, 'instance', 'put', function (request, response, next) {
     var operator = request.headers['x-baucis-update-operator'];
     var conditions;
     var updateWrapper = {};

@@ -5,20 +5,19 @@ var Api = require('./Api');
 var instance = Api();
 
 // __Module Definition__
-var Baucis = module.exports = function Baucis (options) {
-  var previous = empty();
+var baucis = module.exports = function (options) {
+  var previous = baucis.empty();
   return previous;
 };
 
 // __Public Methods__
-Baucis.rest = function (options) {
+baucis.rest = function (options) {
   // TODO maybe only check publish here and not in Api
   var controller = instance.rest(options);
   return controller;
 };
 
-// TODO name? reset?
-Baucis.empty = function () {
+baucis.empty = function () {
   var previous = instance;
   instance = Api();
   return previous;

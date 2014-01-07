@@ -1,5 +1,9 @@
 // TODO false, documents, *
-lastModified: function (request, response, next) {
+// __Module Definition__
+var mixin = module.exports = function () {
+  var controller = this;
+
+  controller.documents(false, function (request, response, next) {
     var lastModifiedPath = request.baucis.controller.get('lastModified');
     var documents = request.baucis.documents;
 
@@ -25,4 +29,6 @@ lastModified: function (request, response, next) {
     response.set('Last-Modified', (new Date(lastModified)).toUTCString());
 
     next();
-  }
+  });
+};
+

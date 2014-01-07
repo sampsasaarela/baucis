@@ -3,11 +3,11 @@ var url = require('url');
 var connect = require('connect');
 
 // __Module Definition__
-var mixin = module.exports = function (activate) {
+var mixin = module.exports = function () {
   var controller = this;
 
   // Add "Link" header field, with some basic defaults
-  activate(false, 'query', 'instance', '*', function (request, response, next) {
+  controller.query(false, 'instance', '*', function (request, response, next) {
     if (controller.get('relations') !== true) return next();
 
     var originalPath = request.originalUrl.split('?')[0];
@@ -28,7 +28,7 @@ var mixin = module.exports = function (activate) {
   });
 
   // Add "Link" header field, with some basic defaults (for collection routes)
-  activate(false, 'query', 'collection', '*', function (request, response, next) {
+  controller.query(false, 'collection', '*', function (request, response, next) {
     if (controller.get('relations') !== true) return next();
 
     var makeLink = function (query) {
@@ -58,6 +58,4 @@ var mixin = module.exports = function (activate) {
       done();
     });
   });
-
-  return controller;
 };

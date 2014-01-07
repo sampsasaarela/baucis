@@ -8,7 +8,6 @@ var includes = require('requireindex')(__dirname);
 
 // __Module Definition__
 var Controller = module.exports = function Controller (options) {
-
   // __Private Instance Members & Validation__
 
   // Marshal string into a hash

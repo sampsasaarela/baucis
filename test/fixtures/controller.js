@@ -65,8 +65,6 @@ var fixture = module.exports = {
       next();
     });
 
-    subcontroller.initialize();
-
     // Stores controller
     controller = baucis.rest({
       singular: 'store',

@@ -1,9 +1,7 @@
 // __Module Definition__
-var mixin = module.exports = function (activate) {
-  var controller = this;
-
+var mixin = module.exports = function () {
   // Build the "Accept" response header.
-  activate(true, 'request', function (request, response, next) {
+  this.request(true, function (request, response, next) {
     var putOff = (request.baucis.controller.get('put') === false);
     var postOff = (request.baucis.controller.get('post') === false);
 
@@ -12,6 +10,4 @@ var mixin = module.exports = function (activate) {
     response.set('Accept', 'application/json, application/x-www-form-urlencoded');
     next();
   });
-
-  return controller;
 };
