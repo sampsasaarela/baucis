@@ -221,6 +221,7 @@ Controller Options
 | basePath | Defaults to `/`.  Used for embedding a controller in another controller. |
 | publish | Set to `false` to not publish the controller's endpoints when `baucis()` is called. |
 | select | Select or deselect fields for all queries e.g. `'foo +bar -password'` |
+| relations | Set to `true` to add various relationship headers for paging, etc. |
 | findBy | Use another field besides `_id` for entity queries. |
 | lastModified | Set the `Last-Modified` HTTP header using the given field.  Currently this field must be a `Date`. |
 | allow push | *BYPASSES VALIDATION* Allow using X-Baucis-Update-Operator to push to a document's path. |
