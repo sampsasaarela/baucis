@@ -59,7 +59,7 @@ function factor (options) {
 
   // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
   // this middleware is ignored.
-  if (options.override !== true && options.stage === 'query'
+  if (options.override === false && options.stage === 'query'
     && verbString && verbString.indexOf('post') !== -1) throw new Error('Query stage not executed for POST.');
 
   if (!verbString || verbString === '*') verbString = 'head get post put del';
@@ -101,23 +101,32 @@ var mixin = module.exports = function () {
     initial: express(),
     request: express(),
     query: express(),
-    documents: express()
+    documents: express(),
+    finalize: express()
   };
-  var initial = controllerForStage['initial'];
+  var initial = controllerForStage.initial;
+  var finalize = controllerForStage.finalize;
 
   // A method used to activate middleware for a particular stage.
   function activate (definition) {
     // If override is not set, and the verb has been turned off, ignore the middleware
-    if (definition.override !== true && controller.get(definition.verb) === false) return;
+    if (definition.override === false && controller.get(definition.verb) === false) return;
     var path = definition.howMany === 'instance' ? controller.get('basePathWithId') : controller.get('basePath');
     controllerForStage[definition.stage][definition.verb](path, definition.middleware);
   }
+
+  // __Body Parsers__
+  // Middleware for parsing JSON POST/PUTs
+  controller.use(express.json());
+  // Middleware for parsing form POST/PUTs
+  controller.use(express.urlencoded());
 
   // __Stage Controllers__
   controller.use(controllerForStage.initial);
   controller.use(controllerForStage.request);
   controller.use(controllerForStage.query);
   controller.use(controllerForStage.documents);
+  controller.use(controllerForStage.finalize);
 
   // __Public Instance Methods__
 
@@ -156,11 +165,6 @@ var mixin = module.exports = function () {
   Object.keys(controllerForStage).forEach(function (stage) {
     controllerForStage[stage].disable('x-powered-by');
   });
-
-  // Middleware for parsing JSON POST/PUTs
-  controller.use(express.json());
-  // Middleware for parsing form POST/PUTs
-  controller.use(express.urlencoded());
 
   // __Request-Stage Middleware__
 
@@ -203,9 +207,8 @@ var mixin = module.exports = function () {
   // Activate the middleware that sets the `Last-Modified` header when appropriate.
   middleware.lastModified.apply(controller);
 
-  // TODO this comes after documents-stage, correct?
-  // Activate the middleware that sends the resulting document(s) or count.
-  middleware.send.apply(controller);
+  // Activate the middleware that sends the final document(s) or count.
+  middleware.send.apply(finalize);
 
   return controller;
 };

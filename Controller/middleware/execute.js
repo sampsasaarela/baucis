@@ -111,7 +111,7 @@ var mixin = module.exports = function () {
       next();
     };
 
-    console.log('%s: %s', versionKey, updateVersion);
+    console.log('First check: %s', lock && !Number.isFinite(updateVersion));
 
     if (lock && !Number.isFinite(updateVersion)) return response.send(409);
 
@@ -140,11 +140,13 @@ var mixin = module.exports = function () {
       var currentVersion = doc[versionKey];
 
       if (lock) {
+        console.log('selected: %s', doc.isSelected(versionKey))
+
         // Make sure the version key was selected.
         if (!doc.isSelected(versionKey)) return next(new Error('Version key "'+ versionKey + '" was not selected.'));
         // Update and current version have been found.
         // Check if they're equal.
-        if (updateVersion !== currentVersion) response.send(409);
+        if (updateVersion !== currentVersion) return response.send(409);
         // One is not allowed to set __v and increment in the same update.
         delete update[versionKey];
         doc.increment();

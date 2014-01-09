@@ -17,35 +17,35 @@ describe('Swagger Resource Listing', function () {
     done();
   });
 
-  it('should generate the correct listing', function (done) {
-    var options = {
-      url: 'http://127.0.0.1:8012/api/api-docs',
-      json: true
-    };
-    request.get(options, function (err, response, body) {
-      if (err) return done(err);
+  // it('should generate the correct listing', function (done) {
+  //   var options = {
+  //     url: 'http://127.0.0.1:8012/api/api-docs',
+  //     json: true
+  //   };
+  //   request.get(options, function (err, response, body) {
+  //     if (err) return done(err);
 
-      expect(response).to.have.property('statusCode', 200);
-      expect(body).to.have.property('apiVersion', '0.0.1');
-      expect(body).to.have.property('swaggerVersion', '1.1');
-      expect(body).to.have.property('basePath', 'http://127.0.0.1:8012/api');
-      expect(body).to.have.property('apis');
+  //     expect(response).to.have.property('statusCode', 200);
+  //     expect(body).to.have.property('apiVersion', '0.0.1');
+  //     expect(body).to.have.property('swaggerVersion', '1.1');
+  //     expect(body).to.have.property('basePath', 'http://127.0.0.1:8012/api');
+  //     expect(body).to.have.property('apis');
 
-      // Check the API listing
-      expect(body.apis).to.be.an(Array);
-      expect(body.apis).to.have.property('length', 4);
-      expect(body.apis[0].path).to.be('/api-docs/fungi');
-      expect(body.apis[0].description).to.be('Operations about fungi.');
-      expect(body.apis[1].path).to.be('/api-docs/minerals');
-      expect(body.apis[1].description).to.be('Operations about minerals.');
-      expect(body.apis[2].path).to.be('/api-docs/geese');
-      expect(body.apis[2].description).to.be('Operations about geese.');
-      expect(body.apis[3].path).to.be('/api-docs/vegetables');
-      expect(body.apis[3].description).to.be('Operations about vegetables.');
+  //     // Check the API listing
+  //     expect(body.apis).to.be.an(Array);
+  //     expect(body.apis).to.have.property('length', 4);
+  //     expect(body.apis[0].path).to.be('/api-docs/fungi');
+  //     expect(body.apis[0].description).to.be('Operations about fungi.');
+  //     expect(body.apis[1].path).to.be('/api-docs/minerals');
+  //     expect(body.apis[1].description).to.be('Operations about minerals.');
+  //     expect(body.apis[2].path).to.be('/api-docs/geese');
+  //     expect(body.apis[2].description).to.be('Operations about geese.');
+  //     expect(body.apis[3].path).to.be('/api-docs/vegetables');
+  //     expect(body.apis[3].description).to.be('Operations about vegetables.');
 
-      done();
-    });
-  });
+  //     done();
+  //   });
+  // });
 
   it('should generate the correct API definition', function (done) {
     var options = {

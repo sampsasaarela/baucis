@@ -1,7 +1,7 @@
 // __Module Definition__
 var mixin = module.exports = function () {
   // Apply various options based on request query parameters.
-  this.query(false, 'collection', 'head get del', function (request, response, next) {
+  this.query(false, 'collection', 'head get put del', function (request, response, next) {
     var populate = request.query.populate;
     var hint = request.query.hint;
     var select = request.query.select;
@@ -36,11 +36,11 @@ var mixin = module.exports = function () {
         query.hint(hint);
       }
       else {
-        response.send(403, 'Hints are not enabled for this resource.');
+        return response.send(403, 'Hints are not enabled for this resource.');
       }
     }
 
-    if (select && request.baucis.query) {
+    if (select) {
       if (select.indexOf('+') !== -1) {
         return next(new Error('Including excluded fields is not permitted.'));
       }

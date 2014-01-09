@@ -1,5 +1,6 @@
 // __Dependencies__
 var url = require('url');
+var express = require('express');
 var mongoose = require('mongoose');
 var etag = require('express/lib/utils').etag
 
@@ -7,7 +8,7 @@ var etag = require('express/lib/utils').etag
 var mixin = module.exports = function () {
   var controller = this;
 
-  controller.documents(false, function (request, response, next) {
+  controller.use(function (request, response, next) {
     var ids;
     var location;
     var replacer;

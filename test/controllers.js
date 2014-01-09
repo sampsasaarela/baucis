@@ -29,8 +29,6 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-
-      console.log(body)
       expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
       expect(body[1]).to.have.property('color', 'Yellow');
@@ -49,6 +47,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (err, response, body) {
       if (err) return done(err);
+      console.log(body)
       expect(response.statusCode).to.be(201);
       expect(body).to.have.property('color', 'Green');
       expect(body).to.have.property('name', 'Gorgonzola');
@@ -75,21 +74,22 @@ describe('Controllers', function () {
     });
   });
 
-  it('should allow POSTing when fields are deselected (issue #67)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores',
-      json: true,
-      body: { name: "Lou's" }
-    };
-    request.post(options, function (err, response, body) {
-      if (err) return done(err);
-      expect(response.statusCode).to.be(201);
-      expect(body).to.have.property('_id');
-      expect(body).to.have.property('__v');
-      expect(body).to.have.property('name', "Lou's");
-      done();
-    });
-  });
+  // it('should allow POSTing when fields are deselected (issue #67)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores',
+  //     json: true,
+  //     body: { name: "Lou's" }
+  //   };
+  //   request.post(options, function (err, response, body) {
+  //     if (err) return done(err);
+  //     console.log(body)
+  //     expect(response.statusCode).to.be(201);
+  //     expect(body).to.have.property('_id');
+  //     expect(body).to.have.property('__v');
+  //     expect(body).to.have.property('name', "Lou's");
+  //     done();
+  //   });
+  // });
 
   it('should support finding documents with custom findBy field', function (done) {
     var options = {
@@ -132,18 +132,18 @@ describe('Controllers', function () {
     done();
   });
 
-  it('should allow adding arbitrary routes', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/info',
-      json: true
-    };
-    request.get(options, function (err, response, body) {
-      if (err) return done(err);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.be('OK!');
-      done();
-    });
-  });
+  // it('should allow adding arbitrary routes', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/info',
+  //     json: true
+  //   };
+  //   request.get(options, function (err, response, body) {
+  //     if (err) return done(err);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.be('OK!');
+  //     done();
+  //   });
+  // });
 
   it('should allow adding arbitrary routes with params', function (done) {
     var options = {
@@ -158,224 +158,224 @@ describe('Controllers', function () {
     });
   });
 
-  it('should still allow using baucis routes when adding arbitrary routes', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores',
-      qs: { select: '-_id -__v', sort: 'name' },
-      json: true
-    };
-    request.get(options, function (err, response, body) {
-      if (err) return done(err);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.eql([ { name: 'Corner' }, { name: 'Westlake' } ]);
-      done();
-    });
-  });
+  // it('should still allow using baucis routes when adding arbitrary routes', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores',
+  //     qs: { select: '-_id -__v', sort: 'name' },
+  //     json: true
+  //   };
+  //   request.get(options, function (err, response, body) {
+  //     if (err) return done(err);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.eql([ { name: 'Corner' }, { name: 'Westlake' } ]);
+  //     done();
+  //   });
+  // });
 
-  it('should allow mounting of subcontrollers (GET plural)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.property('length', 3);
-      expect(body[0]).to.have.property('name', 'Axe');
-      done();
-    });
-  });
+  // it('should allow mounting of subcontrollers (GET plural)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.have.property('length', 3);
+  //     expect(body[0]).to.have.property('name', 'Axe');
+  //     done();
+  //   });
+  // });
 
-  it('should allow mounting of subcontrollers (POST plural)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/123/tools',
-      json: { name: 'Reticulating Saw' }
-    };
-    request.post(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(201);
-      expect(body).to.have.property('bogus', false);
-      done();
-    });
-  });
+  // it('should allow mounting of subcontrollers (POST plural)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/123/tools',
+  //     json: { name: 'Reticulating Saw' }
+  //   };
+  //   request.post(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(201);
+  //     expect(body).to.have.property('bogus', false);
+  //     done();
+  //   });
+  // });
 
-  it('should allow mounting of subcontrollers (DEL plural)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/123/tools',
-      json: true
-    };
-    request.del(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.be(3);
-      done();
-    });
-  });
+  // it('should allow mounting of subcontrollers (DEL plural)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/123/tools',
+  //     json: true
+  //   };
+  //   request.del(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.be(3);
+  //     done();
+  //   });
+  // });
 
-  it('should allow mounting of subcontrollers (GET singular)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.property('length', 3);
-      expect(body[0]).to.have.property('name', 'Axe');
+  // it('should allow mounting of subcontrollers (GET singular)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.have.property('length', 3);
+  //     expect(body[0]).to.have.property('name', 'Axe');
 
-      var id = body[0]._id;
-      var options = {
-        url: 'http://localhost:8012/api/stores/123/tools/' + id,
-        json: true
-      };
-      request.get(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(200);
-        expect(body).to.have.property('name', 'Axe');
-        done();
-      });
-    });
-  });
+  //     var id = body[0]._id;
+  //     var options = {
+  //       url: 'http://localhost:8012/api/stores/123/tools/' + id,
+  //       json: true
+  //     };
+  //     request.get(options, function (error, response, body) {
+  //       if (error) return done(error);
+  //       expect(response.statusCode).to.be(200);
+  //       expect(body).to.have.property('name', 'Axe');
+  //       done();
+  //     });
+  //   });
+  // });
 
-  it('should allow mounting of subcontrollers (PUT singular)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/123/tools',
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
+  // it('should allow mounting of subcontrollers (PUT singular)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/123/tools',
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
 
-      var id = body[0]._id;
-      var options = {
-        url: 'http://localhost:8012/api/stores/123/tools/' + id,
-        json: { name: 'Screwdriver' }
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(200);
-        expect(body).to.have.property('name', 'Screwdriver');
-        expect(body).to.have.property('bogus', false);
-        done();
-      });
-    });
-  });
+  //     var id = body[0]._id;
+  //     var options = {
+  //       url: 'http://localhost:8012/api/stores/123/tools/' + id,
+  //       json: { name: 'Screwdriver' }
+  //     };
+  //     request.put(options, function (error, response, body) {
+  //       if (error) return done(error);
+  //       expect(response.statusCode).to.be(200);
+  //       expect(body).to.have.property('name', 'Screwdriver');
+  //       expect(body).to.have.property('bogus', false);
+  //       done();
+  //     });
+  //   });
+  // });
 
-  it('should allow mounting of subcontrollers (DEL singular)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.property('length', 3);
-      expect(body[0]).to.have.property('name', 'Axe');
+  // it('should allow mounting of subcontrollers (DEL singular)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.have.property('length', 3);
+  //     expect(body[0]).to.have.property('name', 'Axe');
 
-      var id = body[0]._id;
-      var options = {
-        url: 'http://localhost:8012/api/stores/123/tools/' + id,
-        json: true
-      };
-      request.del(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(200);
-        expect(body).to.be(1);
-        done();
-      });
-    });
-  });
+  //     var id = body[0]._id;
+  //     var options = {
+  //       url: 'http://localhost:8012/api/stores/123/tools/' + id,
+  //       json: true
+  //     };
+  //     request.del(options, function (error, response, body) {
+  //       if (error) return done(error);
+  //       expect(response.statusCode).to.be(200);
+  //       expect(body).to.be(1);
+  //       done();
+  //     });
+  //   });
+  // });
 
-  it('should allow parent to function when mounting subcontrollers (GET plural)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/?sort=name',
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.length(2);
-      done();
-    });
-  });
+  // it('should allow parent to function when mounting subcontrollers (GET plural)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/?sort=name',
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.have.length(2);
+  //     done();
+  //   });
+  // });
 
-  it('should allow parent to function when mounting subcontrollers (POST plural)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/',
-      json: { name: 'Arena' }
-    };
-    request.post(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(201);
-      expect(body).not.to.have.property('bogus');
-      done();
-    });
-  });
+  // it('should allow parent to function when mounting subcontrollers (POST plural)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/',
+  //     json: { name: 'Arena' }
+  //   };
+  //   request.post(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(201);
+  //     expect(body).not.to.have.property('bogus');
+  //     done();
+  //   });
+  // });
 
-  it('should allow parent to function when mounting subcontrollers (DELETE plural)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/',
-      json: true
-    };
-    request.del(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.be(2);
-      done();
-    });
-  });
+  // it('should allow parent to function when mounting subcontrollers (DELETE plural)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/',
+  //     json: true
+  //   };
+  //   request.del(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.be(2);
+  //     done();
+  //   });
+  // });
 
-  it('should allow parent to function when mounting subcontrollers (GET singular)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.property('name', 'Westlake');
-      done();
-    });
-  });
+  // it('should allow parent to function when mounting subcontrollers (GET singular)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.have.property('name', 'Westlake');
+  //     done();
+  //   });
+  // });
 
-  it('should allow parent to function when mounting subcontrollers (PUT singular)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      json: { mercoledi: false, __v: 0 }
-    };
-    request.put(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.property('mercoledi', false);
-      done();
-    });
-  });
+  // it('should allow parent to function when mounting subcontrollers (PUT singular)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     json: { mercoledi: false, __v: 0 }
+  //   };
+  //   request.put(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.have.property('mercoledi', false);
+  //     done();
+  //   });
+  // });
 
-  it('should allow parent to function when mounting subcontrollers (DELETE singular)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      json: true
-    };
-    request.del(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.be(1);
-      done();
-    });
-  });
+  // it('should allow parent to function when mounting subcontrollers (DELETE singular)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     json: true
+  //   };
+  //   request.del(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.be(1);
+  //     done();
+  //   });
+  // });
 
-  it('should allow using middleware', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores',
-      json: true
-    };
-    request.del(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(response.headers['x-poncho']).to.be('Poncho!');
-      done();
-    });
-  });
+  // it('should allow using middleware', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores',
+  //     json: true
+  //   };
+  //   request.del(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(response.headers['x-poncho']).to.be('Poncho!');
+  //     done();
+  //   });
+  // });
 
   it('should allow using middleware mounted at a path', function (done) {
     var options = {
@@ -454,33 +454,33 @@ describe('Controllers', function () {
     done();
   });
 
-  it('should err when X-Baucis-Push is used (deprecated)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      headers: { 'X-Baucis-Push': true },
-    };
-    request.put(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: The "X-Baucis-Push header" is deprecated.  Use "X-Baucis-Update-Operator: $push" instead.');
-      done();
-    });
-  });
+  // it('should err when X-Baucis-Push is used (deprecated)', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     headers: { 'X-Baucis-Push': true },
+  //   };
+  //   request.put(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(500);
+  //     expect(body).to.contain('Error: The "X-Baucis-Push header" is deprecated.  Use "X-Baucis-Update-Operator: $push" instead.');
+  //     done();
+  //   });
+  // });
 
-  it('should disallow push mode by default', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      headers: { 'X-Baucis-Update-Operator': '$push' },
-      json: true,
-      body: { molds: 'penicillium roqueforti', __v: 0 }
-    };
-    request.put(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: Update operator not enabled for this controller: $push');
-      done();
-    });
-  });
+  // it('should disallow push mode by default', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     headers: { 'X-Baucis-Update-Operator': '$push' },
+  //     json: true,
+  //     body: { molds: 'penicillium roqueforti', __v: 0 }
+  //   };
+  //   request.put(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(500);
+  //     expect(body).to.contain('Error: Update operator not enabled for this controller: $push');
+  //     done();
+  //   });
+  // });
 
   it('should disallow pushing to non-whitelisted paths', function (done) {
     var options = {
@@ -516,20 +516,20 @@ describe('Controllers', function () {
     });
   });
 
-  it('should disallow $pull mode by default', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      headers: { 'X-Baucis-Update-Operator': '$pull' },
-      json: true,
-      body: { molds: 'penicillium roqueforti', __v: 0 }
-    };
-    request.put(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: Update operator not enabled for this controller: $pull');
-      done();
-    });
-  });
+  // it('should disallow $pull mode by default', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     headers: { 'X-Baucis-Update-Operator': '$pull' },
+  //     json: true,
+  //     body: { molds: 'penicillium roqueforti', __v: 0 }
+  //   };
+  //   request.put(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(500);
+  //     expect(body).to.contain('Error: Update operator not enabled for this controller: $pull');
+  //     done();
+  //   });
+  // });
 
   it('should disallow pulling non-whitelisted paths', function (done) {
     var options = {
@@ -576,20 +576,20 @@ describe('Controllers', function () {
     });
   });
 
-  it('should disallow push mode by default', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      headers: { 'X-Baucis-Update-Operator': '$set' },
-      json: true,
-      body: { molds: 'penicillium roqueforti', __v: 0 }
-    };
-    request.put(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: Update operator not enabled for this controller: $set');
-      done();
-    });
-  });
+  // it('should disallow push mode by default', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/stores/Westlake',
+  //     headers: { 'X-Baucis-Update-Operator': '$set' },
+  //     json: true,
+  //     body: { molds: 'penicillium roqueforti', __v: 0 }
+  //   };
+  //   request.put(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(500);
+  //     expect(body).to.contain('Error: Update operator not enabled for this controller: $set');
+  //     done();
+  //   });
+  // });
 
   it('should disallow setting non-whitelisted paths', function (done) {
     var options = {
@@ -813,54 +813,53 @@ describe('Controllers', function () {
     });
   });
 
-  it('should cause an error if locking is enabled and no version is selected on the doc', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/liens',
-      json: true,
-      body: { title: 'Forest Expansion' }
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
+  // it('should cause an error if locking is enabled and no version is selected on the doc', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/liens',
+  //     json: true,
+  //     body: { title: 'Forest Expansion' }
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
 
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body[0]._id,
-        json: true,
-        qs: { select: '-__v' },
-        body: { __v: 1000 }
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(500);
-        done();
-      });
-    });
-  });
+  //     var options = {
+  //       url: 'http://localhost:8012/api/liens/' + body[0]._id,
+  //       json: true,
+  //       qs: { select: '-__v' },
+  //       body: { __v: 1000 }
+  //     };
+  //     request.put(options, function (error, response, body) {
+  //       if (error) return done(error);
+  //       expect(response.statusCode).to.be(500);
+  //       done();
+  //     });
+  //   });
+  // });
 
+  // it('should cause an error if locking is enabled and no version is selected', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/liens',
+  //     json: true,
+  //     body: { title: 'Forest Expansion' }
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
 
-  it('should cause an error if locking is enabled and no version is selected', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/liens',
-      json: true,
-      body: { title: 'Forest Expansion' }
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body[0]._id,
-        json: true,
-        qs: { select: '-__v' },
-        body: { __v: 1000 }
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(500);
-        done();
-      });
-    });
-  });
+  //     var options = {
+  //       url: 'http://localhost:8012/api/liens/' + body[0]._id,
+  //       json: true,
+  //       qs: { select: '-__v' },
+  //       body: { __v: 1000 }
+  //     };
+  //     request.put(options, function (error, response, body) {
+  //       if (error) return done(error);
+  //       expect(response.statusCode).to.be(500);
+  //       done();
+  //     });
+  //   });
+  // });
 
   it('should not send 409 if locking is not enabled');
 
