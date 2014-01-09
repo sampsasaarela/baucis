@@ -1,6 +1,7 @@
 // __Dependencies__
 var url = require('url');
 var mongoose = require('mongoose');
+var etag = require('express/lib/utils').etag
 
 // __Module Definition__
 var mixin = module.exports = function () {
@@ -23,7 +24,7 @@ var mixin = module.exports = function () {
       if (documents) {
         replacer = request.baucis.controller.get('json replacer');
         spaces = request.baucis.controller.get('json spaces');
-        response.set('ETag', eutils.etag(JSON.stringify(documents, replacer, spaces)));
+        response.set('ETag', etag(JSON.stringify(documents, replacer, spaces)));
       }
       return response.send(200);
     }

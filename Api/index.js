@@ -9,17 +9,9 @@ var Release = require('../Release');
 
 // __Private Module Members__
 
-// Figure out the basePath for Swagger API definition
-function getBase (request, extra) {
-  var parts = request.originalUrl.split('/');
-  // Remove extra path parts.
-  parts.splice(-extra, extra);
-  return request.protocol + '://' + request.headers.host + parts.join('/');
-}
-
-function getMatchingReleases (releases, dependency) {
+function getMatchingReleases (releases, range) {
   var matching = releases.filter(function (release) {
-    return semver.satisfies(release, dependency);
+    return semver.satisfies(release, range);
   });
 
   return matching;
@@ -31,18 +23,19 @@ var Api = module.exports = function Api (options) {
     releases: [ '0.0.1' ]
   }, options);
 
-  if (!options.releases.every(function (release) { return semver.valid(release) })) throw new Error('Invalid semver API release version.');
-
   var api = express();
 
+  // TODO merge options
+  api.set('releases', options.releases);
+
   // __Private Instance Members__
-  // Store controllers, keyed on API semver dependency the controllers satisfy.
+  // Store controllers, keyed on API semver version range the controllers satisfy.
   var controllersFor = {};
 
   function register (controller) {
     // The controller's semver range
     var range = controller.get('versions');
-    if (!semver.validRange(range)) throw new Error('Controller dependency was not a valid semver range.');
+    if (!semver.validRange(range)) throw new Error('Controller version range was not a valid semver range.');
     // Create an array for this range if it hasn't been registered yet.
     if (!controllersFor[range]) controllersFor[range] = [];
     // Add the controller to the controllers to be published.
@@ -89,9 +82,11 @@ var Api = module.exports = function Api (options) {
     var releaseControllers;
     var controllersForRelease = {};
 
-    // Ensure all controllers satisfy some dependency.
-    Object.keys(controllersFor).forEach(function (dependency) {
-      var controllers = controllersFor[dependency];
+    if (!releases.every(semver.valid.bind(semver))) throw new Error('Invalid semver API release version.');
+
+    // Ensure all controllers satisfy some version range.
+    Object.keys(controllersFor).forEach(function (range) {
+      var controllers = controllersFor[range];
       controllers.forEach(checkReleaseConflict.bind(undefined, releases));
     });
 
@@ -99,28 +94,31 @@ var Api = module.exports = function Api (options) {
     releases.forEach(function (release) {
       controllersForRelease[release] = [];
 
-      Object.keys(controllersFor).forEach(function (dependency) {
-        if (!semver.satisfies(release, dependency)) return;
-        controllersForRelease[release] = controllersForRelease[release].concat(controllersFor[dependency]);
+      Object.keys(controllersFor).forEach(function (range) {
+        if (!semver.satisfies(release, range)) return;
+        controllersForRelease[release] = controllersForRelease[release].concat(controllersFor[range]);
       });
     });
 
     // Build the version controller for each release, and sort them high to low.
     releaseControllers = releases.sort(semver.rcompare).map(function (release) {
-      return Release({ release: release, controllers: controllersForRelease[release] });
+      return Release({
+        release: release,
+        controllers: controllersForRelease[release]
+      });
     });
 
     // Add a middleware chain that checks the version requested and uses the
     // highest version middleware that matches the requested range.
     releaseControllers.forEach(function (releaseController) {
       api.use(function (request, response, next) {
-        // Check if this controller satisfies the requested dependency.
+        // Check if this controller satisfies the requested version range.
         var range = request.headers['api-version'] || '*';
         var release = releaseController.get('release');
         var satisfied = semver.satisfies(release, range);
         console.log('Checking release %s against %s.', release, range);
 
-        // Short-circuit this release if the version doesn't satisfy the dependency.
+        // Short-circuit this release if the version doesn't satisfy the version range.
         if (!satisfied) return next();
         console.log('Found release.')
         // Otherwise, let the request fall through to this version's middleware.

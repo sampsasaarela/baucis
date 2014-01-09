@@ -31,7 +31,7 @@ describe('Controllers', function () {
       if (error) return done(error);
 
       console.log(body)
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
       expect(body[1]).to.have.property('color', 'Yellow');
       expect(body[1]).to.have.property('name', 'Cheddar');
@@ -49,7 +49,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 201);
+      expect(response.statusCode).to.be(201);
       expect(body).to.have.property('color', 'Green');
       expect(body).to.have.property('name', 'Gorgonzola');
       expect(body).not.to.have.property('_id');
@@ -66,7 +66,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('color', 'White');
       expect(body).to.have.property('name', 'Cheddar');
       expect(body).not.to.have.property('_id');
@@ -83,7 +83,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 201);
+      expect(response.statusCode).to.be(201);
       expect(body).to.have.property('_id');
       expect(body).to.have.property('__v');
       expect(body).to.have.property('name', "Lou's");
@@ -98,7 +98,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('color', 'White');
       done();
     });
@@ -139,7 +139,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be('OK!');
       done();
     });
@@ -152,7 +152,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be('XYZ');
       done();
     });
@@ -166,7 +166,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.eql([ { name: 'Corner' }, { name: 'Westlake' } ]);
       done();
     });
@@ -179,7 +179,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
       expect(body[0]).to.have.property('name', 'Axe');
       done();
@@ -193,7 +193,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 201);
+      expect(response.statusCode).to.be(201);
       expect(body).to.have.property('bogus', false);
       done();
     });
@@ -206,7 +206,7 @@ describe('Controllers', function () {
     };
     request.del(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(3);
       done();
     });
@@ -219,7 +219,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
       expect(body[0]).to.have.property('name', 'Axe');
 
@@ -230,7 +230,7 @@ describe('Controllers', function () {
       };
       request.get(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         expect(body).to.have.property('name', 'Axe');
         done();
       });
@@ -244,7 +244,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       var id = body[0]._id;
       var options = {
@@ -253,7 +253,7 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         expect(body).to.have.property('name', 'Screwdriver');
         expect(body).to.have.property('bogus', false);
         done();
@@ -268,7 +268,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
       expect(body[0]).to.have.property('name', 'Axe');
 
@@ -279,7 +279,7 @@ describe('Controllers', function () {
       };
       request.del(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         expect(body).to.be(1);
         done();
       });
@@ -293,7 +293,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.length(2);
       done();
     });
@@ -306,7 +306,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 201);
+      expect(response.statusCode).to.be(201);
       expect(body).not.to.have.property('bogus');
       done();
     });
@@ -319,7 +319,7 @@ describe('Controllers', function () {
     };
     request.del(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(2);
       done();
     });
@@ -332,7 +332,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('name', 'Westlake');
       done();
     });
@@ -345,7 +345,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('mercoledi', false);
       done();
     });
@@ -358,7 +358,7 @@ describe('Controllers', function () {
     };
     request.del(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(1);
       done();
     });
@@ -371,7 +371,7 @@ describe('Controllers', function () {
     };
     request.del(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers['x-poncho']).to.be('Poncho!');
       done();
     });
@@ -384,7 +384,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be('Poncho!');
       done();
     });
@@ -461,7 +461,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain('Error: The "X-Baucis-Push header" is deprecated.  Use "X-Baucis-Update-Operator: $push" instead.');
       done();
     });
@@ -476,7 +476,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain('Error: Update operator not enabled for this controller: $push');
       done();
     });
@@ -491,7 +491,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain("Error: Can't use update operator with non-whitelisted paths.");
       done();
     });
@@ -506,7 +506,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       expect(body).to.have.property('molds');
       expect(body.molds).to.have.property('length', 1);
@@ -525,7 +525,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain('Error: Update operator not enabled for this controller: $pull');
       done();
     });
@@ -540,7 +540,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain("Error: Can't use update operator with non-whitelisted paths.");
       done();
     });
@@ -555,7 +555,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       expect(body).to.have.property('molds');
       expect(body.molds).to.have.property('length', 1);
@@ -566,7 +566,7 @@ describe('Controllers', function () {
       request.put(options, function (error, response, body) {
         if (error) return done(error);
 
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
 
         expect(body).to.have.property('molds');
         expect(body.molds).to.have.property('length', 0);
@@ -585,7 +585,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain('Error: Update operator not enabled for this controller: $set');
       done();
     });
@@ -600,7 +600,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       expect(body).to.contain("Error: Can't use update operator with non-whitelisted paths.");
       done();
     });
@@ -615,7 +615,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       expect(body).to.have.property('molds');
       expect(body.molds).to.have.property('length', 1);
@@ -635,7 +635,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       expect(body).to.have.property('arbitrary');
       expect(body.arbitrary).to.have.property('length', 2);
@@ -662,7 +662,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       expect(body).to.have.property('arbitrary');
       expect(body.arbitrary).to.have.property('length', 2);
@@ -683,7 +683,7 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       expect(body).to.have.property('arbitrary');
       expect(body.arbitrary).to.have.property('length', 2);
@@ -701,7 +701,7 @@ describe('Controllers', function () {
   it('should send 405 when a verb is disabled (GET)', function (done) {
     request.get('http://localhost:8012/api/beans', function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 405);
+      expect(response.statusCode).to.be(405);
       expect(response.headers).to.have.property('allow', 'HEAD,POST,PUT,DELETE');
       done();
     });
@@ -710,7 +710,7 @@ describe('Controllers', function () {
   it('should send 405 when a verb is disabled (DELETE)', function (done) {
     request.del('http://localhost:8012/api/liens', function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 405);
+      expect(response.statusCode).to.be(405);
       expect(response.headers).to.have.property('allow', 'HEAD,GET,POST,PUT');
       done();
     });
@@ -723,7 +723,7 @@ describe('Controllers', function () {
     };
     request.head(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 400);
+      expect(response.statusCode).to.be(400);
       done();
     });
   });
@@ -735,7 +735,7 @@ describe('Controllers', function () {
     };
     request.head(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 400);
+      expect(response.statusCode).to.be(400);
       done();
     });
   });
@@ -748,7 +748,7 @@ describe('Controllers', function () {
     };
     request.post(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 201);
+      expect(response.statusCode).to.be(201);
 
       var options = {
         url: 'http://localhost:8012/api/liens/' + body._id,
@@ -761,7 +761,7 @@ describe('Controllers', function () {
 
         request.put(options, function (error, response, body) {
           if (error) return done(error);
-          expect(response).to.have.property('statusCode', 409);
+          expect(response.statusCode).to.be(409);
           done();
         });
       });
@@ -776,7 +776,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       var options = {
         url: 'http://localhost:8012/api/liens/' + body[1]._id,
@@ -785,7 +785,7 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 409);
+        expect(response.statusCode).to.be(409);
         done();
       });
     });
@@ -798,7 +798,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       var options = {
         url: 'http://localhost:8012/api/liens/' + body[1]._id,
@@ -807,13 +807,13 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         done();
       });
     });
   });
 
-  it('should cause an error if locking is enabled and no version is selected', function (done) {
+  it('should cause an error if locking is enabled and no version is selected on the doc', function (done) {
     var options = {
       url: 'http://localhost:8012/api/liens',
       json: true,
@@ -821,7 +821,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       var options = {
         url: 'http://localhost:8012/api/liens/' + body[0]._id,
@@ -831,7 +831,7 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 500);
+        expect(response.statusCode).to.be(500);
         done();
       });
     });
@@ -846,7 +846,7 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
 
       var options = {
         url: 'http://localhost:8012/api/liens/' + body[0]._id,
@@ -856,7 +856,7 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 500);
+        expect(response.statusCode).to.be(500);
         done();
       });
     });

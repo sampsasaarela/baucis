@@ -71,36 +71,36 @@ describe('Versioning', function () {
   });
 
   it('should catch controllers that are added twice to overlapping API dependencies', function (done) {
-    baucis.rest({ singular: 'party', dependency: '>0.0.0' });
-    baucis.rest({ singular: 'party', dependency: '<2' });
+    baucis.rest({ singular: 'party', versions: '>0.0.0' });
+    baucis.rest({ singular: 'party', versions: '<2' });
     expect(baucis.bind(baucis)).to.throwException(/^Controller "parties" exists more than once in a release.$/);
     done();
   });
 
   it('should catch controllers that are added twice to the same release', function (done) {
-    baucis.rest({ singular: 'party', dependency: '0.0.1' });
-    baucis.rest({ singular: 'party', dependency: '0.0.1' });
+    baucis.rest({ singular: 'party', versions: '0.0.1' });
+    baucis.rest({ singular: 'party', versions: '0.0.1' });
     expect(baucis.bind(baucis)).to.throwException(/^Controller "parties" exists more than once in a release.$/);
     done();
   });
 
-  it('should catch controllers with invalid dependency', function (done) {
-    var fn = baucis.rest.bind(baucis, { singular: 'party', dependency: 'abc' });
-    expect(fn).to.throwException(/^Controller dependency was not a valid semver range.$/);
+  it('should catch controllers with invalid version range', function (done) {
+    var fn = baucis.rest.bind(baucis, { singular: 'party', versions: 'abc' });
+    expect(fn).to.throwException(/^Controller version range was not a valid semver range.$/);
     done();
   });
 
   it('should cause an error whne a release has no controllers', function (done) {
-    baucis.rest({ singular: 'party', dependency: '1.5.7' });
+    baucis.rest({ singular: 'party', versions: '1.5.7' });
     var fn = baucis.bind(baucis, { releases: [ '0.0.1', '1.5.7' ]});
     expect(fn).to.throwException(/^There are no controllers in release "0.0.1".$/);
     done();
   });
 
-  it("should catch controllers where the API dependency doesn't satisfy any releases", function (done) {
-    baucis.rest({ singular: 'party', dependency: '0.0.1' });
-    baucis.rest({ singular: 'party', dependency: '1.4.6' });
-    expect(baucis.bind(baucis)).to.throwException(/^The controller dependency "1.4.6" doesn't satisfy any API release.$/);
+  it("should catch controllers where the API version range doesn't satisfy any releases", function (done) {
+    baucis.rest({ singular: 'party', versions: '0.0.1' });
+    baucis.rest({ singular: 'party', versions: '1.4.6' });
+    expect(baucis.bind(baucis)).to.throwException(/^The controller version range "1.4.6" doesn't satisfy any API release.$/);
     done();
   });
 

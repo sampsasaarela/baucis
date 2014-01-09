@@ -7,6 +7,10 @@ var instance = Api();
 // __Module Definition__
 var baucis = module.exports = function (options) {
   var previous = baucis.empty();
+  // TODO refactor options
+  if (options) {
+    if (options.releases) previous.set('releases', options.releases);
+  }
   previous.initialize();
   return previous;
 };

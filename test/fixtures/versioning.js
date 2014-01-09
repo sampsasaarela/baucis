@@ -24,17 +24,17 @@ var fixture = module.exports = {
 
     baucis.rest({
       singular: 'party',
-      dependency: '1.x'
+      versions: '1.x'
     });
 
     baucis.rest({
       singular: 'party',
-      dependency: '2.1.0'
+      versions: '2.1.0'
     });
 
     baucis.rest({
       singular: 'party',
-      dependency: '~3'
+      versions: '~3'
     });
 
     app.use('/api/versioned', baucis({

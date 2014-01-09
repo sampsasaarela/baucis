@@ -42,8 +42,6 @@ var fixture = module.exports = {
       next(new Error('request.baucis.controller set incorrectly!'));
     });
 
-    taskSubcontroller.initialize();
-
     var userController = baucis.rest('user');
 
     userController.request(function (request, response, next) {

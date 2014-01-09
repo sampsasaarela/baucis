@@ -47,7 +47,7 @@ var mixin = module.exports = function () {
   });
 
   // Create the documents for a POST request.
-  this.query(false, 'collection', 'post', function (request, response, next) {
+  this.query(true, 'collection', 'post', function (request, response, next) {
     var saved = [];
     var documents = request.body;
     var Model = request.baucis.controller.get('model');
@@ -103,13 +103,15 @@ var mixin = module.exports = function () {
     var update = connect.utils.merge(request.body);
     var versionKey = request.baucis.controller.get('schema').get('versionKey');
     var lock = request.baucis.controller.get('locking') === true;
-    var updateVersion = update[versionKey];
+    var updateVersion = update[versionKey] ? Number(update[versionKey]) : null;
     var done = function (error, saved) {
       if (error) return next(error);
       if (!saved) return response.send(404);
       request.baucis.documents = saved;
       next();
     };
+
+    console.log('%s: %s', versionKey, updateVersion);
 
     if (lock && !Number.isFinite(updateVersion)) return response.send(409);
 

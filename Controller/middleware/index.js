@@ -13,7 +13,7 @@ var parseActivateParameters = function (stage, params) {
   // First, check for override.
   if (typeof argumentsArray[0] === 'boolean') {
     options = last(1, ['howMany', 'verbs', 'middleware'], argumentsArray);
-    options.override = argumentsArray[1];
+    options.override = argumentsArray[0];
   }
   // Override wasn't set.
   else {
@@ -59,7 +59,7 @@ function factor (options) {
 
   // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
   // this middleware is ignored.
-  if (options.override === false && options.stage === 'query'
+  if (options.override !== true && options.stage === 'query'
     && verbString && verbString.indexOf('post') !== -1) throw new Error('Query stage not executed for POST.');
 
   if (!verbString || verbString === '*') verbString = 'head get post put del';
@@ -132,7 +132,6 @@ var mixin = module.exports = function () {
   controller.del = initial.del.bind(initial);
   controller.delete = initial.delete.bind(initial);
 
-
   // A method used to activate request-stage middleware.
   controller.request = function (override, howMany, verbs, middleware) {
     var definitions = parseActivateParameters('request', arguments);
@@ -153,6 +152,10 @@ var mixin = module.exports = function () {
     definitions.forEach(activate);
     return controller;
   };
+
+  Object.keys(controllerForStage).forEach(function (stage) {
+    controllerForStage[stage].disable('x-powered-by');
+  });
 
   // Middleware for parsing JSON POST/PUTs
   controller.use(express.json());

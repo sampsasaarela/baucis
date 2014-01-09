@@ -4,6 +4,16 @@ var util = require('util');
 var express = require('express');
 var connect = require('connect');
 
+// __Private Module Members__
+
+// Figure out the basePath for Swagger API definition
+function getBase (request, extra) {
+  var parts = request.originalUrl.split('/');
+  // Remove extra path parts.
+  parts.splice(-extra, extra);
+  return request.protocol + '://' + request.headers.host + parts.join('/');
+}
+
 // __Module Definition__
 
 var Release = module.exports = function Release (options) {
@@ -18,7 +28,7 @@ var Release = module.exports = function Release (options) {
 
   // Activate Swagger resource listing.
   release.get('/api-docs', function (request, response, next) {
-    if (app.get('swagger') !== true) return next();
+    // TODO if (options.swagger !== true) return next();
 
     response.set('X-Powered-By', 'Baucis');
     response.json(generateResourceListing({
@@ -34,7 +44,7 @@ var Release = module.exports = function Release (options) {
 
     // Add a route for the controller's Swagger API definition.
     release.get('/api-docs' + route, function (request, response, next) {
-      if (app.get('swagger') !== true) return next();
+      // TODO  if (app.get('swagger') !== true) return next();
 
       response.set('X-Powered-By', 'Baucis');
       response.json({

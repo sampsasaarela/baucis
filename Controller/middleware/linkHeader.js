@@ -1,5 +1,6 @@
 // __Dependencies__
 var url = require('url');
+var qs = require('querystring');
 var connect = require('connect');
 
 // __Module Definition__
