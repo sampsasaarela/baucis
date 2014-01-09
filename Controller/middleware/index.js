@@ -30,7 +30,6 @@ function exists (o) { return o !== undefined && o !== null }
 
 // Handle variable number of arguments
 function last (skip, names, values) {
-  console.log(values)
   var r = {};
   var position = names.length;
   var count = values.filter(exists).length - skip;
@@ -39,7 +38,6 @@ function last (skip, names, values) {
 
   names.forEach(function (name) {
     var index = skip + count - position;
-    console.log('%s -> %s', name, values[index])
     position--;
     if (index >= skip) r[name] = values[index];
   });
@@ -56,8 +54,6 @@ function factor (options) {
   var factored = [];
   var verbString = options.verbs;
   var verbs;
-
-  console.log(options)
 
   if (!verbString || verbString === '*') verbString = 'head get post put del';
   verbs = verbString.toLowerCase().split(/\s+/);
@@ -96,6 +92,7 @@ var mixin = module.exports = function () {
 
   var controller = this;
   var controllerForStage = {
+    pre: express(), // TODO make sure this is only privately accessible
     request: express(),
     query: express(),
     documents: express()

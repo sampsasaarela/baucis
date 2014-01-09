@@ -1,13 +1,20 @@
 // __Dependencies__
+var url = require('url');
 var util = require('util');
 var express = require('express');
+var connect = require('connect');
 
 // __Module Definition__
 
 var Release = module.exports = function Release (options) {
   var release = express();
 
-  if (options.controllers.length === 0) throw new Error('There are no controllers in release "' + release + '".');
+  options = connect.utils.merge({}, options);
+
+  if (!options.controllers) throw new Error('There are no controllers in release "' + options.release + '".');
+  if (options.controllers.length === 0) throw new Error('There are no controllers in release "' + options.release + '".');
+
+  release.set('release', options.release);
 
   // Activate Swagger resource listing.
   release.get('/api-docs', function (request, response, next) {
@@ -15,7 +22,7 @@ var Release = module.exports = function Release (options) {
 
     response.set('X-Powered-By', 'Baucis');
     response.json(generateResourceListing({
-      version: options.version,
+      version: options.release,
       controllers: options.controllers,
       basePath: getBase(request, 1)
     }));
@@ -31,7 +38,7 @@ var Release = module.exports = function Release (options) {
 
       response.set('X-Powered-By', 'Baucis');
       response.json({
-        apiVersion: options.version,
+        apiVersion: options.release,
         swaggerVersion: '1.1',
         basePath: getBase(request, 2),
         resourcePath: route,
@@ -43,6 +50,8 @@ var Release = module.exports = function Release (options) {
     // Mount the controller to the version controller.
     release.use(route, controller);
   });
+
+  return release;
 };
 
 util.inherits(Release, express);

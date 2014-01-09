@@ -94,7 +94,7 @@ var Controller = module.exports = function Controller (options) {
   controller.set('allow push', options['allow push'] || false);
   controller.set('allow comments', options['allow comments'] || false);
   controller.set('allow hints', options['allow hints'] || false);
-  controller.set('dependency', options['dependency'] || '*');
+  controller.set('versions', options['versions'] || '*');
 
   controller.set('basePath', basePath);
   controller.set('basePathWithId', basePathWithId);

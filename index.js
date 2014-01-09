@@ -7,6 +7,7 @@ var instance = Api();
 // __Module Definition__
 var baucis = module.exports = function (options) {
   var previous = baucis.empty();
+  previous.initialize();
   return previous;
 };
 

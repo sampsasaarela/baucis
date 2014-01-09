@@ -1,3 +1,7 @@
+// __Dependencies__
+var url = require('url');
+var mongoose = require('mongoose');
+
 // __Module Definition__
 var mixin = module.exports = function () {
   var controller = this;
