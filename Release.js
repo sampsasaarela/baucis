@@ -14,6 +14,23 @@ function getBase (request, extra) {
   return request.protocol + '://' + request.headers.host + parts.join('/');
 }
 
+// A method for generating a Swagger resource listing
+function generateResourceListing (options) {
+  var plurals = options.controllers.map(function (controller) {
+    return controller.get('plural');
+  });
+  var listing = {
+    apiVersion: options.version,
+    swaggerVersion: '1.1',
+    basePath: options.basePath,
+    apis: plurals.map(function (plural) {
+      return { path: '/api-docs/' + plural, description: 'Operations about ' + plural + '.' };
+    })
+  };
+
+  return listing;
+}
+
 // __Module Definition__
 
 var Release = module.exports = function Release (options) {
