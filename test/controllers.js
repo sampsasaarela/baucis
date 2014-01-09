@@ -390,14 +390,6 @@ describe('Controllers', function () {
     });
   });
 
-  it('should disallow adding handlers after initialization', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
-    controller.initialize();
-    var register = function () { controller.request('get', function () {}) };
-    expect(register).to.throwException(/Can't add middleware after the controller has been activated./);
-    done();
-  });
-
   it('should not allow query middleware to be explicitly registered for POST', function (done) {
     var controller = baucis.rest({ singular: 'store', publish: false });
     var register = function () { controller.query('get put head del post', function () {}) };
@@ -415,7 +407,7 @@ describe('Controllers', function () {
   it('should disallow unrecognized verbs', function (done) {
     var controller = baucis.rest({ singular: 'store', publish: false });
     var register = function () { controller.request('get dude', function () {}) };
-    expect(register).to.throwException(/Unrecognized verb: dude/);
+    expect(register).to.throwException(/Unrecognized verb./);
     done();
   });
 

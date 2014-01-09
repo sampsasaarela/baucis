@@ -1,7 +1,7 @@
 // __Module Definition__
 var mixin = module.exports = function (activate) {
   // Build the "Allow" response header
-  this.request(false, function (request, response, next) {
+  this.request(true, function (request, response, next) {
     // Controller Options
     if (request.baucis.controller.get('restrict')) return next(new Error('The "restrict" controller options is deprecated.  Use query middleware instead.'));
     // Headers

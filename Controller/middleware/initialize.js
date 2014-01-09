@@ -4,7 +4,7 @@ var mixin = module.exports = function () {
 
   controller.request(true, function (request, response, next) {
     if (request.baucis) return next(new Error('Baucis request property already created!'));
-    console.log('Initialized.');
+    console.log('Initialized request.baucis...');
     request.baucis = {};
     request.baucis.controller = controller;
     response.set('X-Powered-By', 'Baucis');

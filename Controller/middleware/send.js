@@ -42,12 +42,10 @@ var mixin = module.exports = function () {
     // url.resolve, otherwise the model's plural will be missing in the location
     // URL.
     if(!basePath.match(/\/$/)) basePath += '/';
-    // Otherwise, set the location and send JSON document(s).  Don't set location if documents
+    // Now, set the location and send JSON document(s).  Don't set location if documents
     // don't have IDs for whatever reason e.g. custom middleware.
-    if (!Array.isArray(documents) && documents instanceof mongoose.Document) {
-      if (documents.get) {
-        location = url.resolve(basePath, documents.get(findBy).toString());
-      }
+    if (documents instanceof mongoose.Document) {
+      location = url.resolve(basePath, documents.get(findBy).toString());
     }
     else if (documents.length === 1 && documents[0] instanceof mongoose.Document) {
       location = url.resolve(basePath, documents[0].get(findBy).toString());

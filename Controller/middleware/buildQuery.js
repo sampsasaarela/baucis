@@ -17,7 +17,7 @@ var mixin = module.exports = function () {
 
   // Treat the addressed document as a collection, and push
   // the addressed object to it.
-  this.query(false, 'instance', 'post', function (request, response, next) {
+  this.query(true, 'instance', 'post', function (request, response, next) {
     response.send(405); // method not allowed
   });
 
@@ -56,7 +56,7 @@ var mixin = module.exports = function () {
   });
 
   // Update all given docs ...
-  this.query(false, 'collection', 'put', function (request, response, next) {
+  this.query(true, 'collection', 'put', function (request, response, next) {
     response.send(405); // method not allowed
   });
 

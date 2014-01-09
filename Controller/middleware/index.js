@@ -55,11 +55,18 @@ function factor (options) {
   var verbString = options.verbs;
   var verbs;
 
+  if (verbString) verbString = verbString.toLowerCase();
+
+  // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
+  // this middleware is ignored.
+  if (options.override === false && options.stage === 'query'
+    && verbString && verbString.indexOf('post') !== -1) throw new Error('Query stage not executed for POST.');
+
   if (!verbString || verbString === '*') verbString = 'head get post put del';
-  verbs = verbString.toLowerCase().split(/\s+/);
+  verbs = verbString.split(/\s+/);
 
   if (!options.stage) throw new Error('Must supply stage.');
-  if (verbs.some(isInvalidVerb)) throw new Exception('Unrecognized verb.');
+  if (verbs.some(isInvalidVerb)) throw new Error('Unrecognized verb.');
   if (options.howMany && options.howMany !== 'instance' && options.howMany !== 'collection') {
     throw new Error('Unrecognized howMany: ' + options.howMany);
   }
@@ -67,17 +74,16 @@ function factor (options) {
   if (!Array.isArray(options.middleware) && typeof options.middleware !== 'function') {
     throw new Error('Middleware must be an array or function.');
   }
-  // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
-  // this middleware is ignored.
-  if (options.stage === 'query' && options.verb === 'post') throw new Error('Query stage not executed for POST.');
+
   // Check howMany is valid
   if (options.howMany !== undefined && options.howMany !== 'instance' && options.howMany !== 'collection') {
     throw new Error('Unrecognized howMany: "' + options.howMany + '".');
   }
 
-  // TODO ignore implicitly added middleware that doesn't make sense
-
   verbs.forEach(function (verb) {
+    // Ignore implicitly added middleware that doesn't make sense.
+    if (options.override === false && options.stage === 'query' && verb === 'post') return;
+    // Add definitions for one or both `howManys`.
     if (options.howMany !== 'collection') factored.push({ stage: options.stage, howMany: 'instance', verb: verb, middleware: options.middleware, override: options.override });
     if (options.howMany !== 'instance') factored.push({ stage: options.stage, howMany: 'collection', verb: verb, middleware: options.middleware, override: options.override });
   });
@@ -92,11 +98,12 @@ var mixin = module.exports = function () {
 
   var controller = this;
   var controllerForStage = {
-    pre: express(), // TODO make sure this is only privately accessible
+    initial: express(),
     request: express(),
     query: express(),
     documents: express()
   };
+  var initial = controllerForStage['initial'];
 
   // A method used to activate middleware for a particular stage.
   function activate (definition) {
@@ -106,7 +113,25 @@ var mixin = module.exports = function () {
     controllerForStage[definition.stage][definition.verb](path, definition.middleware);
   }
 
+  // __Stage Controllers__
+  controller.use(controllerForStage.initial);
+  controller.use(controllerForStage.request);
+  controller.use(controllerForStage.query);
+  controller.use(controllerForStage.documents);
+
   // __Public Instance Methods__
+
+  // Pass the method calls through to the "initial" stage middleware controller,
+  // so that it precedes all other stages and middleware that might have been
+  // already added.
+  controller.use = initial.use.bind(initial);
+  controller.head = initial.head.bind(initial);
+  controller.get = initial.get.bind(initial);
+  controller.post = initial.post.bind(initial);
+  controller.put = initial.put.bind(initial);
+  controller.del = initial.del.bind(initial);
+  controller.delete = initial.delete.bind(initial);
+
 
   // A method used to activate request-stage middleware.
   controller.request = function (override, howMany, verbs, middleware) {
@@ -133,11 +158,6 @@ var mixin = module.exports = function () {
   controller.use(express.json());
   // Middleware for parsing form POST/PUTs
   controller.use(express.urlencoded());
-
-  // Activate stage controllers.
-  controller.use(controllerForStage.request);
-  controller.use(controllerForStage.query);
-  controller.use(controllerForStage.documents);
 
   // __Request-Stage Middleware__
 
