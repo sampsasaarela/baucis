@@ -5,6 +5,8 @@ Baucis is Express middleware that creates configurable REST APIs using Mongoose 
 
 Like Baucis and Philemon of old, this library provides REST to the weary traveler.  The goal is to create a JSON REST API for Mongoose & Express that matches as closely as possible the richness and versatility of the [HTTP 1.1 protocol](http://www.w3.org/Protocols/rfc2616/rfc2616.html).
 
+[Baucis](https://en.wikipedia.org/wiki/Baucis_and_Philemon) shouldn't be confused with [Bacchus](https://en.wikipedia.org/wiki/Dionysus).
+
 Baucis uses [semver](http://semver.org).  Each new feature results in a minor version increase, each bug fix in a patch number increase.
 
 Baucis is tested with over 130 Mocha.js tests.
