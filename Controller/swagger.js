@@ -65,7 +65,7 @@ var mixin = module.exports = function () {
       if (mode === 'inclusive' && name !== '_id' && !select.match(inclusiveNamePattern)) return;
 
       // Configure the property
-      property.required = path.options.required || (name === '_id');
+      property.required = path.options.required;
       property.type = type;
 
       // Set enum values if applicable
