@@ -1,6 +1,12 @@
 Baucis Change Log
 =================
 
+v0.14.0
+-------
+Add support for external decorator plugins and move swagger support to its own module.
+
+    npm install --save baucis-swagger
+
 v0.13.0
 -------
 Allow setting `model` for controller, separately from `singular`.  This way, model name and controller path are not coupled.

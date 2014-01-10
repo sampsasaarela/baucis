@@ -1,4 +1,4 @@
-baucis v0.13.0
+baucis v0.14.0
 ==============
 
 Baucis is Express middleware that creates configurable REST APIs using Mongoose schemata.
@@ -7,7 +7,7 @@ Like Baucis and Philemon of old, this library provides REST to the weary travele
 
 Baucis uses [semver](http://semver.org).  Each new feature results in a minor version increase, each bug fix in a patch number increase.
 
-Baucis is tested with over 140 Mocha.js tests.
+Baucis is tested with over 130 Mocha.js tests.
 
 <a href="https://www.gittip.com/wprl/">Donations via gittip.com are appreciated.</a>
 
@@ -20,20 +20,26 @@ Check the [change log](CHANGES.md) for info on all the latest features.
 
 [Swagger](https://developers.helloreverb.com/swagger/) support has been partially added.  More Swagger functionality is planned in the near future.
 
-Want to check it out now?  Create your API with the swagger option enabled:
+Want to check it out now?  Install the plugin:
 
-    app.use('/api', baucis({ swagger: true }));
+    npm install --save baucis-swagger
 
 Next, download the [swagger-ui](https://github.com/wordnik/swagger-ui) client.
 
     git clone git@github.com:wordnik/swagger-ui.git
     open swagger-ui/dist/index.html
 
-Point it at your API.  Something like:
+Then, create your API with the swagger option enabled:
+
+    var baucis = require('baucis');
+    var swagger = require('baucis-swagger');
+    app.use('/api', baucis({ swagger: true }));
+
+Point the swagger client at your API.  Something like:
 
     http://localhost:8012/api/api-docs
 
-Now you have documentation and a test client for free!
+Now you have documentation and a test client!
 
 To customize the swagger definition, simply alter the controler's swagger data directly:
 
@@ -47,7 +53,7 @@ To customize the swagger definition, simply alter the controler's swagger data d
           'httpMethod': 'GET',
           'nickname': 'getAwesomeSauce',
           'responseClass': 'Sauce',
-          'summary': 'Taste the awesome sauce; be the awesome sauce.'
+          'summary': 'Carolina BBQ Sauce.'
         }
       ]
     });

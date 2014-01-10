@@ -1,5 +1,5 @@
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   // Retrieve header for the addressed document
   this.query(false, 'instance', 'head', function (request, response, next) {
     var Model = request.baucis.controller.get('model');

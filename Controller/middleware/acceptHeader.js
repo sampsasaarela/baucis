@@ -1,5 +1,5 @@
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   // Build the "Accept" response header.
   this.request(true, function (request, response, next) {
     var putOff = (request.baucis.controller.get('put') === false);

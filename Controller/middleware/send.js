@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var etag = require('express/lib/utils').etag
 
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   var controller = this;
 
   controller.use(function (request, response, next) {

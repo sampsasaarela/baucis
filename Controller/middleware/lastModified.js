@@ -1,6 +1,5 @@
-// TODO false, documents, *
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   var controller = this;
 
   controller.documents(false, function (request, response, next) {

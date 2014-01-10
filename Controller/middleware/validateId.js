@@ -1,5 +1,5 @@
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   var controller = this;
 
   controller.request(false, function (request, response, next) {

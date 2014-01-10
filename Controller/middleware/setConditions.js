@@ -10,7 +10,7 @@ function setConditions (request, response, next) {
 }
 
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   var controller = this;
 
   // Set the conditions used for finding/removing documents

@@ -6,7 +6,7 @@ var connect = require('connect');
 var validOperators = [ '$set', '$push', '$pull' ];
 
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   // Get the count for HEAD requests.
   this.documents(false, 'head', function (request, response, next) {
     request.baucis.count = true;

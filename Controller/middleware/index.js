@@ -1,8 +1,9 @@
-// This is a Controller mixin for adding methods to manage middleware creation.
+// This is a Controller decorator for adding methods to manage middleware creation.
 
 // __Dependencies__
 var express = require('express');
-var middleware = require('requireindex')(__dirname);
+var deco = require('deco');
+var middleware = deco.require(__dirname).hash;
 
 // __Private Module Members__
 
@@ -93,7 +94,7 @@ function factor (options) {
 }
 
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
 
   // __Private Instance Members__
   var controller = this;
@@ -172,45 +173,47 @@ var mixin = module.exports = function () {
     controllerForStage[stage].disable('x-powered-by');
   });
 
-  // __Request-Stage Middleware__
+  // Order is important so can't use deco.call
+  var decorators = [
+    // __Request-Stage Middleware__
+    // Initialize baucis state
+    middleware.initialize,
+    // Activate middleware to check for deprecated features
+    middleware.deprecated,
+    // Activate middleware that sets the Allow & Accept headers
+    middleware.allowHeader,
+    middleware.acceptHeader,
+    // Activate middleware that checks for correct Mongo _ids when applicable
+    middleware.validateId,
+    // Activate middleware that checks for disabled HTTP methods
+    middleware.checkMethodSupported,
+    // Activate middleware to set request.baucis.conditions
+    middleware.setConditions,
 
-  // Initialize baucis state
-  middleware.initialize.apply(controller);
-  // Activate middleware to check for deprecated features
-  middleware.deprecated.apply(controller);
-  // Activate middleware that sets the Allow & Accept headers
-  middleware.allowHeader.apply(controller);
-  middleware.acceptHeader.apply(controller);
-  // Activate middleware that checks for correct Mongo _ids when applicable
-  middleware.validateId.apply(controller);
-  // Activate middleware that checks for disabled HTTP methods
-  middleware.checkMethodSupported.apply(controller);
-  // Activate middleware to set request.baucis.conditions
-  middleware.setConditions.apply(controller);
+    // __Query-Stage Middleware__
+    // The query will have been created (except for POST, which doesn't use a
+    // find or remove query).
 
-  // __Query-Stage Middleware__
-  // The query will have been created (except for POST, which doesn't use a
-  // find or remove query).
+    // Activate middleware to build the query (except for POST requests).
+    middleware.buildQuery,
+    // Activate middleware to handle controller and query options.
+    middleware.applyControllerOptions,
+    middleware.applyQueryString,
 
-  // Activate middleware to build the query (except for POST requests).
-  middleware.buildQuery.apply(controller);
-  // Activate middleware to handle controller and query options.
-  middleware.applyControllerOptions.apply(controller);
-  middleware.applyQueryString.apply(controller);
+    // __Document-Stage Middleware__
 
-  // __Document-Stage Middleware__
-
-  // Activate middleware to execute the query.
-  middleware.execute.apply(controller);
-  // Activate some middleware that will set the Link header when that feature
-  // is enabled.  (This must come after exec or else the count is
-  // returned for all subsequqent executions of the query.)
-  middleware.linkHeader.apply(controller);
-  // Activate the middleware that sets the `Last-Modified` header when appropriate.
-  middleware.lastModified.apply(controller);
+    // Activate middleware to execute the query.
+    middleware.execute,
+    // Activate some middleware that will set the Link header when that feature
+    // is enabled.  (This must come after exec or else the count is
+    // returned for all subsequqent executions of the query.)
+    middleware.linkHeader,
+    // Activate the middleware that sets the `Last-Modified` header when appropriate.
+    middleware.lastModified
+  ];
 
   // Activate the middleware that sends the final document(s) or count.
-  middleware.send.apply(finalize);
+  middleware.send.call(finalize);
 
-  return controller;
+  return deco.call(controller, decorators);
 };

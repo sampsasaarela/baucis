@@ -4,7 +4,7 @@ var qs = require('querystring');
 var connect = require('connect');
 
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   var controller = this;
 
   // Add "Link" header field, with some basic defaults

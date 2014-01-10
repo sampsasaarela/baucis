@@ -1,1 +1,1 @@
-module.exports = require('requireindex')(__dirname);
+module.exports = require('deco').require(__dirname).hash;

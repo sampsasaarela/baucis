@@ -1,5 +1,5 @@
 // __Module Definition__
-var mixin = module.exports = function () {
+var decorator = module.exports = function () {
   // Build the "Allow" response header
   this.request(true, function (request, response, next) {
     var allowed = request.baucis.controller.activeVerbs().map(function (verb) {

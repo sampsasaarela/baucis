@@ -1,6 +1,7 @@
 // __Dependencies__
 var url = require('url');
 var util = require('util');
+var deco = require('deco');
 var express = require('express');
 var connect = require('connect');
 var semver = require('semver');
@@ -134,7 +135,8 @@ var Api = module.exports = function Api (options) {
     return register(controller);
   };
 
-  return api;
+  return deco.call(api, Api.decorators, options);
 };
 
 util.inherits(Api, express);
+Api.decorators = [];

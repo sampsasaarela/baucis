@@ -4,7 +4,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var lingo = require('lingo');
 var connect = require('connect');
-var includes = require('requireindex')(__dirname);
+var deco = require('deco');
 
 // __Module Definition__
 var Controller = module.exports = function Controller (options) {
@@ -119,13 +119,8 @@ var Controller = module.exports = function Controller (options) {
   });
   controller.set('deselected paths', deselected);
 
-  // __Mixins__
-  includes.middleware.apply(controller);
-  includes.swagger.apply(controller);
-
-  controller.generateSwaggerDefinition();
-
-  return controller;
+  return deco.call(controller, Controller.decorators, options);
 };
 
 util.inherits(Controller, express);
+Controller.decorators = deco.require(__dirname);
