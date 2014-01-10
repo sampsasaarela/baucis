@@ -35,7 +35,7 @@ Then, create your API with the swagger option enabled:
 
     var baucis = require('baucis');
     var swagger = require('baucis-swagger');
-    app.use('/api', baucis({ swagger: true }));
+    app.use('/api', baucis());
 
 Point the swagger client at your API.  Something like:
 
