@@ -38,7 +38,7 @@ var fixture = module.exports = {
     var Beans = new Schema({ koji: Boolean });
     var Deans = new Schema({ room: { type: Number, unique: true } });
     var Liens = new Schema({ title: String });
-    var Means = new Schema({ average: Number });
+    var Fiends = new Schema({ average: Number });
 
     if (!mongoose.models['tool']) mongoose.model('tool', Tools);
     if (!mongoose.models['store']) mongoose.model('store', Stores);
@@ -46,7 +46,7 @@ var fixture = module.exports = {
     if (!mongoose.models['bean']) mongoose.model('bean', Beans);
     if (!mongoose.models['dean']) mongoose.model('dean', Deans);
     if (!mongoose.models['lien']) mongoose.model('lien', Liens);
-    if (!mongoose.models['mean']) mongoose.model('mean', Means);
+    if (!mongoose.models['fiend']) mongoose.model('fiend', Fiends);
 
     // Tools embedded controller
     subcontroller = baucis.rest({
@@ -123,6 +123,7 @@ var fixture = module.exports = {
     });
 
     baucis.rest({
+      model: 'fiend',
       singular: 'mean',
       locking: true
     });

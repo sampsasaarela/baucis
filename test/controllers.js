@@ -106,7 +106,7 @@ describe('Controllers', function () {
     var makeController = function () {
       baucis.rest({ singular: 'cheese', findBy: 'color', publish: false });
     };
-    expect(makeController).to.throwException(/findBy path for cheese not unique/);
+    expect(makeController).to.throwException(/findBy path for model "cheese" not unique[.]/);
     done();
   });
 
