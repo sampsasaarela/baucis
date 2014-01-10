@@ -73,7 +73,7 @@ describe('Swagger Resource Listing', function () {
       expect(body.models.Vegetable.properties.name).to.have.property('required', true);
       expect(body.models.Vegetable.properties).to.have.property('_id');
       expect(body.models.Vegetable.properties._id).to.have.property('type', 'string');
-      expect(body.models.Vegetable.properties._id).to.have.property('required', true);
+      expect(body.models.Vegetable.properties._id).to.have.property('required', false);
       expect(body.models.Vegetable.properties).to.have.property('lastModified');
       expect(body.models.Vegetable.properties.lastModified).to.have.property('type', 'Date');
       expect(body.models.Vegetable.properties.lastModified).to.have.property('required', true);
