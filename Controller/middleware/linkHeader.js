@@ -8,7 +8,7 @@ var mixin = module.exports = function () {
   var controller = this;
 
   // Add "Link" header field, with some basic defaults
-  controller.query(false, 'instance', '*', function (request, response, next) {
+  controller.documents(false, 'instance', '*', function (request, response, next) {
     if (controller.get('relations') !== true) return next();
 
     var originalPath = request.originalUrl.split('?')[0];
@@ -29,7 +29,7 @@ var mixin = module.exports = function () {
   });
 
   // Add "Link" header field, with some basic defaults (for collection routes)
-  controller.query(false, 'collection', '*', function (request, response, next) {
+  controller.documents(false, 'collection', '*', function (request, response, next) {
     if (controller.get('relations') !== true) return next();
 
     var makeLink = function (query) {

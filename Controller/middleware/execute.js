@@ -8,7 +8,7 @@ var validOperators = [ '$set', '$push', '$pull' ];
 // __Module Definition__
 var mixin = module.exports = function () {
   // Get the count for HEAD requests.
-  this.query(false, 'head', function (request, response, next) {
+  this.documents(false, 'head', function (request, response, next) {
     request.baucis.count = true;
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
@@ -18,16 +18,18 @@ var mixin = module.exports = function () {
   });
 
   // Execute the find query for GET.
-  this.query(false, 'get', function (request, response, next) {
+  this.documents(false, 'get', function (request, response, next) {
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
       request.baucis.documents = documents;
+      console.log('ORIG')
+      console.log(documents)
       next();
     });
   });
 
   // Execute the remove query for DELETE.
-  this.query(false, 'del', function (request, response, next) {
+  this.documents(false, 'del', function (request, response, next) {
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
       if (!documents) return response.send(404);
@@ -47,7 +49,7 @@ var mixin = module.exports = function () {
   });
 
   // Create the documents for a POST request.
-  this.query(true, 'collection', 'post', function (request, response, next) {
+  this.documents(false, 'collection', 'post', function (request, response, next) {
     var saved = [];
     var documents = request.body;
     var Model = request.baucis.controller.get('model');
@@ -96,7 +98,7 @@ var mixin = module.exports = function () {
   });
 
   // Update the documents specified for a PUT request.
-  this.query(false, 'instance', 'put', function (request, response, next) {
+  this.documents(false, 'instance', 'put', function (request, response, next) {
     var operator = request.headers['x-baucis-update-operator'];
     var conditions;
     var updateWrapper = {};

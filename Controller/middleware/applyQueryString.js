@@ -1,7 +1,7 @@
 // __Module Definition__
 var mixin = module.exports = function () {
   // Apply various options based on request query parameters.
-  this.query(false, 'collection', 'head get put del', function (request, response, next) {
+  this.query(false, function (request, response, next) {
     var populate = request.query.populate;
     var hint = request.query.hint;
     var select = request.query.select;

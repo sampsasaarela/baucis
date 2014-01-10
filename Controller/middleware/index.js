@@ -83,6 +83,7 @@ function factor (options) {
   verbs.forEach(function (verb) {
     // Ignore implicitly added middleware that doesn't make sense.
     if (options.override === false && options.stage === 'query' && verb === 'post') return;
+    if (options.override === false && options.stage === 'query' && options.howMany === 'collection' && verb === 'put') return;
     // Add definitions for one or both `howManys`.
     if (options.howMany !== 'collection') factored.push({ stage: options.stage, howMany: 'instance', verb: verb, middleware: options.middleware, override: options.override });
     if (options.howMany !== 'instance') factored.push({ stage: options.stage, howMany: 'collection', verb: verb, middleware: options.middleware, override: options.override });
@@ -179,12 +180,8 @@ var mixin = module.exports = function () {
   middleware.validateId.apply(controller);
   // Activate middleware that checks for disabled HTTP methods
   middleware.checkMethodSupported.apply(controller);
-  // Activate middleware to set request.baucis.conditions for find/remove
+  // Activate middleware to set request.baucis.conditions
   middleware.setConditions.apply(controller);
-  // Also activate conditions middleware for update
-  // TODO // activate('request', 'instance', 'put', middleware.configure.conditions);
-  // Activate middleware to set request.baucis.count when query is present
-  // TODO // activate('request', 'get', middleware.configure.count);
 
   // __Query-Stage Middleware__
   // The query will have been created (except for POST, which doesn't use a

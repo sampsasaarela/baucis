@@ -119,9 +119,9 @@ var fixture = module.exports = {
   create: function (done) {
     var Vegetable = mongoose.model('vegetable');
     var Mineral = mongoose.model('mineral');
-    var mineralNames = [ 'Blue', 'Green', 'Pearlescent', 'Red', 'Orange', 'Yellow', 'Indigo', 'Violet' ];
+    var mineralColors = [ 'Blue', 'Green', 'Pearlescent', 'Red', 'Orange', 'Yellow', 'Indigo', 'Violet' ];
     var vegetableNames = [ 'Turnip', 'Spinach', 'Pea', 'Shitake', 'Lima Bean', 'Carrot', 'Zucchini', 'Radicchio' ];
-    var minerals = mineralNames.map(function (color) {
+    var minerals = mineralColors.map(function (color) {
       return new Mineral({ color: color });
     });
     vegetables = vegetableNames.map(function (name) { // TODO leaked global
