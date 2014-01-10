@@ -1,4 +1,4 @@
-baucis v0.11.0
+baucis v0.12.0
 ==============
 
 Baucis is Express middleware that creates configurable REST APIs using Mongoose schemata.
@@ -257,12 +257,12 @@ An example of embedding a controller within another controller
 API Versioning
 --------------
 
-Versioning is implemented using [semver](http://semver.org).  Supported releases are specified when calling `baucis()`.  The release(s) that a controller belongs to are specified with the `dependency` controller option.
+Versioning is implemented using [semver](http://semver.org).  Supported releases are specified when calling `baucis()`.  The release(s) that a controller belongs to are specified with the `versions` controller option.
 
-    baucis.rest({ singular: 'cat', dependency: '0.0.1' });
-    baucis.rest({ singular: 'cat', dependency: '>0.0.1 <1.0.0' });
-    baucis.rest({ singular: 'cat', dependency: '~1' });
-    baucis.rest({ singular: 'cat', dependency: '>2.0.0' });
+    baucis.rest({ singular: 'cat', versions: '0.0.1' });
+    baucis.rest({ singular: 'cat', versions: '>0.0.1 <1.0.0' });
+    baucis.rest({ singular: 'cat', versions: '~1' });
+    baucis.rest({ singular: 'cat', versions: '>2.0.0' });
     app.use('/api', baucis({ releases: [ '0.0.1', '0.0.2', '1.0.0', '1.1.0', '2.0.0' ]}));
 
 Later, make requests and set the `API-Version` header to a [semver](http://semver.org) range, such as `~1`, `>2 <3`, `*`, etc.  Baucis will use the highest release number that satisfies the range.

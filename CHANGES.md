@@ -1,6 +1,12 @@
 Baucis Change Log
 =================
 
+v0.12.0
+-------
+Major internal refactor!
+
+Controller version range is now specified with the `versions` key on `baucis.rest`.
+
 v0.11.0
 -------
 Add API versioning using the `API-Version` header.
