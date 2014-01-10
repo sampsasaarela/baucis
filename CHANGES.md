@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.12.3
+-------
+Add dependency on connect (for connect.utils).
+
 v0.12.2
 -------
 Fix issue #107.  (Special thanks to stemey.)
