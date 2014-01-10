@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.12.1
+-------
+Fix issue #108.  (Special thanks to stemey.)
+
 v0.12.0
 -------
 Major internal refactor!

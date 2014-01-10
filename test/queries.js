@@ -405,6 +405,19 @@ describe('Queries', function () {
     });
   });
 
+  it('should not send count if count is not set to true', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables?count=false',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response).to.have.property('statusCode', 200);
+      expect(body).not.to.be(8);
+      done();
+    });
+  });
+
   it('should report bad hints', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables?count=true&hint={ "foogle": 1 }',

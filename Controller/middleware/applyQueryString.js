@@ -16,7 +16,7 @@ var mixin = module.exports = function () {
     if (sort) query.sort(sort);
     if (skip) query.skip(skip);
     if (limit) query.limit(limit);
-    if (count) request.baucis.count = true;
+    if (count === 'true') request.baucis.count = true;
 
     if (comment) {
       if (request.baucis.controller.get('allow comments') === true) {
