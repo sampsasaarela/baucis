@@ -1,4 +1,4 @@
-baucis v0.12.3
+baucis v0.13.0
 ==============
 
 Baucis is Express middleware that creates configurable REST APIs using Mongoose schemata.
@@ -218,6 +218,7 @@ Controller Options
 | ---- | ----------- |
 | singular | The name of the schema, as registered with `mongoose.model`. |
 | plural | This will be set automatically using the `lingo` module, but may be overridden by passing it into `baucis.rest`.
+| model | The name of the mongoose model.  This will be set to the value of singular by default (and vice versa). |
 | basePath | Defaults to `/`.  Used for embedding a controller in another controller. |
 | publish | Set to `false` to not publish the controller's endpoints when `baucis()` is called. |
 | select | Select or deselect fields for all queries e.g. `'foo +bar -password'` |

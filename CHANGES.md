@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.13.0
+-------
+Allow setting `model` for controller, separately from `singular`.  This way, model name and controller path are not coupled.
+
 v0.12.3
 -------
 Add dependency on connect for `connect.utils`.  (Special thanks to lcalvy.)

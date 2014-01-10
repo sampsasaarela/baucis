@@ -11,12 +11,13 @@ var Controller = module.exports = function Controller (options) {
   // __Private Instance Members & Validation__
 
   // Marshal string into a hash
-  if (typeof options === 'string') options = { singular: options };
+  if (typeof options === 'string') options = { model: options };
 
-  if (!options.singular) throw new Error('Must provide the Mongoose schema name');
+  if (!options.model && !options.singular) throw new Error('Must provide the Mongoose schema name.');
 
   var controller = express();
-  var model = mongoose.model(options.singular);
+  var model = mongoose.model(options.model || options.singular);
+  var modelName = model.modelName;
   var findByPath;
 
   if (options.basePath && options.basePath !== '/') {
@@ -26,7 +27,7 @@ var Controller = module.exports = function Controller (options) {
   if (options.findBy) {
     findByPath = model.schema.path(options.findBy);
     if (!findByPath.options.unique && !(findByPath.options.index && findByPath.options.index.unique)) {
-      throw new Error('findBy path for ' + options.singular + ' not unique');
+      throw new Error('findBy path for model "' + modelName + '" not unique.');
     }
   }
 
@@ -86,8 +87,10 @@ var Controller = module.exports = function Controller (options) {
   // TODO merge defaults
 
   controller.set('model', model);
+  controller.set('modelName', modelName);
   controller.set('schema', model.schema);
-  controller.set('plural', options.plural || lingo.en.pluralize(options.singular));
+  controller.set('singular', options.singular || modelName);
+  controller.set('plural', options.plural || lingo.en.pluralize(controller.get('singular')));
   controller.set('findBy', options.findBy || '_id');
   controller.set('allow set', options['allow set'] || false);
   controller.set('allow pull', options['allow pull'] || false);
