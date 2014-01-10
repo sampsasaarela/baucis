@@ -94,7 +94,7 @@ var fixture = module.exports = {
       response.json(request.params.id);
     });
 
-    controller.use(subcontroller);
+    controller.embed(subcontroller);
 
     baucis.rest({
       singular: 'cheese',
