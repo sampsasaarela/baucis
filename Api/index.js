@@ -116,11 +116,9 @@ var Api = module.exports = function Api (options) {
         var range = request.headers['api-version'] || '*';
         var release = releaseController.get('release');
         var satisfied = semver.satisfies(release, range);
-        console.log('Checking release %s against %s.', release, range);
 
         // Short-circuit this release if the version doesn't satisfy the version range.
         if (!satisfied) return next();
-        console.log('Found release.')
         // Otherwise, let the request fall through to this version's middleware.
         response.set('API-Version', release);
         response.set('Vary', 'API-Version')

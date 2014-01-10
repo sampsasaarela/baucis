@@ -102,7 +102,6 @@ var fixture = module.exports = {
     app.use('/api', baucis({ swagger: true }));
 
     app.use(function (error, request, response, next) {
-      console.log(error);
       if (error) return response.send(500, error.toString());
       next();
     });

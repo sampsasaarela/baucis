@@ -47,7 +47,6 @@ describe('Controllers', function () {
     };
     request.post(options, function (err, response, body) {
       if (err) return done(err);
-      console.log(body)
       expect(response.statusCode).to.be(201);
       expect(body).to.have.property('color', 'Green');
       expect(body).to.have.property('name', 'Gorgonzola');
@@ -82,7 +81,6 @@ describe('Controllers', function () {
     };
     request.post(options, function (err, response, body) {
       if (err) return done(err);
-      console.log(body)
       expect(response.statusCode).to.be(201);
       expect(body).to.have.property('_id');
       expect(body).to.have.property('__v');
@@ -179,7 +177,6 @@ describe('Controllers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      console.log(body)
       expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
       expect(body[0]).to.have.property('name', 'Axe');

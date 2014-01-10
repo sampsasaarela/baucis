@@ -22,8 +22,6 @@ var mixin = module.exports = function () {
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
       request.baucis.documents = documents;
-      console.log('ORIG')
-      console.log(documents)
       next();
     });
   });
@@ -113,8 +111,6 @@ var mixin = module.exports = function () {
       next();
     };
 
-    console.log('First check: %s', lock && !Number.isFinite(updateVersion));
-
     if (lock && !Number.isFinite(updateVersion)) return response.send(409);
 
     // Save with non-default operator
@@ -142,8 +138,6 @@ var mixin = module.exports = function () {
       var currentVersion = doc[versionKey];
 
       if (lock) {
-        console.log('selected: %s', doc.isSelected(versionKey))
-
         // Make sure the version key was selected.
         if (!doc.isSelected(versionKey)) return next(new Error('Version key "'+ versionKey + '" was not selected.'));
         // Update and current version have been found.

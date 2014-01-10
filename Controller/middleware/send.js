@@ -20,9 +20,6 @@ var mixin = module.exports = function () {
     var basePath = request.originalUrl;
     var documents = request.baucis.documents;
 
-    console.log('DOCS')
-    console.log(documents)
-
     // 404 if document(s) not found or 0 documents removed/counted
     if (!documents) return response.send(404);
     // Send 204 No Content if no body.
