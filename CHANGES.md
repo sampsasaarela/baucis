@@ -7,6 +7,8 @@ Major internal refactor!
 
 Controller version range is now specified with the `versions` key on `baucis.rest`.
 
+Controllers no longer need to be inialized.
+
 v0.11.0
 -------
 Add API versioning using the `API-Version` header.

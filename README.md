@@ -246,9 +246,6 @@ An example of embedding a controller within another controller
       next();
     });
 
-    // Didn't publish, so have to manually initialize
-    subcontroller.initialize();
-
     var controller = baucis.rest('foo');
 
     // Embed the subcontroller at /foos/:fooId/bars
