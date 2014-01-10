@@ -49,7 +49,7 @@ var fixture = module.exports = {
       next(new Error('request.baucis.controller set incorrectly!'));
     });
 
-    userController.embed(taskSubcontroller);
+    userController.use(taskSubcontroller);
 
     app = express();
     app.use('/api', baucis());

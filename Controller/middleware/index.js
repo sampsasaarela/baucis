@@ -96,7 +96,6 @@ function factor (options) {
 var mixin = module.exports = function () {
 
   // __Private Instance Members__
-
   var controller = this;
   var controllerForStage = {
     initial: express(),
@@ -134,10 +133,15 @@ var mixin = module.exports = function () {
   // Pass the method calls through to the "initial" stage middleware controller,
   // so that it precedes all other stages and middleware that might have been
   // already added.
-  var originalUse = controller.use;
   controller.use = initial.use.bind(initial);
   controller.head = initial.head.bind(initial);
-  controller.get = initial.get.bind(initial);
+  var originalGet = controller.get;
+  controller.get = function () {
+    // When getting options set on the controller, use the original funcitonality.
+    if (arguments.length === 1) return originalGet.apply(controller, arguments);
+    // Otherwise set get middleware on initial.
+    else return initial.get.apply(initial, arguments);
+  };
   controller.post = initial.post.bind(initial);
   controller.put = initial.put.bind(initial);
   controller.del = initial.del.bind(initial);
@@ -162,11 +166,6 @@ var mixin = module.exports = function () {
     var definitions = parseActivateParameters('documents', arguments);
     definitions.forEach(activate);
     return controller;
-  };
-
-  // A method used to embed subcontrollers and other middleware.
-  controller.embed = function (middleware) {
-    return originalUse.bind(controller, middleware);
   };
 
   Object.keys(controllerForStage).forEach(function (stage) {

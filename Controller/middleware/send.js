@@ -9,6 +9,9 @@ var mixin = module.exports = function () {
   var controller = this;
 
   controller.use(function (request, response, next) {
+    // If no routes matched, initialization won't have happened.
+    if (!request.baucis) return next();
+
     var ids;
     var location;
     var replacer;

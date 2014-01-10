@@ -72,11 +72,6 @@ var fixture = module.exports = {
       select: '-mercoledi'
     });
 
-    controller.request(function (request, response, next) {
-      if (request.baucis.controller === controller) return next();
-      next(new Error('request.baucis.controller set incorrectly!'));
-    });
-
     controller.use('/binfo', function (request, response, next) {
       response.json('Poncho!');
     });
@@ -94,7 +89,12 @@ var fixture = module.exports = {
       response.json(request.params.id);
     });
 
-    controller.embed(subcontroller);
+    controller.use(subcontroller);
+
+    controller.request(function (request, response, next) {
+      if (request.baucis.controller === controller) return next();
+      next(new Error('request.baucis.controller set incorrectly!'));
+    });
 
     baucis.rest({
       singular: 'cheese',

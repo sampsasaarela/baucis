@@ -172,120 +172,120 @@ describe('Controllers', function () {
     });
   });
 
-  // it('should allow mounting of subcontrollers (GET plural)', function (done) {
-  //   var options = {
-  //     url: 'http://localhost:8012/api/stores/123/tools?sort=name',
-  //     json: true
-  //   };
-  //   request.get(options, function (error, response, body) {
-  //     if (error) return done(error);
-  //     console.log(body)
-  //     expect(response.statusCode).to.be(200);
-  //     expect(body).to.have.property('length', 3);
-  //     expect(body[0]).to.have.property('name', 'Axe');
-  //     done();
-  //   });
-  // });
+  it('should allow mounting of subcontrollers (GET plural)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      console.log(body)
+      expect(response.statusCode).to.be(200);
+      expect(body).to.have.property('length', 3);
+      expect(body[0]).to.have.property('name', 'Axe');
+      done();
+    });
+  });
 
-  // it('should allow mounting of subcontrollers (POST plural)', function (done) {
-  //   var options = {
-  //     url: 'http://localhost:8012/api/stores/123/tools',
-  //     json: { name: 'Reticulating Saw' }
-  //   };
-  //   request.post(options, function (error, response, body) {
-  //     if (error) return done(error);
-  //     expect(response.statusCode).to.be(201);
-  //     expect(body).to.have.property('bogus', false);
-  //     done();
-  //   });
-  // });
+  it('should allow mounting of subcontrollers (POST plural)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/stores/123/tools',
+      json: { name: 'Reticulating Saw' }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('bogus', false);
+      done();
+    });
+  });
 
-  // it('should allow mounting of subcontrollers (DEL plural)', function (done) {
-  //   var options = {
-  //     url: 'http://localhost:8012/api/stores/123/tools',
-  //     json: true
-  //   };
-  //   request.del(options, function (error, response, body) {
-  //     if (error) return done(error);
-  //     expect(response.statusCode).to.be(200);
-  //     expect(body).to.be(3);
-  //     done();
-  //   });
-  // });
+  it('should allow mounting of subcontrollers (DEL plural)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/stores/123/tools',
+      json: true
+    };
+    request.del(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.be(3);
+      done();
+    });
+  });
 
-  // it('should allow mounting of subcontrollers (GET singular)', function (done) {
-  //   var options = {
-  //     url: 'http://localhost:8012/api/stores/123/tools?sort=name',
-  //     json: true
-  //   };
-  //   request.get(options, function (error, response, body) {
-  //     if (error) return done(error);
-  //     expect(response.statusCode).to.be(200);
-  //     expect(body).to.have.property('length', 3);
-  //     expect(body[0]).to.have.property('name', 'Axe');
+  it('should allow mounting of subcontrollers (GET singular)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.have.property('length', 3);
+      expect(body[0]).to.have.property('name', 'Axe');
 
-  //     var id = body[0]._id;
-  //     var options = {
-  //       url: 'http://localhost:8012/api/stores/123/tools/' + id,
-  //       json: true
-  //     };
-  //     request.get(options, function (error, response, body) {
-  //       if (error) return done(error);
-  //       expect(response.statusCode).to.be(200);
-  //       expect(body).to.have.property('name', 'Axe');
-  //       done();
-  //     });
-  //   });
-  // });
+      var id = body[0]._id;
+      var options = {
+        url: 'http://localhost:8012/api/stores/123/tools/' + id,
+        json: true
+      };
+      request.get(options, function (error, response, body) {
+        if (error) return done(error);
+        expect(response.statusCode).to.be(200);
+        expect(body).to.have.property('name', 'Axe');
+        done();
+      });
+    });
+  });
 
-  // it('should allow mounting of subcontrollers (PUT singular)', function (done) {
-  //   var options = {
-  //     url: 'http://localhost:8012/api/stores/123/tools',
-  //     json: true
-  //   };
-  //   request.get(options, function (error, response, body) {
-  //     if (error) return done(error);
-  //     expect(response.statusCode).to.be(200);
+  it('should allow mounting of subcontrollers (PUT singular)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/stores/123/tools',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
 
-  //     var id = body[0]._id;
-  //     var options = {
-  //       url: 'http://localhost:8012/api/stores/123/tools/' + id,
-  //       json: { name: 'Screwdriver' }
-  //     };
-  //     request.put(options, function (error, response, body) {
-  //       if (error) return done(error);
-  //       expect(response.statusCode).to.be(200);
-  //       expect(body).to.have.property('name', 'Screwdriver');
-  //       expect(body).to.have.property('bogus', false);
-  //       done();
-  //     });
-  //   });
-  // });
+      var id = body[0]._id;
+      var options = {
+        url: 'http://localhost:8012/api/stores/123/tools/' + id,
+        json: { name: 'Screwdriver' }
+      };
+      request.put(options, function (error, response, body) {
+        if (error) return done(error);
+        expect(response.statusCode).to.be(200);
+        expect(body).to.have.property('name', 'Screwdriver');
+        expect(body).to.have.property('bogus', false);
+        done();
+      });
+    });
+  });
 
-  // it('should allow mounting of subcontrollers (DEL singular)', function (done) {
-  //   var options = {
-  //     url: 'http://localhost:8012/api/stores/123/tools?sort=name',
-  //     json: true
-  //   };
-  //   request.get(options, function (error, response, body) {
-  //     if (error) return done(error);
-  //     expect(response.statusCode).to.be(200);
-  //     expect(body).to.have.property('length', 3);
-  //     expect(body[0]).to.have.property('name', 'Axe');
+  it('should allow mounting of subcontrollers (DEL singular)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.have.property('length', 3);
+      expect(body[0]).to.have.property('name', 'Axe');
 
-  //     var id = body[0]._id;
-  //     var options = {
-  //       url: 'http://localhost:8012/api/stores/123/tools/' + id,
-  //       json: true
-  //     };
-  //     request.del(options, function (error, response, body) {
-  //       if (error) return done(error);
-  //       expect(response.statusCode).to.be(200);
-  //       expect(body).to.be(1);
-  //       done();
-  //     });
-  //   });
-  // });
+      var id = body[0]._id;
+      var options = {
+        url: 'http://localhost:8012/api/stores/123/tools/' + id,
+        json: true
+      };
+      request.del(options, function (error, response, body) {
+        if (error) return done(error);
+        expect(response.statusCode).to.be(200);
+        expect(body).to.be(1);
+        done();
+      });
+    });
+  });
 
   it('should allow parent to function when mounting subcontrollers (GET plural)', function (done) {
     var options = {
