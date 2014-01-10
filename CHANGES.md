@@ -3,7 +3,7 @@ Baucis Change Log
 
 v0.12.3
 -------
-Add dependency on connect (for connect.utils).
+Add dependency on connect for `connect.utils`.  (Special thanks to lcalvy.)
 
 v0.12.2
 -------
