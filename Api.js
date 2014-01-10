@@ -4,8 +4,8 @@ var util = require('util');
 var express = require('express');
 var connect = require('connect');
 var semver = require('semver');
-var Controller = require('../Controller');
-var Release = require('../Release');
+var Controller = require('./Controller');
+var Release = require('./Release');
 
 // __Private Module Members__
 
