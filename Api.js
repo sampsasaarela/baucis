@@ -1,9 +1,7 @@
 // __Dependencies__
 var url = require('url');
-var util = require('util');
 var deco = require('deco');
 var express = require('express');
-var connect = require('connect');
 var semver = require('semver');
 var Controller = require('./Controller');
 var Release = require('./Release');
@@ -19,30 +17,12 @@ function getMatchingReleases (releases, range) {
 }
 
 // __Module Definition__
-var Api = module.exports = function Api (options) {
-  options = connect.utils.merge({
-    releases: [ '0.0.1' ]
-  }, options);
-
-  var api = express();
-
-  // TODO merge options
-  api.set('releases', options.releases);
+var Api = module.exports = deco(function (options) {
+  var api = this;
 
   // __Private Instance Members__
   // Store controllers, keyed on API semver version range the controllers satisfy.
   var controllersFor = {};
-
-  function register (controller) {
-    // The controller's semver range
-    var range = controller.get('versions');
-    if (!semver.validRange(range)) throw new Error('Controller version range was not a valid semver range.');
-    // Create an array for this range if it hasn't been registered yet.
-    if (!controllersFor[range]) controllersFor[range] = [];
-    // Add the controller to the controllers to be published.
-    controllersFor[range].push(controller);
-    return controller;
-  }
 
   function checkReleaseConflict (releases, controller) {
     var range = controller.get('versions');
@@ -69,11 +49,6 @@ var Api = module.exports = function Api (options) {
 
     return !ok;
   }
-
-  // Set options on the api.
-  Object.keys(options).forEach(function (key) {
-    api.set(key, options[key]);
-  });
 
   // __Public Instance Methods__
 
@@ -130,13 +105,16 @@ var Api = module.exports = function Api (options) {
 
   api.rest = function (options) {
     var controller = Controller(options);
-    // Don't publish it automatically if it's private.
-    if (options.publish === false) return controller;
-    return register(controller);
+    var range = controller.get('versions');
+    if (!semver.validRange(range)) throw new Error('Controller version range was not a valid semver range.');
+    // Create an array for this range if it hasn't been registered yet.
+    if (!controllersFor[range]) controllersFor[range] = [];
+    // Add the controller to the controllers to be published.
+    controllersFor[range].push(controller);
+    return controller;
   };
+});
 
-  return deco.call(api, Api.decorators, options);
-};
-
-util.inherits(Api, express);
-Api.decorators = [];
+Api.inherit(express);
+Api.defaults({ releases: [ '0.0.1' ] });
+Api.decorators(deco.builtin.setOptions);

@@ -8,7 +8,7 @@ var etag = require('express/lib/utils').etag
 var decorator = module.exports = function () {
   var controller = this;
 
-  controller.use(function (request, response, next) {
+  controller.finalize(function (request, response, next) {
     // If no routes matched, initialization won't have happened.
     if (!request.baucis) return next();
 

@@ -5,7 +5,7 @@ var decorator = module.exports = function () {
   controller.request(false, function (request, response, next) {
     var findBy = request.baucis.controller.get('findBy');
     var id = request.params.id;
-    var findByPath = request.baucis.controller.get('model').schema.path(findBy);
+    var findByPath = request.baucis.controller.get('schema').path(findBy);
     var check = ['ObjectID', 'Number'];
     var instance = findByPath.instance;
 

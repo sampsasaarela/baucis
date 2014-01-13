@@ -55,7 +55,7 @@ var fixture = module.exports = {
     app.use('/api', baucis());
 
     app.use(function (error, request, response, next) {
-      if (error) return response.send(500, error.toString());
+      if (error) return response.send(500, error.stack);
       next();
     });
 

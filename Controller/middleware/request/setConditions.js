@@ -1,4 +1,4 @@
-
+// __Private Module Members__
 function setConditions (request, response, next) {
   if (!request.query.conditions) return next();
 

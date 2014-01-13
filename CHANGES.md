@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.14.1
+-------
+Update to use latest `deco` features.  Other additional refactoring.
+
 v0.14.0
 -------
 Add support for external decorator plugins and move swagger support to its own module.
