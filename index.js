@@ -2,6 +2,7 @@
 var Api = require('./Api');
 var Release = require('./Release');
 var Controller = require('./Controller');
+var errors = require('./errors');
 
 // __Private Module Members__
 var instance = Api();
@@ -20,6 +21,7 @@ var baucis = module.exports = function (options) {
 baucis.Api = Api;
 baucis.Release = Release;
 baucis.Controller = Controller;
+baucis.errors = errors;
 
 // __Public Methods__
 baucis.rest = function (options) {

@@ -14,6 +14,7 @@ var decorator = module.exports = function (options, protect) {
   };
   var initial = controllerForStage.initial;
   var finalize = controllerForStage.finalize;
+  var originalGet = controller.get;
 
   // __Stage Controllers__
   controller.use(controllerForStage.initial);
@@ -31,15 +32,15 @@ var decorator = module.exports = function (options, protect) {
   // already added.
   controller.use = initial.use.bind(initial);
   controller.head = initial.head.bind(initial);
-  var originalGet = controller.get;
-  controller.get = function () {
-    // When getting options set on the controller, use the original funcitonality.
-    if (arguments.length === 1) return originalGet.apply(controller, arguments);
-    // Otherwise set get middleware on initial.
-    else return initial.get.apply(initial, arguments);
-  };
   controller.post = initial.post.bind(initial);
   controller.put = initial.put.bind(initial);
   controller.del = initial.del.bind(initial);
   controller.delete = initial.delete.bind(initial);
+
+  controller.get = function () {
+    // When getting options set on the controller, use the original functionality.
+    if (arguments.length === 1) return originalGet.apply(controller, arguments);
+    // Otherwise set get middleware on initial.
+    else return initial.get.apply(initial, arguments);
+  };
 };

@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.15.0
+-------
+Send 422 on validation error.
+
 v0.14.2
 -------
 Remove stale calls to `connect.utils.merge`.

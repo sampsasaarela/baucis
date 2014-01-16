@@ -73,7 +73,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -86,7 +86,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -99,7 +99,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -112,7 +112,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -125,7 +125,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/May not set selected fields of populated document[.]/i);
       done();
     });
@@ -138,7 +138,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -151,7 +151,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/May not set selected fields of populated document[.]/i);
       done();
     });
@@ -164,7 +164,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 403);
       expect(body).to.match(/May not set selected fields of populated document[.]/i);
       done();
     });

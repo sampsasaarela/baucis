@@ -459,8 +459,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: The "X-Baucis-Push header" is deprecated.  Use "X-Baucis-Update-Operator: $push" instead.');
+      expect(response.statusCode).to.be(400);
+      expect(body).to.contain('The &quot;X-Baucis-Push header&quot; is deprecated.  Use &quot;X-Baucis-Update-Operator: $push&quot; instead.');
       done();
     });
   });
@@ -474,8 +474,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: Update operator not enabled for this controller: $push');
+      expect(response.statusCode).to.be(403);
+      expect(body).to.contain('Update operator not enabled for this controller: $push');
       done();
     });
   });
@@ -489,8 +489,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain("Error: Can't use update operator with non-whitelisted paths.");
+      expect(response.statusCode).to.be(403);
+      expect(body).to.contain("Can't use update operator with non-whitelisted paths.");
       done();
     });
   });
@@ -523,8 +523,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: Update operator not enabled for this controller: $pull');
+      expect(response.statusCode).to.be(403);
+      expect(body).to.contain('Update operator not enabled for this controller: $pull');
       done();
     });
   });
@@ -538,8 +538,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain("Error: Can't use update operator with non-whitelisted paths.");
+      expect(response.statusCode).to.be(403);
+      expect(body).to.contain("Can't use update operator with non-whitelisted paths.");
       done();
     });
   });
@@ -583,8 +583,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain('Error: Update operator not enabled for this controller: $set');
+      expect(response.statusCode).to.be(403);
+      expect(body).to.contain('Update operator not enabled for this controller: $set');
       done();
     });
   });
@@ -598,8 +598,8 @@ describe('Controllers', function () {
     };
     request.put(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
-      expect(body).to.contain("Error: Can't use update operator with non-whitelisted paths.");
+      expect(response.statusCode).to.be(403);
+      expect(body).to.contain("Can't use update operator with non-whitelisted paths.");
       done();
     });
   });
@@ -757,8 +757,11 @@ describe('Controllers', function () {
       request.put(options, function (error, response, body) {
         if (error) return done(error);
 
+        expect(response.statusCode).to.be(200);
+
         request.put(options, function (error, response, body) {
           if (error) return done(error);
+          console.log(body)
           expect(response.statusCode).to.be(409);
           done();
         });
@@ -829,7 +832,7 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response.statusCode).to.be(500);
+        expect(response.statusCode).to.be(400);
         done();
       });
     });
@@ -853,7 +856,7 @@ describe('Controllers', function () {
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response.statusCode).to.be(500);
+        expect(response.statusCode).to.be(400);
         done();
       });
     });

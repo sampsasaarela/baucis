@@ -1,3 +1,6 @@
+// __Dependencies__
+var errors = require('../../../errors');
+
 // __Module Definition__
 var decorator = module.exports = function () {
   // Apply various options based on request query parameters.
@@ -36,16 +39,16 @@ var decorator = module.exports = function () {
         query.hint(hint);
       }
       else {
-        return response.send(403, 'Hints are not enabled for this resource.');
+        return next(errors.Forbidden('Hints are not enabled for this resource.'));
       }
     }
 
     if (select) {
       if (select.indexOf('+') !== -1) {
-        return next(new Error('Including excluded fields is not permitted.'));
+        return next(errors.Forbidden('Including excluded fields is not permitted.'));
       }
       if (request.baucis.controller.checkBadSelection(select)) {
-        return next(new Error('Including excluded fields is not permitted.'));
+        return next(errors.Forbidden('Including excluded fields is not permitted.'));
       }
       query.select(select);
     }
@@ -61,11 +64,11 @@ var decorator = module.exports = function () {
       populate.forEach(function (field) {
         if (error) return;
         if (request.baucis.controller.checkBadSelection(field.path || field)) {
-          return error = new Error('Including excluded fields is not permitted.');
+          return error = errors.Forbidden('Including excluded fields is not permitted.');
         }
         // Don't allow selecting fields from client when populating
         if (field.select) {
-          return error = new Error('May not set selected fields of populated document.');
+          return error = errors.Forbidden('May not set selected fields of populated document.');
         }
 
         query.populate(field);

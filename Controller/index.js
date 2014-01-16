@@ -5,7 +5,7 @@ var express = require('express');
 // __Module Definition__
 var Controller = module.exports = deco();
 
-Controller.inherit(express);
+Controller.factory(express);
 Controller.decorators(__dirname, [ 'configure' ]);
 Controller.decorators(deco.builtin.setOptions);
 Controller.decorators(__dirname, [ 'publicMethods', 'middleware' ]);

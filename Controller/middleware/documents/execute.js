@@ -1,6 +1,7 @@
 // __Dependencies__
 var async = require('async');
 var deco = require('deco');
+var errors = require('../../../errors');
 
 // __Private Module Members__
 var validOperators = [ '$set', '$push', '$pull' ];
@@ -30,7 +31,7 @@ var decorator = module.exports = function () {
   this.documents(false, 'del', function (request, response, next) {
     request.baucis.query.exec(function (error, documents) {
       if (error) return next(error);
-      if (!documents) return response.send(404);
+      if (!documents) return next(errors.NotFound('Could not find the document to be deleted.'));
 
       // Make it an array if it wasn't already
       var tasks = [].concat(documents).map(function (doc) {
@@ -54,14 +55,14 @@ var decorator = module.exports = function () {
 
     // Must be an object or array
     if (!documents || typeof documents !== 'object') {
-      return next(new Error('Must supply a document or array to POST.'));
+      return next(errors.Forbidden('Must supply a document or array to POST.'));
     }
 
     // Make it an array if it wasn't already
     documents = [].concat(documents);
 
     // No empty arrays
-    if (documents.length === 0) return next(new Error('Array was empty.'));
+    if (documents.length === 0) return next(errors.Forbidden('Array was empty.'));
 
     response.status(201);
 
@@ -103,24 +104,24 @@ var decorator = module.exports = function () {
     var update = deco.merge(request.body);
     var versionKey = request.baucis.controller.get('schema').get('versionKey');
     var lock = request.baucis.controller.get('locking') === true;
-    var updateVersion = update[versionKey] ? Number(update[versionKey]) : null;
+    var updateVersion = update[versionKey] !== undefined ? Number(update[versionKey]) : null;
     var done = function (error, saved) {
       if (error) return next(error);
-      if (!saved) return response.send(404);
+      if (!saved) return next(errors.NotFound('Could not find the document to update.'));
       request.baucis.documents = saved;
       next();
     };
 
-    if (lock && !Number.isFinite(updateVersion)) return response.send(409);
+    if (lock && !Number.isFinite(updateVersion)) return next(errors.BadRequest('Must supply update version when locking is enabled.'));
 
     // Save with non-default operator
     if (operator) {
-      if (validOperators.indexOf(operator) === -1) return next(new Error('Unsupported update operator: ' + operator));
+      if (validOperators.indexOf(operator) === -1) return next(errors.BadRequest('Unsupported update operator: ' + operator));
       // Ensure that some paths have been enabled for the operator.
-      if (!request.baucis.controller.get('allow ' + operator)) return next(new Error('Update operator not enabled for this controller: ' + operator));
+      if (!request.baucis.controller.get('allow ' + operator)) return next(errors.Forbidden('Update operator not enabled for this controller: ' + operator));
       // Make sure paths have been whitelisted for this operator.
       if (request.baucis.controller.checkBadUpdateOperatorPaths(operator, Object.keys(update))) {
-        return next(new Error("Can't use update operator with non-whitelisted paths."));
+        return next(errors.Forbidden("Can't use update operator with non-whitelisted paths."));
       }
 
       conditions = request.baucis.controller.getFindByConditions(request);
@@ -133,16 +134,16 @@ var decorator = module.exports = function () {
     // Default update operator with `doc.save`.
     request.baucis.query.exec(function (error, doc) {
       if (error) return next(error);
-      if (!doc) return response.send(404);
+      if (!doc) return next(errors.NotFound('Could not find the document to update.'));
 
       var currentVersion = doc[versionKey];
 
       if (lock) {
         // Make sure the version key was selected.
-        if (!doc.isSelected(versionKey)) return next(new Error('Version key "'+ versionKey + '" was not selected.'));
+        if (!doc.isSelected(versionKey)) return next(errors.BadRequest('Version key "'+ versionKey + '" was not selected.'));
         // Update and current version have been found.
         // Check if they're equal.
-        if (updateVersion !== currentVersion) return response.send(409);
+        if (updateVersion !== currentVersion) return next(errors.LockConflict('The version of the document to update did not match.'));
         // One is not allowed to set __v and increment in the same update.
         delete update[versionKey];
         doc.increment();

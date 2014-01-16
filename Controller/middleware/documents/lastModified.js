@@ -1,3 +1,6 @@
+// __Dependencies__
+var errors = require('../../../errors');
+
 // __Module Definition__
 var decorator = module.exports = function () {
   var controller = this;
@@ -18,7 +21,7 @@ var decorator = module.exports = function () {
     // TODO allow/convert Timestamp, Number, ISODate
     modifiedDates.forEach(function (modified) {
       if (modified instanceof Date) return;
-      else next(new Error('lastModified path was not a date'));
+      else next(errors.Configuration('lastModified path was not a date'));
     });
 
     // Find the latest date

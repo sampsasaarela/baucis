@@ -2,7 +2,9 @@
 var url = require('url');
 var deco = require('deco');
 var express = require('express');
+var mongoose = require('mongoose');
 var semver = require('semver');
+var errors = require('./errors');
 var Controller = require('./Controller');
 var Release = require('./Release');
 
@@ -28,7 +30,7 @@ var Api = module.exports = deco(function (options) {
     var range = controller.get('versions');
 
     var matchingReleases = getMatchingReleases(releases, range);
-    if (matchingReleases.length === 0) throw new Error("The controller version range \"" + range + "\" doesn't satisfy any API release.");
+    if (matchingReleases.length === 0) throw errors.Configuration("The controller version range \"" + range + "\" doesn't satisfy any API release.");
 
     // Find overlapping ranges.  A range overlaps if it shares any API release
     // versions with another range.
@@ -42,7 +44,7 @@ var Api = module.exports = deco(function (options) {
     var ok = overlapping.every(function (range) {
       return controllersFor[range].every(function (otherController) {
         if (controller === otherController) return true;
-        if (controller.get('plural') === otherController.get('plural')) throw new Error('Controller "' + controller.get('plural') + '" exists more than once in a release.');
+        if (controller.get('plural') === otherController.get('plural')) throw errors.Configuration('Controller "' + controller.get('plural') + '" exists more than once in a release.');
         return controller.get('plural') !== otherController.get('plural');
       });
     });
@@ -58,7 +60,7 @@ var Api = module.exports = deco(function (options) {
     var releaseControllers;
     var controllersForRelease = {};
 
-    if (!releases.every(semver.valid.bind(semver))) throw new Error('Invalid semver API release version.');
+    if (!releases.every(semver.valid.bind(semver))) throw errors.Configuration('Invalid semver API release version.');
 
     // Ensure all controllers satisfy some version range.
     Object.keys(controllersFor).forEach(function (range) {
@@ -101,12 +103,38 @@ var Api = module.exports = deco(function (options) {
         return releaseController(request, response, next);
       });
     });
+
+    // Error checking
+    api.use(function (error, request, response, next) {
+      if (!error) return next();
+
+      if (error instanceof errors.BadRequest) response.status(400);
+      else if (error instanceof errors.Deprecated) response.status(400);
+      else if (error instanceof mongoose.Error.CastError) response.status(400);
+      else if (error instanceof errors.Forbidden) response.status(403);
+      else if (error instanceof errors.NotFound) response.status(404);
+      else if (error instanceof errors.MethodNotAllowed) response.status(405);
+      else if (error instanceof errors.LockConflict) response.status(409);
+      else if (error instanceof mongoose.Error.DivergentArrayError) response.status(409);
+      else if (error instanceof mongoose.Error.VersionError) response.status(409);
+      else if (error instanceof mongoose.Error.ValidationError) response.status(422);
+      else if (error instanceof mongoose.Error.ValidatorError) response.status(422);
+      else if (error instanceof errors.Configuration) response.status(500);
+      // else return next(error);
+
+      // // TODO provide more info when possible (like for validation)
+      // TODO // if (api.get('handle errors') === false) return next(error);
+      // Otherwise send more detailed response
+      // response.end(error.message);
+
+      next(error);
+    });
   };
 
   api.rest = function (options) {
     var controller = Controller(options);
     var range = controller.get('versions');
-    if (!semver.validRange(range)) throw new Error('Controller version range was not a valid semver range.');
+    if (!semver.validRange(range)) throw errors.Configuration('Controller version range was not a valid semver range.');
     // Create an array for this range if it hasn't been registered yet.
     if (!controllersFor[range]) controllersFor[range] = [];
     // Add the controller to the controllers to be published.
@@ -115,6 +143,6 @@ var Api = module.exports = deco(function (options) {
   };
 });
 
-Api.inherit(express);
+Api.factory(express);
 Api.defaults({ releases: [ '0.0.1' ] });
 Api.decorators(deco.builtin.setOptions);

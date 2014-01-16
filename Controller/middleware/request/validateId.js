@@ -1,3 +1,6 @@
+// __Dependencies__
+var errors = require('../../../errors');
+
 // __Module Definition__
 var decorator = module.exports = function () {
   var controller = this;
@@ -14,6 +17,6 @@ var decorator = module.exports = function () {
     if (instance === 'ObjectID' && id.match(/^[a-f0-9]{24}$/i)) return next();
     if (instance === 'Number' && !isNaN(Number(id))) return next();
 
-    response.send(400, 'Invalid ID.');
+    next(errors.BadRequest('Invalid document ID.'));
   });
 };

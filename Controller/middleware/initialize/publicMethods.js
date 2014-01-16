@@ -1,3 +1,6 @@
+// __Dependencies__
+var errors = require('../../../errors');
+
 // __Private Module Members__
 
 var parseActivateParameters = function (stage, params) {
@@ -28,7 +31,7 @@ function last (skip, names, values) {
   var position = names.length;
   var count = values.filter(exists).length - skip;
 
-  if (count < 1) throw new Error('Too few arguments.');
+  if (count < 1) throw errors.Configuration('Too few arguments.');
 
   names.forEach(function (name) {
     var index = skip + count - position;
@@ -54,24 +57,24 @@ function factor (options) {
   // Prevent explicitly setting query-stage POST middleware.  Implicitly adding
   // this middleware is ignored.
   if (options.override === false && options.stage === 'query'
-    && verbString && verbString.indexOf('post') !== -1) throw new Error('Query stage not executed for POST.');
+    && verbString && verbString.indexOf('post') !== -1) throw errors.Configuration('Query stage not executed for POST.');
 
   if (!verbString || verbString === '*') verbString = 'head get post put del';
   verbs = verbString.split(/\s+/);
 
-  if (!options.stage) throw new Error('Must supply stage.');
-  if (verbs.some(isInvalidVerb)) throw new Error('Unrecognized verb.');
+  if (!options.stage) throw errors.Configuration('Must supply stage.');
+  if (verbs.some(isInvalidVerb)) throw errors.Configuration('Unrecognized verb.');
   if (options.howMany && options.howMany !== 'instance' && options.howMany !== 'collection') {
-    throw new Error('Unrecognized howMany: ' + options.howMany);
+    throw errors.Configuration('Unrecognized howMany: ' + options.howMany);
   }
   // Middleware function or array
   if (!Array.isArray(options.middleware) && typeof options.middleware !== 'function') {
-    throw new Error('Middleware must be an array or function.');
+    throw errors.Configuration('Middleware must be an array or function.');
   }
 
   // Check howMany is valid
   if (options.howMany !== undefined && options.howMany !== 'instance' && options.howMany !== 'collection') {
-    throw new Error('Unrecognized howMany: "' + options.howMany + '".');
+    throw errors.Configuration('Unrecognized howMany: "' + options.howMany + '".');
   }
 
   verbs.forEach(function (verb) {
@@ -124,7 +127,7 @@ var decorator = module.exports = function (options, protect) {
   };
 
   controller.finalize = function (middleware) {
-    if (finalMiddlewareWasAdded) throw new Error('Already added final middleware.');
+    if (finalMiddlewareWasAdded) throw errors.Configuration('Already added final middleware.');
     protect.controllerForStage.finalize.use(middleware);
     finalMiddlewareWasAdded = true;
   };

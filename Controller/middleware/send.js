@@ -1,4 +1,7 @@
 // __Dependencies__
+var errors = require('../../errors');
+
+// __Dependencies__
 var url = require('url');
 var express = require('express');
 var mongoose = require('mongoose');
@@ -21,7 +24,7 @@ var decorator = module.exports = function () {
     var documents = request.baucis.documents;
 
     // 404 if document(s) not found or 0 documents removed/counted
-    if (!documents) return response.send(404);
+    if (!documents) return next(errors.NotFound('No documents matched your query.'));
     // Send 204 No Content if no body.
     if (request.baucis.noBody) {
       if (request.method !== 'HEAD') return response.send(204);

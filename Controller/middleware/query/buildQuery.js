@@ -1,3 +1,6 @@
+// __Dependencies__
+var errors = require('../../../errors');
+
 // __Module Definition__
 var decorator = module.exports = function () {
   // Retrieve header for the addressed document
@@ -18,7 +21,7 @@ var decorator = module.exports = function () {
   // Treat the addressed document as a collection, and push
   // the addressed object to it.
   this.query(true, 'instance', 'post', function (request, response, next) {
-    response.send(405); // method not allowed
+    return next(errors.MethodNotAllowed('Cannot POST to an instance.'));
   });
 
   // Update the addressed document
@@ -26,7 +29,7 @@ var decorator = module.exports = function () {
     var Model = request.baucis.controller.get('model');
     var bodyId = request.body[request.baucis.controller.get('findBy')];
 
-    if (bodyId && request.params.id !== bodyId) return next(new Error('ID mismatch'));
+    if (bodyId && request.params.id !== bodyId) return next(errors.BadRequest('ID mismatch'));
 
     request.baucis.updateWithBody = true;
     request.baucis.query = Model.findOne(request.baucis.controller.getFindByConditions(request));
@@ -57,7 +60,7 @@ var decorator = module.exports = function () {
 
   // Update all given docs ...
   this.query(true, 'collection', 'put', function (request, response, next) {
-    response.send(405); // method not allowed
+    return next(errors.MethodNotAllowed('Cannot PUT to the collection.'));
   });
 
   // Delete all documents matching conditions

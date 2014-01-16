@@ -126,7 +126,7 @@ describe('POST plural', function () {
     request.post(options, function (error, response, body) {
       if (error) return done(error);
 
-      expect(response).to.have.property('statusCode', 500);
+      expect(response).to.have.property('statusCode', 422);
 
       done();
     });

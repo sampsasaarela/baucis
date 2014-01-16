@@ -45,11 +45,6 @@ var fixture = module.exports = {
 
     app.use('/api/unversioned', baucis());
 
-    app.use(function (error, request, response, next) {
-      if (error) return response.send(500, error.toString());
-      next();
-    });
-
     server = app.listen(8012);
 
     done();

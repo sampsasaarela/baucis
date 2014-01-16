@@ -96,11 +96,6 @@ var fixture = module.exports = {
     app = express();
     app.use('/api', baucis());
 
-    app.use(function (error, request, response, next) {
-      if (error) return response.send(500, error.toString());
-      next();
-    });
-
     server = app.listen(8012);
 
     done();
