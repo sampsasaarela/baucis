@@ -1,7 +1,7 @@
 // __Dependencies__
 var url = require('url');
 var qs = require('querystring');
-var connect = require('connect');
+var deco = require('deco');
 
 // __Module Definition__
 var decorator = module.exports = function () {
@@ -33,7 +33,7 @@ var decorator = module.exports = function () {
     if (controller.get('relations') !== true) return next();
 
     var makeLink = function (query) {
-      var newQuery = connect.utils.merge(request.query, query);
+      var newQuery = deco.merge(request.query, query);
       var originalPath = request.originalUrl.split('?')[0];
       return originalPath + '?' + qs.stringify(newQuery);
     };

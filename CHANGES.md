@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.14.2
+-------
+Remove stale calls to `connect.utils.merge`.
+
 v0.14.1
 -------
 Update to use latest `deco` features.  Other additional refactoring.

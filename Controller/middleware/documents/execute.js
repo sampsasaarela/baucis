@@ -1,6 +1,6 @@
 // __Dependencies__
 var async = require('async');
-var connect = require('connect');
+var deco = require('deco');
 
 // __Private Module Members__
 var validOperators = [ '$set', '$push', '$pull' ];
@@ -100,7 +100,7 @@ var decorator = module.exports = function () {
     var operator = request.headers['x-baucis-update-operator'];
     var conditions;
     var updateWrapper = {};
-    var update = connect.utils.merge(request.body);
+    var update = deco.merge(request.body);
     var versionKey = request.baucis.controller.get('schema').get('versionKey');
     var lock = request.baucis.controller.get('locking') === true;
     var updateVersion = update[versionKey] ? Number(update[versionKey]) : null;
