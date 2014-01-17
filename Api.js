@@ -108,25 +108,24 @@ var Api = module.exports = deco(function (options) {
     api.use(function (error, request, response, next) {
       if (!error) return next();
 
+      // Always set status when possible.
       if (error instanceof errors.BadRequest) response.status(400);
       else if (error instanceof errors.Deprecated) response.status(400);
-      else if (error instanceof mongoose.Error.CastError) response.status(400);
       else if (error instanceof errors.Forbidden) response.status(403);
       else if (error instanceof errors.NotFound) response.status(404);
       else if (error instanceof errors.MethodNotAllowed) response.status(405);
       else if (error instanceof errors.LockConflict) response.status(409);
-      else if (error instanceof mongoose.Error.DivergentArrayError) response.status(409);
       else if (error instanceof mongoose.Error.VersionError) response.status(409);
       else if (error instanceof mongoose.Error.ValidationError) response.status(422);
-      else if (error instanceof mongoose.Error.ValidatorError) response.status(422);
-      else if (error instanceof errors.Configuration) response.status(500);
-      // else return next(error);
+      else return next(error);
 
-      // // TODO provide more info when possible (like for validation)
+      // // TODO provide more info when possible
       // TODO // if (api.get('handle errors') === false) return next(error);
-      // Otherwise send more detailed response
-      // response.end(error.message);
 
+      // Handle some errors.
+      if (error instanceof mongoose.Error.ValidationError) return response.json(error.errors);
+
+      // Pass the rest on.
       next(error);
     });
   };

@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.15.1
+-------
+Send a descriptive body for validation errors.
+
 v0.15.0
 -------
 Send 422 on validation error.

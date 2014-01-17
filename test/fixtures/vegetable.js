@@ -23,7 +23,8 @@ var fixture = module.exports = {
       lastModified: { type: Date, required: true, default: Date.now },
       diseases: { type: [ String ], select: false },
       species: { type: String, default: 'n/a', select: false },
-      related: { type: Schema.ObjectId, ref: 'vegetable' }
+      related: { type: Schema.ObjectId, ref: 'vegetable' },
+      score: { type: Number, min: 1 }
     });
 
     fixture.saveCount = 0;

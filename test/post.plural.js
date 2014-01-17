@@ -118,15 +118,26 @@ describe('POST plural', function () {
     });
   });
 
-  it('should next validation exceptions', function (done) {
+  it('should provide correct status and informative body for validation errors', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables/',
-      json: {}
+      json: { score: -1 }
     };
     request.post(options, function (error, response, body) {
       if (error) return done(error);
 
       expect(response).to.have.property('statusCode', 422);
+      expect(body).to.have.property('name');
+      expect(body.name).to.have.property('message', 'Path `name` is required.');
+      expect(body.name).to.have.property('name', 'ValidatorError');
+      expect(body.name).to.have.property('path', 'name');
+      expect(body.name).to.have.property('type', 'required');
+      expect(body).to.have.property('score');
+      expect(body.score).to.have.property('message', 'Path `score` (-1) is less than minimum allowed value (1).');
+      expect(body.score).to.have.property('name', 'ValidatorError');
+      expect(body.score).to.have.property('path', 'score');
+      expect(body.score).to.have.property('type', 'min');
+      expect(body.score).to.have.property('value', -1);
 
       done();
     });
