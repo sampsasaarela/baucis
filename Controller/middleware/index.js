@@ -7,6 +7,5 @@ var middleware = module.exports = deco(__dirname, [
   'request',
   'query',
   'documents',
-  // Activate the middleware that sends the final document(s) or count.
   'send'
 ]);

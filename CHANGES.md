@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.0
+-------
+Stream documents to manage resources more efficiently with large datasets.
+
 v0.15.1
 -------
 Send a descriptive body for validation errors.

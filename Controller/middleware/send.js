@@ -1,72 +1,154 @@
 // __Dependencies__
+var crypto = require('crypto');
+var es = require('event-stream');
+var JSONStream = require('JSONStream'); // TODO just use es stuff?
 var errors = require('../../errors');
 
-// __Dependencies__
-var url = require('url');
-var express = require('express');
-var mongoose = require('mongoose');
-var etag = require('express/lib/utils').etag
+// __Private Module Members__
+function singleOrArray () {
+  var first = false;
+  var multiple = false;
+
+  return es.through(
+    function (doc) {
+      if (!first) {
+        first = JSON.stringify(doc);
+      }
+      else if (!multiple) {
+        multiple = true;
+        this.emit('data', '[');
+        this.emit('data', first);
+        this.emit('data', ',\n')
+        this.emit('data', JSON.stringify(doc));
+      }
+      else {
+        this.emit('data', ',\n');
+        this.emit('data', JSON.stringify(doc));
+      }
+    },
+    function () {
+      if (!first) return this.emit('end');
+      else if (!multiple) this.emit('data', first);
+      else this.emit('data', ']');
+      this.emit('end');
+    }
+  );
+};
+
+function removeDocuments () {
+  return es.map(function (doc, callback) {
+    doc.remove(callback);
+  });
+}
+
+function count () {
+  var count = 0;
+
+  return es.through(
+    function () { count += 1 },
+    function () {
+      this.emit('data', String(count));
+      this.emit('end');
+    }
+  );
+}
+
+function check404 () {
+  var count = 0;
+
+  return es.through(
+    function (doc) { count += 1, this.emit('data', doc) },
+    function () {
+      if (count === 0) return this.emit('error', errors.NotFound('Query did not match any documents.'));
+      this.emit('end');
+    }
+  );
+}
+
+function etag (response) {
+  var hash = crypto.createHash('md5');
+  return es.map(function (doc, callback) {
+    // TODO check if already set
+    hash.update(JSON.stringify(doc));
+    response.set('Etag', '"' + hash.digest('hex') + '"');
+    callback(null, doc);
+  });
+}
+
+function lastModified (response, lastModifiedPath) {
+  return es.map(function (doc, callback) {
+    // TODO check if already set
+    if (lastModifiedPath) response.set('Last-Modified', doc.get(lastModifiedPath));
+    callback(null, doc);
+  });
+}
+
+function emptyString () {
+  return es.map(function (doc, callback) {
+    callback(null, '');
+  });
+}
 
 // __Module Definition__
-var decorator = module.exports = function () {
+var decorator = module.exports = function (options, protect) {
   var controller = this;
 
-  controller.finalize(function (request, response, next) {
-    // If no routes matched, initialization won't have happened.
-    if (!request.baucis) return next();
+  // // TODO these need to happen for all routes
+  // // If no routes matched, initialization didn't happen; it's a non-baucis route.
+  // if (!request.baucis) return next();
 
-    var ids;
-    var location;
-    var replacer;
-    var spaces;
-    var findBy = request.baucis.controller.get('findBy');
-    var basePath = request.originalUrl;
-    var documents = request.baucis.documents;
+  protect.finalize(function (request, response, next) {
+    response.type('json');
+    request.baucis.pipe(check404(next));
+    next();
+  });
 
-    // 404 if document(s) not found or 0 documents removed/counted
-    if (!documents) return next(errors.NotFound('No documents matched your query.'));
-    // Send 204 No Content if no body.
-    if (request.baucis.noBody) {
-      if (request.method !== 'HEAD') return response.send(204);
-      if (documents) {
-        replacer = request.baucis.controller.get('json replacer');
-        spaces = request.baucis.controller.get('json spaces');
-        response.set('ETag', etag(JSON.stringify(documents, replacer, spaces)));
-      }
-      return response.send(200);
-    }
-    // If it's a document count (e.g. the result of a DELETE), send it back and
-    // short-circuit.
-    if (typeof documents === 'number') return response.json(documents);
-    // If count mode is set, send the length, or send 1 for single document
-    if (request.baucis.count) {
-      if (Array.isArray(documents)) response.json(documents.length);
-      else response.json(1);
-      return;
-    }
-    // If it's not a POST, send now because Location shouldn't be set.
-    if (request.method !== 'POST') return response.json(documents);
-    // Ensure there is a trailing slash on basePath for proper function of
-    // url.resolve, otherwise the model's plural will be missing in the location
-    // URL.
-    if(!basePath.match(/\/$/)) basePath += '/';
-    // Now, set the location and send JSON document(s).  Don't set location if documents
-    // don't have IDs for whatever reason e.g. custom middleware.
-    if (documents instanceof mongoose.Document) {
-      location = url.resolve(basePath, documents.get(findBy).toString());
-    }
-    else if (documents.length === 1 && documents[0] instanceof mongoose.Document) {
-      location = url.resolve(basePath, documents[0].get(findBy).toString());
-    }
-    else if (documents.every(function (doc) { return doc instanceof mongoose.Document })) {
-      ids = documents.map(function (doc) { return '"' + doc.get(findBy) + '"' });
-      if (ids.every(function (id) { return id })) {
-        location = basePath + '?conditions={ "' + findBy + '": { "$in": [' + ids.join() + '] } }';
-      }
-    }
+  protect.finalize('del', function (request, response, next) {
+    request.baucis.pipe(removeDocuments());
+    request.baucis.pipe(count());
+    next();
+  });
 
-    if (location) response.set('Location', location);
-    response.json(documents);
+  protect.finalize('put', function (request, response, next) {
+    request.baucis.pipe(JSONStream.stringify(false));
+    next();
+  });
+
+  protect.finalize('collection', 'head', function (request, response, next) {
+    // TODO use es.wait for setting etag and lastModified on collections!!
+    request.baucis.pipe(emptyString());
+    next();
+  });
+
+  protect.finalize('instance', 'head', function (request, response, next) {
+    var lastModifiedPath = request.baucis.controller.get('lastModified');
+    request.baucis.pipe(etag(response));
+    request.baucis.pipe(lastModified(response, lastModifiedPath));
+    request.baucis.pipe(emptyString());
+    next();
+  });
+
+  protect.finalize('instance', 'get', function (request, response, next) {
+    request.baucis.pipe(etag(response));
+    request.baucis.pipe(lastModified(response));
+    if (request.baucis.count) request.baucis.pipe(count());
+    else request.baucis.pipe(JSONStream.stringify(false));
+    next();
+  });
+
+  protect.finalize('collection', 'get', function (request, response, next) {
+    if (request.baucis.count) request.baucis.pipe(count());
+    else request.baucis.pipe(JSONStream.stringify());
+    next();
+  });
+
+  protect.finalize('collection', 'post', function (request, response, next) {
+    request.baucis.pipe(singleOrArray());
+    next();
+  });
+
+  protect.finalize(function (request, response, next) {
+    request.baucis.pipe();
   });
 };
 

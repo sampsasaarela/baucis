@@ -5,7 +5,7 @@ var errors = require('../../../errors');
 var decorator = module.exports = function () {
   var controller = this;
 
-  controller.request(false, function (request, response, next) {
+  controller.request(function (request, response, next) {
     var findBy = request.baucis.controller.get('findBy');
     var id = request.params.id;
     var findByPath = request.baucis.controller.get('schema').path(findBy);

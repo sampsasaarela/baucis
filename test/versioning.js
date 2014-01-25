@@ -17,7 +17,6 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('api-version', '3.0.1');
       done();
     });
@@ -37,7 +36,6 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('api-version', '2.1.0');
       done();
     });
@@ -51,7 +49,6 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('api-version', '1.0.0');
       done();
     });
@@ -65,7 +62,7 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.statusCode).to.be(404);
+      expect(response.headers).not.to.have.property('api-version');
       done();
     });
   });
@@ -111,7 +108,6 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('api-version', '0.0.1');
       done();
     });
@@ -124,7 +120,6 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('vary', 'API-Version');
       done();
     });

@@ -388,20 +388,6 @@ describe('Controllers', function () {
     });
   });
 
-  it('should not allow query middleware to be explicitly registered for POST', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
-    var register = function () { controller.query('get put head del post', function () {}) };
-    expect(register).to.throwException(/Query stage not executed for POST./);
-    done();
-  });
-
-  it('should ignore implicitly registered query middleware for POST', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
-    var register = function () { controller.query(function () {}) };
-    expect(register).not.to.throwException();
-    done();
-  });
-
   it('should disallow unrecognized verbs', function (done) {
     var controller = baucis.rest({ singular: 'store', publish: false });
     var register = function () { controller.request('get dude', function () {}) };
@@ -497,7 +483,7 @@ describe('Controllers', function () {
 
   it("should allow pushing to an instance document's whitelisted arrays when $push mode is enabled", function (done) {
     var options = {
-      url: 'http://localhost:8012/api/cheeses/Huntsman',
+      url: 'http://localhost:8012/api/cheeses/Huntsman?select=molds',
       headers: { 'X-Baucis-Update-Operator': '$push' },
       json: true,
       body: { molds: 'penicillium roqueforti' }
@@ -546,7 +532,7 @@ describe('Controllers', function () {
 
   it("should allow pulling from an instance document's whitelisted arrays when $pull mode is enabled", function (done) {
     var options = {
-      url: 'http://localhost:8012/api/cheeses/Huntsman',
+      url: 'http://localhost:8012/api/cheeses/Huntsman?select=molds',
       headers: { 'X-Baucis-Update-Operator': '$push' },
       json: true,
       body: { molds: 'penicillium roqueforti' }
@@ -606,7 +592,7 @@ describe('Controllers', function () {
 
   it("should allow setting an instance document's whitelisted paths when $set mode is enabled", function (done) {
     var options = {
-      url: 'http://localhost:8012/api/cheeses/Huntsman',
+      url: 'http://localhost:8012/api/cheeses/Huntsman?select=molds',
       headers: { 'X-Baucis-Update-Operator': '$set' },
       json: true,
       body: { molds: ['penicillium roqueforti'] }
@@ -625,7 +611,7 @@ describe('Controllers', function () {
 
   it("should allow pushing to embedded arrays using positional $", function (done) {
     var options = {
-      url: 'http://localhost:8012/api/cheeses/Camembert',
+      url: 'http://localhost:8012/api/cheeses/Camembert?select=arbitrary',
       headers: { 'X-Baucis-Update-Operator': '$push' },
       json: true,
       qs: { conditions: JSON.stringify({ 'arbitrary.goat': true }) },
@@ -652,7 +638,7 @@ describe('Controllers', function () {
 
   it("should allow setting embedded fields using positional $", function (done) {
     var options = {
-      url: 'http://localhost:8012/api/cheeses/Camembert',
+      url: 'http://localhost:8012/api/cheeses/Camembert?select=arbitrary',
       headers: { 'X-Baucis-Update-Operator': '$set' },
       json: true,
       qs: { conditions: JSON.stringify({ 'arbitrary.goat': false }) },
@@ -673,7 +659,7 @@ describe('Controllers', function () {
 
   it("should allow pulling from embedded fields using positional $", function (done) {
     var options = {
-      url: 'http://localhost:8012/api/cheeses/Camembert',
+      url: 'http://localhost:8012/api/cheeses/Camembert?select=arbitrary',
       headers: { 'X-Baucis-Update-Operator': '$pull' },
       json: true,
       qs: { conditions: JSON.stringify({ 'arbitrary.goat': true }) },
@@ -826,33 +812,7 @@ describe('Controllers', function () {
 
       var options = {
         url: 'http://localhost:8012/api/liens/' + body[0]._id,
-        json: true,
-        qs: { select: '-__v' },
-        body: { __v: 1000 }
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(400);
-        done();
-      });
-    });
-  });
-
-  it('should cause an error if locking is enabled and no version is selected', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/liens',
-      json: true,
-      body: { title: 'Forest Expansion' }
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body[0]._id,
-        json: true,
-        qs: { select: '-__v' },
-        body: { __v: 1000 }
+        json: true
       };
       request.put(options, function (error, response, body) {
         if (error) return done(error);

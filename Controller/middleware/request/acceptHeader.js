@@ -1,7 +1,7 @@
 // __Module Definition__
 var decorator = module.exports = function () {
   // Build the "Accept" response header.
-  this.request(true, function (request, response, next) {
+  this.request(function (request, response, next) {
     var putOff = (request.baucis.controller.get('put') === false);
     var postOff = (request.baucis.controller.get('post') === false);
 

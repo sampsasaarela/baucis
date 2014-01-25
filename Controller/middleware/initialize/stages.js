@@ -13,7 +13,6 @@ var decorator = module.exports = function (options, protect) {
     finalize: express()
   };
   var initial = controllerForStage.initial;
-  var finalize = controllerForStage.finalize;
   var originalGet = controller.get;
 
   // __Stage Controllers__

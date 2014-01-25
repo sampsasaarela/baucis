@@ -90,7 +90,8 @@ var fixture = module.exports = {
     controller.documents(function (request, response, next) {
       if (request.query.testDocuments !== 'true') return next();
       var transformation = JSON.stringify(request.baucis.documents).substring(0, 6).split('');
-      request.baucis.documents = transformation;
+      //request.baucis.documents = transformation;
+      console.log(request.baucis.stream)
       next();
     });
 

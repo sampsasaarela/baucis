@@ -68,8 +68,7 @@ var fixture = module.exports = {
     // Stores controller
     controller = baucis.rest({
       singular: 'store',
-      findBy: 'name',
-      select: '-mercoledi'
+      findBy: 'name'
     });
 
     controller.use('/binfo', function (request, response, next) {
@@ -98,7 +97,7 @@ var fixture = module.exports = {
 
     baucis.rest({
       singular: 'cheese',
-      select: '-_id +color name',
+      select: '-_id color name',
       findBy: 'name',
       'allow $push': 'molds arbitrary arbitrary.$.llama',
       'allow $set': 'molds arbitrary.$.champagne',

@@ -1,7 +1,7 @@
 // __Dependencies__
 var mongoose = require('mongoose');
-var errors = require('../errors');
 var lingo = require('lingo'); // TODO use mongoose pluralizer?
+var errors = require('../errors');
 
 // __Module Definition__
 var decorator = module.exports = function (options, protect) {

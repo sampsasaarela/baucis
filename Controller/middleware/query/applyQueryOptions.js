@@ -1,10 +1,21 @@
 // __Dependencies__
 var errors = require('../../../errors');
 
+// TODO restructure into more middleware functions
+
 // __Module Definition__
 var decorator = module.exports = function () {
+
+  // Apply various options based on controller parameters
+  this.query(function (request, response, next) {
+    var select = request.baucis.controller.get('select');
+    if (!select) return next();
+    request.baucis.query.select(select);
+    next();
+  });
+
   // Apply various options based on request query parameters.
-  this.query(false, function (request, response, next) {
+  this.query(function (request, response, next) {
     var populate = request.query.populate;
     var hint = request.query.hint;
     var select = request.query.select;

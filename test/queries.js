@@ -192,7 +192,6 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response).to.have.property('statusCode', 200);
-      expect(body[0]).to.have.property('lastModified');
       expect(body[0]).not.to.have.property('_id');
       expect(body[0]).not.to.have.property('name');
       done();
@@ -481,7 +480,6 @@ describe('Queries', function () {
     });
   });
 
-
   it('should ignore query comments if not enabled', function (done) {
     var options = {
       url: 'http://localhost:8012/api/fungi?comment=testing testing 123',
@@ -489,7 +487,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response).to.have.property('statusCode', 404);
       done();
     });
   });

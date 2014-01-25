@@ -2,10 +2,11 @@
 var deco = require('deco');
 
 // __Private Module Members__
-var setMessage = function (message) { this.message = message }
+var setMessage = function (message) { this.message = message } // TODO allow empty/default message
 
 // __Module Definition__
 var errors = module.exports = {
+  // TODO deco(setMessage).inherit(Error).container(errors)
   Configuration: deco(setMessage),
   Deprecated: deco(setMessage),
   BadRequest: deco(setMessage),

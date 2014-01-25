@@ -8,8 +8,8 @@ var decorator = module.exports = function () {
   var controller = this;
 
   // Add "Link" header field, with some basic defaults
-  controller.documents(false, 'instance', '*', function (request, response, next) {
-    if (controller.get('relations') !== true) return next();
+  controller.query('instance', '*', function (request, response, next) {
+    if (controller.get('relations') === false) return next();
 
     var originalPath = request.originalUrl.split('?')[0];
     var originalPathParts = originalPath.split('/');
@@ -29,8 +29,8 @@ var decorator = module.exports = function () {
   });
 
   // Add "Link" header field, with some basic defaults (for collection routes)
-  controller.documents(false, 'collection', '*', function (request, response, next) {
-    if (controller.get('relations') !== true) return next();
+  controller.query('collection', '*', function (request, response, next) {
+    if (controller.get('relations') === false) return next();
 
     var makeLink = function (query) {
       var newQuery = deco.merge(request.query, query);
@@ -40,10 +40,13 @@ var decorator = module.exports = function () {
     var done = function () { response.links(links), next() };
     var links = { search: makeLink(), self: makeLink() };
 
-    // Add paging links if these conditions are not met
+    // Add paging links unless these conditions are met.
     if (request.method !== 'GET') return done();
     if (!request.query.limit) return done();
 
+    // This needs to come after the initial execution of the query, otherwise
+    // the query gets stuck returning the count (at least the last time I checked).
+    // TODO check again
     request.baucis.query.count(function (error, count) {
       if (error) return next(error);
 

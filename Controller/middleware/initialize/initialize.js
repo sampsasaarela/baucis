@@ -1,11 +1,19 @@
 // __Dependencies__
+var express = require('express');
 var errors = require('../../../errors');
 
 // __Module Definition__
 var decorator = module.exports = function () {
   var controller = this;
 
-  controller.request(true, function (request, response, next) {
+  // __Body Parsers__
+  // // Middleware for parsing JSON POST/PUTs
+  // controller.use(express.json());
+  // // Middleware for parsing form POST/PUTs
+  // controller.use(express.urlencoded());
+
+  // __Setup request.baucis__
+  controller.request(function (request, response, next) {
     if (request.baucis) return next(errors.Configuration('Baucis request property already created!'));
     request.baucis = {};
     request.baucis.controller = controller;
