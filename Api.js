@@ -119,9 +119,6 @@ var Api = module.exports = deco(function (options) {
       else if (error instanceof mongoose.Error.ValidationError) response.status(422);
       else return next(error);
 
-      // // TODO provide more info when possible
-      // TODO // if (api.get('handle errors') === false) return next(error);
-
       // Handle some errors.
       if (error instanceof mongoose.Error.ValidationError) return response.json(error.errors);
 

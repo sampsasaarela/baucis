@@ -1,13 +1,10 @@
 // __Dependencies__
 var mongoose = require('mongoose');
-var lingo = require('lingo'); // TODO use mongoose pluralizer?
+var lingo = require('lingo');
 var errors = require('../errors');
 
 // __Module Definition__
 var decorator = module.exports = function (options, protect) {
-  // Marshal string into a hash
-  if (typeof options === 'string') options = { model: options };
-
   if (!options.model && !options.singular) throw errors.Configuration('Must provide the Mongoose schema name.');
 
   var controller = this;

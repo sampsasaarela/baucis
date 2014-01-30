@@ -3,7 +3,9 @@ var deco = require('deco');
 var express = require('express');
 
 // __Module Definition__
-var Controller = module.exports = deco();
+var Controller = module.exports = deco(function (name, protect) {
+  if (typeof name === 'string') protect.options({ model: name });
+});
 
 Controller.factory(express);
 Controller.decorators(__dirname, [ 'configure' ]);

@@ -46,7 +46,6 @@ var decorator = module.exports = function () {
 
     // This needs to come after the initial execution of the query, otherwise
     // the query gets stuck returning the count (at least the last time I checked).
-    // TODO check again
     request.baucis.query.count(function (error, count) {
       if (error) return next(error);
 

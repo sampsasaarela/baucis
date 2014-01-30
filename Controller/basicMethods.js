@@ -3,7 +3,6 @@ var decorator = module.exports = function (options) {
 
   // Return the array of active verbs
   controller.activeVerbs = function () {
-    // TODO is there a del/delete bug here?
     return [ 'head', 'get', 'post', 'put', 'del' ].filter(function (verb) {
       return controller.get(verb) !== false;
     });

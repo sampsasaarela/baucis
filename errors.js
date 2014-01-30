@@ -6,7 +6,6 @@ var setMessage = function (message) { this.message = message || '' };
 
 // __Module Definition__
 var errors = module.exports = {
-  // TODO deco(setMessage).inherit(Error).container(errors)
   Configuration: deco(setMessage),
   Deprecated: deco(setMessage),
   BadRequest: deco(setMessage),

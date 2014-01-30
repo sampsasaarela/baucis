@@ -1,4 +1,5 @@
 // __Dependencies__
+var deco = require('deco');
 var Api = require('./Api');
 var Release = require('./Release');
 var Controller = require('./Controller');
@@ -9,10 +10,11 @@ var instance = Api();
 
 // __Module Definition__
 var baucis = module.exports = function (options) {
-  if (!options) options = {};
-
   var previous = baucis.empty();
-  previous.set('releases', options.releases || [ '0.0.1' ]); // TODO
+
+  options = deco.merge({}, options);
+  if (options.releases) previous.set('releases', options.releases);
+
   previous.initialize();
   return previous;
 };

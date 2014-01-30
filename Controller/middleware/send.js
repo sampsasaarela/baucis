@@ -93,10 +93,6 @@ function emptyString () {
 var decorator = module.exports = function (options, protect) {
   var controller = this;
 
-  // // TODO these need to happen for all routes
-  // // If no routes matched, initialization didn't happen; it's a non-baucis route.
-  // if (!request.baucis) return next();
-
   protect.finalize(function (request, response, next) {
     response.type('json');
     request.baucis.pipe(check404(next));
@@ -115,7 +111,7 @@ var decorator = module.exports = function (options, protect) {
   });
 
   protect.finalize('collection', 'head', function (request, response, next) {
-    // TODO use es.wait for setting etag and lastModified on collections!!
+    // TODO use es.wait for setting etag and lastModified on collections?
     request.baucis.pipe(emptyString());
     next();
   });
