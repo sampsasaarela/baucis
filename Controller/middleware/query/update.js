@@ -50,7 +50,7 @@ var decorator = module.exports = function () {
 
     Model.findOne(request.baucis.conditions, function (error, doc) {
       if (error) return next(error);
-      if (!doc) return next(errors.NotFound('No ducments matched that query.'));
+      if (!doc) return next(errors.NotFound());
 
       var update = request.body;
       var lock = request.baucis.controller.get('locking') === true;
@@ -61,7 +61,7 @@ var decorator = module.exports = function () {
         // Make sure the version key was selected.
         if (!doc.isSelected(versionKey)) return next(errors.BadRequest('Version key "'+ versionKey + '" was not selected.'));
         // Update and current version have been found.  Check if they're equal.
-        if (updateVersion !== doc[versionKey]) return next(errors.LockConflict('The version of the document to update did not match.'));
+        if (updateVersion !== doc[versionKey]) return next(errors.LockConflict());
         // One is not allowed to set __v and increment in the same update.
         delete update[versionKey];
         doc.increment();

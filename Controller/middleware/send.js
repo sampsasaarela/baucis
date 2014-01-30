@@ -59,7 +59,7 @@ function check404 () {
   return es.through(
     function (doc) { count += 1, this.emit('data', doc) },
     function () {
-      if (count === 0) return this.emit('error', errors.NotFound('Query did not match any documents.'));
+      if (count === 0) return this.emit('error', errors.NotFound());
       this.emit('end');
     }
   );
