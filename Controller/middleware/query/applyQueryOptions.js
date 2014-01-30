@@ -1,8 +1,6 @@
 // __Dependencies__
 var errors = require('../../../errors');
 
-// TODO restructure into more middleware functions
-
 // __Module Definition__
 var decorator = module.exports = function () {
 
@@ -14,32 +12,40 @@ var decorator = module.exports = function () {
     next();
   });
 
-  // Apply various options based on request query parameters.
   this.query(function (request, response, next) {
-    var populate = request.query.populate;
-    var hint = request.query.hint;
-    var select = request.query.select;
-    var count = request.query.count;
-    var sort = request.query.sort;
-    var skip = request.query.skip;
-    var limit = request.query.limit;
-    var comment = request.query.comment;
-    var error = null;
-    var query = request.baucis.query;
+    if (request.query.sort) request.baucis.query.sort(request.query.sort);
+    next();
+  });
 
-    if (sort) query.sort(sort);
-    if (skip) query.skip(skip);
-    if (limit) query.limit(limit);
-    if (count === 'true') request.baucis.count = true;
+  this.query(function (request, response, next) {
+    if (request.query.skip) request.baucis.query.skip(request.query.skip);
+    next();
+  });
 
-    if (comment) {
+  this.query(function (request, response, next) {
+    if (request.query.limit) request.baucis.query.limit(request.query.limit);
+    next();
+  });
+
+  this.query(function (request, response, next) {
+    if (request.query.count === 'true') request.baucis.count = true;
+    next();
+  });
+
+  this.query(function (request, response, next) {
+    if (request.query.comment) {
       if (request.baucis.controller.get('allow comments') === true) {
-        query.comment(comment);
+        request.baucis.query.comment(request.query.comment);
       }
       else {
         console.warn('Query comment was ignored.');
       }
     }
+    next();
+  });
+
+  this.query(function (request, response, next) {
+    var hint = request.query.hint;
 
     if (hint) {
       if (request.baucis.controller.get('allow hints') === true) {
@@ -47,12 +53,18 @@ var decorator = module.exports = function () {
         Object.keys(hint).forEach(function (path) {
           hint[path] = Number(hint[path]);
         });
-        query.hint(hint);
+        request.baucis.query.hint(hint);
       }
       else {
         return next(errors.Forbidden('Hints are not enabled for this resource.'));
       }
     }
+
+    next();
+  });
+
+  this.query(function (request, response, next) {
+    var select = request.query.select;
 
     if (select) {
       if (select.indexOf('+') !== -1) {
@@ -61,8 +73,15 @@ var decorator = module.exports = function () {
       if (request.baucis.controller.checkBadSelection(select)) {
         return next(errors.Forbidden('Including excluded fields is not permitted.'));
       }
-      query.select(select);
+      request.baucis.query.select(select);
     }
+
+    next();
+  });
+
+  this.query(function (request, response, next) {
+    var populate = request.query.populate;
+    var error = null;
 
     if (populate) {
       if (typeof populate === 'string') {
@@ -82,7 +101,7 @@ var decorator = module.exports = function () {
           return error = errors.Forbidden('May not set selected fields of populated document.');
         }
 
-        query.populate(field);
+        request.baucis.query.populate(field);
       });
     }
 
