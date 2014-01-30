@@ -1,7 +1,7 @@
 // __Dependencies__
 var crypto = require('crypto');
 var es = require('event-stream');
-var JSONStream = require('JSONStream'); // TODO just use es stuff?
+var JSONStream = require('JSONStream');
 var errors = require('../../errors');
 
 // __Private Module Members__
@@ -68,7 +68,7 @@ function check404 () {
 function etag (response) {
   var hash = crypto.createHash('md5');
   return es.map(function (doc, callback) {
-    // TODO check if already set
+    if (response.get('Etag')) return callback(null, doc);
     hash.update(JSON.stringify(doc));
     response.set('Etag', '"' + hash.digest('hex') + '"');
     callback(null, doc);
@@ -77,7 +77,7 @@ function etag (response) {
 
 function lastModified (response, lastModifiedPath) {
   return es.map(function (doc, callback) {
-    // TODO check if already set
+    if (response.get('Last-Modified')) return callback(null, doc);
     if (lastModifiedPath) response.set('Last-Modified', doc.get(lastModifiedPath));
     callback(null, doc);
   });
