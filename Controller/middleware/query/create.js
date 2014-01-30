@@ -1,71 +1,55 @@
 // __Dependencies__
 var url = require('url');
-var JSONStream = require('JSONStream');
 var es = require('event-stream');
 
 // __Private Module Members__
 
 function parse () {
-  var braces = 0;
+  var depth = 0;
   var buffer = '';
 
   return es.through(
     function (incoming) {
       var remaining = incoming.toString();
-      // TODO simplify, revisit comments
-      while (remaining !== '') {
-        var opens = remaining.indexOf('{');
-        var closes = remaining.indexOf('}');
-        // If the chunk doesn't contain a "{" or a "}," buffer the entire chunk
-        // unless the parser isn't inside an object.
-        if (opens === -1 && closes === -1) {
-          if (braces !== 0) buffer += remaining;
-          remaining = '';
-          continue;
-        }
-        // If the chunk only contains a "{" buffer it and the characters to the
-        // right of the brace.
-        if (closes === -1) {
-          buffer += remaining.substring(opens);
-          braces += 1;
-          remaining = '';
-          continue;
-        }
-        // If the chunk only contains a "}" buffer up to and including the brace.
-        // If the brace indicates the end of the object, emit.  If the parser is
-        // outside of an object, don't do anything.
-        if (opens === -1) {
-          if (braces === 0) continue;
-          buffer += remaining.substring(0, closes + 1);
-          braces -= 1;
-          remaining = remaining.substring(closes + 1);
-          if (braces === 0) this.emit('data', JSON.parse(buffer)), buffer = '';
-          continue;
-        }
 
-        if (closes < opens) {
-          if (braces === 0) {
-            remaining = remaining.substring(opens)
-            continue;
+       while (remaining !== '') {
+        var match = remaining.match(/[\}\{]/);
+        // The head of the string is all characters up to the first brace, if any.
+        var head = match ? remaining.substr(0, match.index) : remaining;
+        // The first brace in the string, if any.
+        var brace = match ? match[0] : '';
+        // The rest of the string, following the brace.
+        var tail = match ? remaining.substr(match.index + 1) : '';
+
+        if (depth === 0) {
+          // The parser is outside an object.
+          // Ignore the head of the string.
+          // Add brace if it's an open brace.
+          if (brace === '{') {
+            depth += 1;
+            buffer += brace;
           }
-          buffer += remaining.substring(0, closes + 1);
-          braces -= 1;
-          remaining = remaining.substring(closes + 1);
-          if (braces === 0) this.emit('data', JSON.parse(buffer)), buffer = '';
-          continue;
         }
-
-        if (opens < closes) {
-          buffer += remaining.substring(opens, closes);
-          braces += 1;
-          remaining = remaining.substring(closes);
-          continue;
+        else {
+          // The parser is inside an object.
+          // Add the head of the string to the buffer.
+          buffer += head;
+          // Increase or decrease depth if a brace was found.
+          if (brace === '{') depth += 1;
+          else if (brace === '}') depth -= 1;
+          // Add the brace to the buffer.
+          buffer += brace;
+          // If the object ended, emit it.
+          if (depth === 0) {
+            this.emit('data', JSON.parse(buffer));
+            buffer = '';
+          }
         }
+        // Move on.
+        remaining = tail;
       }
     },
-    function () {
-      this.emit('end');
-    }
+    function () { this.emit('end') }
   );
 }
 
