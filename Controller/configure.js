@@ -33,7 +33,7 @@ var decorator = module.exports = function (options, protect) {
   options['modelName'] = modelName;
   options['schema'] = model.schema;
   options['singular'] = options.singular || modelName;
-  options['plural'] = options.plural || lingo.en.pluralize(options.singular || modelName);
+  options['plural'] = options.plural || lingo.en.pluralize(options.singular);
 
   options['basePath'] = basePath;
   options['basePathWithId'] = basePathWithId;
