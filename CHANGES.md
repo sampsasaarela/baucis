@@ -1,9 +1,11 @@
 Baucis Change Log
 =================
 
-v0.16.0
--------
-Stream documents to manage resources more efficiently with large datasets.
+v0.16.0-alpha
+-------------
+Stream documents to manage resources more efficiently.  (Performance tests forthcoming.)
+
+The documentation has not been updated yet... public interface subject to change.  Suggestions welcome!
 
 v0.15.1
 -------
