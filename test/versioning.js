@@ -125,4 +125,103 @@ describe('Versioning', function () {
     });
   });
 
+
+  it('should send "409 Conflict" if there is a version conflict', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/versioned/liens',
+      json: true,
+      body: { title: 'Franklin' }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+
+      var options = {
+        url: 'http://localhost:8012/api/versioned/liens/' + body._id,
+        json: true,
+        body: { title: 'Ranken', __v: 0 }
+      };
+
+      request.put(options, function (error, response, body) {
+        if (error) return done(error);
+
+        expect(response.statusCode).to.be(200);
+
+        request.put(options, function (error, response, body) {
+          if (error) return done(error);
+          console.log(body)
+          expect(response.statusCode).to.be(409);
+          done();
+        });
+      });
+    });
+  });
+
+  it('should send "409 Conflict" if there is a version conflict (greater than)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/versioned/liens',
+      json: true,
+      body: { title: 'Smithton' }
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+
+      var options = {
+        url: 'http://localhost:8012/api/versioned/liens/' + body[1]._id,
+        json: true,
+        body: { __v: body[1].__v + 10 }
+      };
+      request.put(options, function (error, response, body) {
+        if (error) return done(error);
+        expect(response.statusCode).to.be(409);
+        done();
+      });
+    });
+  });
+
+  it('should not send "409 Conflict" if there is no version conflict (equal)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/versioned/liens',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+
+      var options = {
+        url: 'http://localhost:8012/api/versioned/liens/' + body[1]._id,
+        json: true,
+        body: { __v: body[1].__v }
+      };
+      request.put(options, function (error, response, body) {
+        if (error) return done(error);
+        expect(response.statusCode).to.be(200);
+        done();
+      });
+    });
+  });
+
+  it('should cause an error if locking is enabled and no version is selected on the doc', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/versioned/liens',
+      json: true,
+      body: { title: 'Forest Expansion' }
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+
+      var options = {
+        url: 'http://localhost:8012/api/versioned/liens/' + body[0]._id,
+        json: true
+      };
+      request.put(options, function (error, response, body) {
+        if (error) return done(error);
+        expect(response.statusCode).to.be(400);
+        done();
+      });
+    });
+  });
+
 });

@@ -37,6 +37,11 @@ var fixture = module.exports = {
       versions: '~3'
     });
 
+    baucis.rest({
+      singular: 'lien',
+      locking: true
+    });
+
     app.use('/api/versioned', baucis({
       releases: [ '1.0.0', '2.1.0', '3.0.1' ]
     }));

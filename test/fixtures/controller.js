@@ -105,6 +105,13 @@ var fixture = module.exports = {
     });
 
     baucis.rest({
+      model: 'cheese',
+      singular: 'timeentry',
+      plural: 'timeentries',
+      findBy: 'name'
+    });
+
+    baucis.rest({
       singular: 'bean',
       get: false
     });
@@ -117,7 +124,6 @@ var fixture = module.exports = {
 
     baucis.rest({
       singular: 'lien',
-      locking: true,
       del: false
     });
 
@@ -125,6 +131,12 @@ var fixture = module.exports = {
       model: 'fiend',
       singular: 'mean',
       locking: true
+    });
+
+    baucis.rest({
+      singular: 'store',
+      plural: 'baloo',
+      findBy: 'name'
     });
 
     app = express();

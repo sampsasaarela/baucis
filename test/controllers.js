@@ -724,104 +724,30 @@ describe('Controllers', function () {
     });
   });
 
-  it('should send "409 Conflict" if there is a version conflict', function (done) {
+  it ('should allow setting plural collection name to non-default', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/liens',
-      json: true,
-      body: { title: 'Franklin' }
-    };
-    request.post(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(201);
-
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body._id,
-        json: true,
-        body: { title: 'Ranken', __v: 0 }
-      };
-
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-
-        expect(response.statusCode).to.be(200);
-
-        request.put(options, function (error, response, body) {
-          if (error) return done(error);
-          console.log(body)
-          expect(response.statusCode).to.be(409);
-          done();
-        });
-      });
-    });
-  });
-
-  it('should send "409 Conflict" if there is a version conflict (greater than)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/liens',
-      json: true,
-      body: { title: 'Smithton' }
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body[1]._id,
-        json: true,
-        body: { __v: body[1].__v + 10 }
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(409);
-        done();
-      });
-    });
-  });
-
-  it('should not send "409 Conflict" if there is no version conflict (equal)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/liens',
+      url: 'http://localhost:8012/api/baloo/?sort=name',
       json: true
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(200);
-
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body[1]._id,
-        json: true,
-        body: { __v: body[1].__v }
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(200);
-        done();
-      });
+      expect(body).to.have.length(2);
+      done();
     });
   });
 
-  it('should cause an error if locking is enabled and no version is selected on the doc', function (done) {
+  it('should allow setting model indepentally of name', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/liens',
-      json: true,
-      body: { title: 'Forest Expansion' }
+      url: 'http://localhost:8012/api/timeentries/Camembert',
+      json: true
     };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
+    request.get(options, function (err, response, body) {
+      if (err) return done(err);
       expect(response.statusCode).to.be(200);
-
-      var options = {
-        url: 'http://localhost:8012/api/liens/' + body[0]._id,
-        json: true
-      };
-      request.put(options, function (error, response, body) {
-        if (error) return done(error);
-        expect(response.statusCode).to.be(400);
-        done();
-      });
+      expect(body).to.have.property('color', 'White');
+      done();
     });
   });
-
-  it('should not send 409 if locking is not enabled');
 
 });
