@@ -15,7 +15,7 @@ var decorator = module.exports = function (options, protect) {
 
   if (options.basePath && options.basePath !== '/') {
     if (options.basePath.indexOf('/') !== 0) throw errors.Configuration('basePath must start with a "/"');
-    if (options.basePath.lastIndexOf('/') === options.basePath.length - 1) throw errors.Configuration('basePath must not end with a "/"');
+    if (options.basePath[options.basePath.length - 1] === '/') throw errors.Configuration('basePath must not end with a "/"');
   }
   if (options.findBy && options.findBy !== '_id') {
     findByPath = model.schema.path(options.findBy);
