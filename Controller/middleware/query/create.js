@@ -77,13 +77,17 @@ var decorator = module.exports = function () {
     }
     // Process the incoming document or documents.
     incoming.stopOnError(next).map(mapIn).map(create).pluck(findBy).toArray(function (ids) {
+      var location;
       // Set the conditions used to build `request.baucis.query`.
       var conditions = request.baucis.conditions[findBy] = { $in: ids };
-      // Check for at least one document, and set the `Location` header if
-      // at least one document was sent.
+      // Check for at least one document.
       if (ids.length === 0) return next(errors.BadRequest('You must POST at least one document.'));
-      if (ids.length === 1) return response.set('Location', url + ids[0]);
-      response.set('Location', url + '?conditions=' + JSON.stringify(conditions));
+      // Set the `Location` header if at least one document was sent.
+      if (ids.length === 1) location = url + ids[0];
+      else location = url + '?conditions=' + JSON.stringify(conditions);
+      response.set('Location', location);
+      // Finished here.
+      next();
     });
   });
 };
