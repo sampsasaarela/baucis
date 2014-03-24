@@ -1,6 +1,5 @@
 // __Dependencies__
-var es = require('event-stream');
-var JSONStream = require('JSONStream');
+var _ = require('highland');
 
 // __Private Module Members__
 // Genereate a function that will add pipes to an array.  Then, when called
@@ -19,7 +18,7 @@ function pipeInterface (source, finalize) {
 // __Module Definition__
 var decorator = module.exports = function () {
   // Middleware to create functions for adding pipes for query and response streams.
-  this.documents(function (request, response, next) {
+  this.request(function (request, response, next) {
     request.baucis.outgoing = pipeInterface(request.baucis.query.stream.bind(request.baucis.query), response);
     request.baucis.incoming = pipeInterface(request, response);
     next();
