@@ -4,6 +4,15 @@ var crypto = require('crypto');
 var errors = require('../../errors');
 
 // __Private Module Members__
+// A consume function that emits an error for 404 state, or otherwise acts as a
+// pass-through.
+function check404 (error, doc, push, next) {
+  var done = _.compose(push, next);
+  if (error) return done(error);
+  if (item instanceof errors.NotFound) return done(item); // ERROR
+  done(null, item);
+}
+
 function removeDocuments () {
   return es.map(function (doc, callback) {
     doc.remove(callback);
@@ -34,7 +43,8 @@ var decorator = module.exports = function (options, protect) {
   // Create the basic stream.
   protect.finalize(function (request, response, next) {
     response.type('json');
-    request.baucis.send = _(request.baucis.documents).otherwise([ errors.NotFound() ])
+    // TODO allow setting request.baucis.documents instead of streaming
+    request.baucis.send = _(request.baucis.query.stream()).otherwise([ errors.NotFound() ])
       .stopOnError(next).map(check404);
     next();
   });
@@ -79,7 +89,7 @@ var decorator = module.exports = function (options, protect) {
   });
 
   protect.finalize('del', function (request, response, next) {
-    request.baucis.send.map(remove);
+    request.baucis.send.map(remove); // TODO move this to another finalize component
     request.baucis.count = true;
     next();
   });

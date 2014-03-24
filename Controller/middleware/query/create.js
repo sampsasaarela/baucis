@@ -58,25 +58,28 @@ var decorator = module.exports = function () {
     var Model = request.baucis.controller.get('model');
     var findBy = request.baucis.controller.get('findBy');
     var incoming;
-    // Function to save an incoming document.
-    function create (doc) {
-      var pending = new Model();
-      pending.set(incoming);
-      pending.save(callback);
+    // Map function to create a document from incoming JSON.
+    function model (incoming) {
+      var doc = new Model();
+      doc.set(incoming);
+      return doc;
+    }
+    // Consume function to save a document.
+    function save (error, unsaved, push, next) {
+      var done = _.compose(push, next);
+      if (error) return done(error);
+      unsaved.save(done);
     }
     // Set the status to 201 (Created).
     response.status(201);
     // Check if the body was parsed by some external middleware e.g. `express.json`.
     // If so, create a stream from the POST'd document or documents.  Otherwise,
     // stream and parse the request.
-    if (request.body) {
-      incoming = _([].concat(request.body));
-    }
-    else {
-      incoming = _(request).map(parse);
-    }
+    if (request.body) incoming = _([].concat(request.body));
+    else incoming = _(request).map(parse);
     // Process the incoming document or documents.
-    incoming.stopOnError(next).map(mapIn).map(create).pluck(findBy).toArray(function (ids) {
+    incoming.stopOnError(next).map(mapIn).map(model).map(save).pluck(findBy);
+    incoming.toArray(function (ids) {
       var location;
       // Set the conditions used to build `request.baucis.query`.
       var conditions = request.baucis.conditions[findBy] = { $in: ids };
