@@ -34,7 +34,6 @@
     "lingo": "0.0.5",
     "semver": "~2.2.1",
     "deco": "~0.9.0",
-    "JSONStream": "~0.7.1",
     "highland": "~1.19.1"
   },
   "peerDependencies": {

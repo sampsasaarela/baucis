@@ -1,7 +1,5 @@
 // __Dependencies__
 var crypto = require('crypto');
-var es = require('event-stream');
-var JSONStream = require('JSONStream');
 var errors = require('../../errors');
 
 // __Private Module Members__
