@@ -6,7 +6,6 @@ var middleware = module.exports = deco(__dirname, [
   // __Query-Stage Middleware__
   'create',
   'update',
-  'remove',
   'buildQuery',
   'applyQueryOptions'
 ]);
