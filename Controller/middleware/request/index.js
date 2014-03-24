@@ -8,6 +8,5 @@ var middleware = module.exports = deco(__dirname, [
   'acceptHeader',
   'checkMethodSupported',
   'validateId',
-  'setConditions',
-  'stream'
+  'setConditions'
 ]);
