@@ -22,6 +22,6 @@ var errors = module.exports = {
 
 Object.keys(errors).forEach(function (name) {
   var BaucisError = errors[name];
-  BaucisError.inherit(Error);
-  BaucisError.container(errors);
+  errors[name].inherit(Error);
+  errors[name].container(errors);
 });
