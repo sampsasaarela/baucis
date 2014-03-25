@@ -34,6 +34,7 @@ describe('POST plural', function () {
     });
   });
 
+  // TODO
   // it('should create a new object and return its ID (form)', function (done) {
   //   var options = {
   //     url: 'http://localhost:8012/api/vegetables/',
@@ -83,6 +84,8 @@ describe('POST plural', function () {
     };
     request.post(options, function (error, response, body) {
       if (error) return done(error);
+
+      console.log(body)
 
       expect(response.statusCode).to.equal(201);
       expect(body[0]._id).not.to.be.empty();
