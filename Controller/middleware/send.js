@@ -117,8 +117,9 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize(function (request, response, next) {
     response.type('json');
     // TODO allow setting request.baucis.documents instead of streaming
-    request.baucis.send = _(request.baucis.query.stream())
-      .otherwise([ errors.NotFound() ]).consume(check404);
+    var stream = request.baucis.query.stream();
+    stream.on('error', next);
+    request.baucis.send = _(stream).otherwise([ errors.NotFound() ]).consume(check404);
     next();
   });
 
