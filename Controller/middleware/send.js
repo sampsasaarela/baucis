@@ -147,7 +147,8 @@ var decorator = module.exports = function (options, protect) {
 
   protect.finalize('collection', 'get', function (request, response, next) {
     request.baucis.send = request.baucis.send.map(stringify);
-    request.baucis.send = request.baucis.send.consume(singleOrArray(true));
+    if (request.baucis.count) request.baucis.send = request.baucis.send.reduce(0, count).map(stringify);
+    else request.baucis.send = request.baucis.send.consume(singleOrArray(true));
     next();
   });
 
@@ -172,7 +173,6 @@ var decorator = module.exports = function (options, protect) {
   });
 
   protect.finalize(function (request, response, next) {
-    if (request.baucis.count) request.baucis.send = request.baucis.send.reduce(0, count).map(stringify);
     request.baucis.send.stopOnError(next).pipe(response);
   });
 };
