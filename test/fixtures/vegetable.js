@@ -98,7 +98,8 @@ var fixture = module.exports = {
     controller.request(function (request, response, next) {
       if (request.query.streamIn !== 'true') return next();
       request.baucis.incoming(_().map(function (doc) {
-        doc.field = 'boom';
+        doc.name = 'boom';
+        return doc;
       }));
       next();
     });
@@ -107,7 +108,8 @@ var fixture = module.exports = {
     controller.request(function (request, response, next) {
       if (request.query.streamOut !== 'true') return next();
       request.baucis.outgoing(_().map(function (doc) {
-        doc.field = 'beam';
+        delete doc.name;
+        return doc;
       }));
       next();
     });
