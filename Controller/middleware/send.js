@@ -153,8 +153,8 @@ var decorator = module.exports = function (options, protect) {
 
   // POST
   protect.finalize('collection', 'post', function (request, response, next) {
-    request.baucis.send = request.baucis.send.consume(singleOrArray());
     request.baucis.send = request.baucis.send.map(stringify);
+    request.baucis.send = request.baucis.send.consume(singleOrArray());
     next();
   });
 
