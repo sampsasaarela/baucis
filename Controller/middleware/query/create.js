@@ -8,9 +8,17 @@ function parse () {
   var depth = 0;
   var buffer = '';
 
-  return function (incoming) {
-    var remaining = incoming.toString();
+  return function (error, chunk, push, next) {
+    if (error) {
+      push(error);
+      return next();
+    }
+    if (chunk === _.nil) {
+      push(null, _.nil);
+      return next();
+    }
 
+    var remaining = chunk.toString();
     while (remaining !== '') {
       var match = remaining.match(/[\}\{]/);
       // The head of the string is all characters up to the first brace, if any.
@@ -40,13 +48,14 @@ function parse () {
         buffer += brace;
         // If the object ended, emit it.
         if (depth === 0) {
-          this.emit('data', JSON.parse(buffer));
+          push(null, JSON.parse(buffer));
           buffer = '';
         }
       }
       // Move on.
       remaining = tail;
     }
+    return next();
   };
 }
 
@@ -57,6 +66,8 @@ var decorator = module.exports = function () {
   controller.query('post', function (request, response, next) {
     var Model = request.baucis.controller.get('model');
     var findBy = request.baucis.controller.get('findBy');
+    var url = 'http://voo.com';
+    var mapIn = request.baucis.mapIn || function (doc) { return doc };
     var incoming;
     // Map function to create a document from incoming JSON.
     function model (incoming) {
@@ -66,9 +77,19 @@ var decorator = module.exports = function () {
     }
     // Consume function to save a document.
     function save (error, unsaved, push, next) {
-      var done = _.compose(push, next);
-      if (error) return done(error);
-      unsaved.save(done);
+      if (error) {
+        push(error);
+        return next();
+      }
+      if (unsaved === _.nil) {
+        push(null, _.nil);
+        return next();
+      }
+
+      unsaved.save(function (error, doc) {
+        push(error, doc);
+        return next();
+      });
     }
     // Set the status to 201 (Created).
     response.status(201);
@@ -76,9 +97,9 @@ var decorator = module.exports = function () {
     // If so, create a stream from the POST'd document or documents.  Otherwise,
     // stream and parse the request.
     if (request.body) incoming = _([].concat(request.body));
-    else incoming = _(request).map(parse);
+    else incoming = _(request).consume(parse());
     // Process the incoming document or documents.
-    incoming.stopOnError(next).map(mapIn).map(model).map(save).pluck(findBy);
+    incoming = incoming.stopOnError(next).map(mapIn).map(model).consume(save).pluck(findBy);
     incoming.toArray(function (ids) {
       var location;
       // Set the conditions used to build `request.baucis.query`.

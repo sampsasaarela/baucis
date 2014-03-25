@@ -124,18 +124,20 @@ var decorator = module.exports = function (options, protect) {
 
   // POST
   protect.finalize('collection', 'post', function (request, response, next) {
-    request.baucis.send.map(singleOrArray);
+    request.baucis.send = request.baucis.send.consume(singleOrArray());
+    request.baucis.send = request.baucis.send.map(stringify);
     next();
   });
 
   // PUT
   protect.finalize('put', function (request, response, next) {
-    request.baucis.send.map(stringify);
+    request.baucis.send = request.baucis.send.map(stringify);
     next();
   });
 
+  // DELETE
   protect.finalize('del', function (request, response, next) {
-    request.baucis.send.map(remove); // TODO move this to another finalize component
+    request.baucis.send = request.baucis.send.map(remove); // TODO move this to another finalize component
     request.baucis.count = true;
     next();
   });
