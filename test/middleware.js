@@ -13,7 +13,7 @@ describe('Middleware', function () {
   beforeEach(fixtures.vegetable.create);
   after(fixtures.vegetable.deinit);
 
-  it('should prevent resource from being loaded when querystring is set', function (done) {
+  it('should prevent resource from being loaded when block is set', function (done) {
     var options = {
       url : 'http://localhost:8012/api/vegetables/' + vegetables[0]._id,
       qs  : { block: true },
@@ -26,7 +26,7 @@ describe('Middleware', function () {
     });
   });
 
-  it('should allow resource to be loaded when querystring is not set', function (done) {
+  it('should allow resource to be loaded when block is not set', function (done) {
     var options = {
       url : 'http://localhost:8012/api/vegetables/' + vegetables[0]._id,
       qs  : { block: false },
@@ -58,6 +58,107 @@ describe('Middleware', function () {
     });
   });
 
-  it('should allow custom stream handlers');
+  it('should allow custom stream handlers (IN)', function (done) {
+    // should set all fields to a string
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { streamIn: true },
+      json: { name: 'zoom' }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('_id');
+      expect(body).to.have.property('name', 'boom');
+      done();
+    });
+  });
+
+  it('should skip streaming documents in if request.body is already present', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { parse: true },
+      json: { name: 'zoom' }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('_id');
+      expect(body).to.have.property('name', 'zoom');
+      done();
+    });
+    done();
+  });
+
+  it('should allow custom stream handlers (OUT)', function (done) {
+    // should set all fields to a string
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { streamOut: true },
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('_id');
+      expect(body).to.have.property('length', 'boom');
+      expect(body[0]).to.have.property('name', 'beam');
+      expect(body[1]).to.have.property('name', 'beam');
+      expect(body[2]).to.have.property('name', 'beam');
+      done();
+    });
+  });
+
+  it('should allow streaming out into request.baucis.documents', function (done) {
+    // should set all fields to a string
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { streamOut: true },
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('_id');
+      expect(body).to.have.property('length', 'boom');
+      expect(body[0]).to.have.property('name', 'beam');
+      expect(body[1]).to.have.property('name', 'beam');
+      expect(body[2]).to.have.property('name', 'beam');
+      done();
+    });
+  });
+
+  it('should 404 if request.baucis.documents is undefined, null, or 0', function (done) {
+        // should set all fields to a string
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { emptyIt: true },
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('_id');
+      expect(body).to.have.property('length', 'boom');
+      expect(body[0]).to.have.property('name', 'beam');
+      expect(body[1]).to.have.property('name', 'beam');
+      expect(body[2]).to.have.property('name', 'beam');
+      done();
+    });
+  });
+
+  it('should skip streaming documents out if request.baucis.documents is present', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { creamIt: true },
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.be('Devonshire Clotted Cream.');
+      done();
+    });
+  });
 
 });
