@@ -1,5 +1,6 @@
 // __Dependencies__
 var _ = require('highland');
+var util = require('util');
 var errors = require('../../../errors');
 
 // __Private Module Members__
@@ -96,7 +97,7 @@ var decorator = module.exports = function () {
       });
     }
     // Add trailing slash to URL if needed.
-    if (url.lastIndexOf('/') !== (url.length - 1)) url += '/';
+    if (url.lastIndexOf('/') === (url.length - 1)) url = url.slice(0, url.length - 1);
     // Set the status to 201 (Created).
     response.status(201);
     // Check if the body was parsed by some external middleware e.g. `express.json`.
@@ -114,8 +115,8 @@ var decorator = module.exports = function () {
       // Check for at least one document.
       if (ids.length === 0) return next(errors.BadRequest('You must POST at least one document.'));
       // Set the `Location` header if at least one document was sent.
-      if (ids.length === 1) location = url + ids[0];
-      else location = url + '?conditions=' + JSON.stringify(conditions);
+      if (ids.length === 1) location = url + '/' + ids[0];
+      else location = util.format('%s?conditions={ "%s": %s }', url, findBy, JSON.stringify(conditions));
       response.set('Location', location);
       // Finished here.
       next();
