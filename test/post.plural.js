@@ -27,7 +27,7 @@ describe('POST plural', function () {
       };
       request.get(options, function (error, response, body) {
       	if (error) return done(error);
-      	expect(response).to.have.property('statusCode', 200);
+      	expect(response.statusCode).to.equal(200);
       	expect(body).to.have.property('name', 'Tomato');
       	done();
       });
@@ -54,7 +54,7 @@ describe('POST plural', function () {
   //     };
   //     request.get(options, function (error, response, body) {
   //       if (error) return done(error);
-  //       expect(response).to.have.property('statusCode', 200);
+  //       expect(response.statusCode).to.equal(200);
   //       expect(body).to.have.property('name', 'Tepin Pepper');
   //       done();
   //     });
@@ -85,8 +85,6 @@ describe('POST plural', function () {
     request.post(options, function (error, response, body) {
       if (error) return done(error);
 
-      console.log(body)
-
       expect(response.statusCode).to.equal(201);
       expect(body[0]._id).not.to.be.empty();
       expect(body[1]._id).not.to.be.empty();
@@ -97,7 +95,7 @@ describe('POST plural', function () {
       };
       request.get(options, function (error, response, body) {
         if (error) return done(error);
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.equal(200);
         expect(body).to.have.property('length', 2);
         expect(body[0]).to.have.property('name', 'Catnip');
         expect(body[1]).to.have.property('name', 'Cattail');
@@ -129,7 +127,7 @@ describe('POST plural', function () {
     request.post(options, function (error, response, body) {
       if (error) return done(error);
 
-      expect(response).to.have.property('statusCode', 422);
+      expect(response.statusCode).to.equal(422);
       expect(body).to.have.property('name');
       expect(body.name).to.have.property('message', 'Path `name` is required.');
       expect(body.name).to.have.property('name', 'ValidatorError');
