@@ -4,8 +4,10 @@ var crypto = require('crypto');
 var errors = require('../../errors');
 
 // __Private Module Members__
-//A map function to stringify emitted entity.
+// A map function to stringify emitted entity.
 function stringify (a) { return JSON.stringify(a) }
+// A reduce function to count emitted entities.
+function count (a, b) { return a + 1 }
 // A consume function that emits an error for 404 state, or otherwise acts as a
 // pass-through.
 function check404 (error, item, push, next) {
@@ -58,27 +60,49 @@ function singleOrArray () {
   };
 };
 
-function removeDocuments () {
-  return es.map(function (doc, callback) {
-    doc.remove(callback);
+function remove (error, doc, push, next) {
+  if (error) {
+    push(error);
+    return next();
+  }
+  if (doc === _.nil) {
+    push(null, _.nil);
+    return next();
+  }
+
+  doc.remove(function (error) {
+    push(error);
+    return next();
   });
 }
 
-function etag (a, b) {
-  var hash = crypto.createHash('md5');
-  var etag = response.get('Etag');
-  if (etag) return etag
-  hash.update(JSON.stringify(doc));
-  response.set('Etag', '"' + hash.digest('hex') + '"');
-  callback(null, doc);
+
+function etag (response) {
+  return function (a, b) {
+    var hash = crypto.createHash('md5');
+    var etag = response.get('Etag');
+    if (etag) return etag;
+    hash.update(JSON.stringify(a));
+    response.set('Etag', '"' + hash.digest('hex') + '"');
+    return;
+  };
 }
 
 function lastModified (response, lastModifiedPath) {
-  return es.map(function (doc, callback) {
-    if (response.get('Last-Modified')) return callback(null, doc);
-    if (lastModifiedPath) response.set('Last-Modified', doc.get(lastModifiedPath));
-    callback(null, doc);
-  });
+  return function (error, doc, push, next) {
+    if (error) {
+      push(error);
+      return next();
+    }
+    if (doc === _.nil) {
+      push(null, _.nil);
+      return next();
+    }
+    if (!response.get('Last-Modified') && lastModifiedPath) {
+      response.set('Last-Modified', doc.get(lastModifiedPath));
+    }
+    next();
+  };
 }
 
 // __Module Definition__
@@ -97,9 +121,9 @@ var decorator = module.exports = function (options, protect) {
   // HEAD
   protect.finalize('instance', 'head', function (request, response, next) {
     request.baucis.send.fork().map(lastModified).resume();
-    request.baucis.send.map(stringify);
+    request.baucis.send = request.baucis.send.map(stringify);
     request.baucis.send.fork().map(etag).resume();
-    request.baucis.send.reduce1(emptyString);
+    request.baucis.send = request.baucis.send.reduce1(emptyString);
     next();
   });
 
@@ -110,9 +134,9 @@ var decorator = module.exports = function (options, protect) {
 
   // GET
   protect.finalize('instance', 'get', function (request, response, next) {
-    request.baucis.send.fork().map(lastModified).resume();
-    request.baucis.send.map(stringify);
-    request.baucis.send.fork().map(etag).resume();
+    request.baucis.send.observe().map(lastModified).resume();
+    request.baucis.send = request.baucis.send.map(stringify);
+    request.baucis.send.observe().reduce1(etag(response)).resume();
     next();
   });
 
@@ -137,13 +161,13 @@ var decorator = module.exports = function (options, protect) {
 
   // DELETE
   protect.finalize('del', function (request, response, next) {
-    request.baucis.send = request.baucis.send.map(remove); // TODO move this to another finalize component
+    request.baucis.send = request.baucis.send.consume(remove); // TODO move this to another finalize component
     request.baucis.count = true;
     next();
   });
 
   protect.finalize(function (request, response, next) {
-    if (request.baucis.count) request.baucis.send.reduce(count, 0).map(stringify);
+    if (request.baucis.count) request.baucis.send = request.baucis.send.reduce(0, count).map(stringify);
     request.baucis.send.pipe(response);
   });
 };
