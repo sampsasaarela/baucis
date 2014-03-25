@@ -44,9 +44,6 @@ var decorator = module.exports = function () {
     if (request.method !== 'GET') return done();
     if (!request.query.limit) return done();
 
-    // This needs to come after the initial execution of the query, otherwise
-    // the query gets stuck returning the count (at least the last time I checked).
-    // TODO not a problem now?
     request.baucis.query.count(function (error, count) {
       if (error) return next(error);
 
