@@ -3,7 +3,7 @@ var request = require('request');
 
 var fixtures = require('./fixtures');
 
-describe('DELETE on instance', function () {
+describe('DELETE singular', function () {
   before(fixtures.vegetable.init);
   beforeEach(fixtures.vegetable.create);
   after(fixtures.vegetable.deinit);
