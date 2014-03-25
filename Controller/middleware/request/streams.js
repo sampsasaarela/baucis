@@ -2,23 +2,22 @@
 var _ = require('highland');
 var errors = require('../../../errors');
 
+// __Private Module Members__
+function addUserStream () {
+  var streams = [];
+  return function (stream) {
+    if (stream) return streams.push(stream);
+    var chain = _();
+    streams.forEach(function (s) {
+      chain = chain.pipe(s);
+    });
+    return chain;
+  }
+}
+
 // __Module Definition__
 var decorator = module.exports = function () {
-  var controller = this;
-
-  function addUserStream () {
-    var streams = [];
-    return function (stream) {
-      if (stream) return streams.push(stream);
-      var through = _();
-      streams.forEach(function (s) {
-        through = through.pipe(s);
-      });
-      return through;
-    }
-  }
-
-  controller.request(function (request, response, next) {
+  this.request(function (request, response, next) {
     request.baucis.incoming = addUserStream();
     request.baucis.outgoing = addUserStream();
     next();
