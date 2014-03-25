@@ -21,8 +21,8 @@ describe('Headers', function () {
       url: 'http://localhost:8012/api/vegetables',
       json: true
     };
-    request.head(options, function (err, response, body) {
-      if (err) return done(err);
+    request.head(options, function (error, response, body) {
+      if (error) return done(error);
       expect(response).to.have.property('statusCode', 200);
       expect(response.headers).to.have.property('allow', 'HEAD,GET,POST,PUT,DELETE');
       done();
@@ -34,8 +34,8 @@ describe('Headers', function () {
       url: 'http://localhost:8012/api/vegetables',
       json: true
     };
-    request.head(options, function (err, response, body) {
-      if (err) return done(err);
+    request.head(options, function (error, response, body) {
+      if (error) return done(error);
       expect(response).to.have.property('statusCode', 200);
       expect(response.headers).to.have.property('accept', 'application/json, application/x-www-form-urlencoded');
       done();
@@ -47,8 +47,8 @@ describe('Headers', function () {
       url: 'http://localhost:8012/api/vegetables',
       json: true
     };
-    request.head(options, function (err, response, body) {
-      if (err) return done(err);
+    request.head(options, function (error, response, body) {
+      if (error) return done(error);
       expect(response).to.have.property('statusCode', 200);
       expect(response.headers).to.have.property('x-powered-by', 'Baucis');
       done();
