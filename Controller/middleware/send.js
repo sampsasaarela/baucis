@@ -169,7 +169,7 @@ var decorator = module.exports = function (options, protect) {
 
   // DELETE
   protect.finalize('del', function (request, response, next) {
-    request.baucis.send = request.baucis.send.consume(remove); // TODO move this to another finalize component
+    request.baucis.send = request.baucis.send.consume(remove);
     request.baucis.send = request.baucis.send.reduce(0, count).map(stringify);
     next();
   });
