@@ -98,66 +98,63 @@ describe('Middleware', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(201);
-      expect(body).to.have.property('_id');
-      expect(body).to.have.property('length', 'boom');
-      expect(body[0]).to.have.property('name', 'beam');
-      expect(body[1]).to.have.property('name', 'beam');
-      expect(body[2]).to.have.property('name', 'beam');
-      done();
-    });
-  });
-
-  it('should allow streaming out into request.baucis.documents', function (done) {
-    // should set all fields to a string
-    var options = {
-      url: 'http://localhost:8012/api/vegetables/',
-      qs: { streamOut: true },
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(201);
-      expect(body).to.have.property('_id');
-      expect(body).to.have.property('length', 'boom');
-      expect(body[0]).to.have.property('name', 'beam');
-      expect(body[1]).to.have.property('name', 'beam');
-      expect(body[2]).to.have.property('name', 'beam');
-      done();
-    });
-  });
-
-  it('should 404 if request.baucis.documents is undefined, null, or 0', function (done) {
-        // should set all fields to a string
-    var options = {
-      url: 'http://localhost:8012/api/vegetables/',
-      qs: { emptyIt: true },
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(201);
-      expect(body).to.have.property('_id');
-      expect(body).to.have.property('length', 'boom');
-      expect(body[0]).to.have.property('name', 'beam');
-      expect(body[1]).to.have.property('name', 'beam');
-      expect(body[2]).to.have.property('name', 'beam');
-      done();
-    });
-  });
-
-  it('should skip streaming documents out if request.baucis.documents is present', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/vegetables/',
-      qs: { creamIt: true },
-      json: true
-    };
-    request.get(options, function (error, response, body) {
-      if (error) return done(error);
       expect(response.statusCode).to.be(200);
-      expect(body).to.be('Devonshire Clotted Cream.');
+      expect(body).to.have.property('length', 8);
+      expect(body[0]).to.have.property('name', 'beam');
+      expect(body[1]).to.have.property('name', 'beam');
+      expect(body[2]).to.have.property('name', 'beam');
       done();
     });
   });
+
+  // TODO
+  // it('should allow streaming out into request.baucis.documents', function (done) {
+  //   // should set all fields to a string
+  //   var options = {
+  //     url: 'http://localhost:8012/api/vegetables/',
+  //     qs: { streamToArray: true },
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(201);
+  //     expect(body).to.have.property('length', 8);
+  //     expect(body[0]).to.have.property('name', 'beam');
+  //     expect(body[1]).to.have.property('name', 'beam');
+  //     expect(body[2]).to.have.property('name', 'beam');
+  //     done();
+  //   });
+  // });
+
+  // TODO
+  // it('should 404 if request.baucis.documents is undefined, null, or 0', function (done) {
+  //       // should set all fields to a string
+  //   var options = {
+  //     url: 'http://localhost:8012/api/vegetables/',
+  //     qs: { emptyIt: true },
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     console.log(body)
+  //     expect(response.statusCode).to.be(404);
+  //     done();
+  //   });
+  // });
+
+  // TODO
+  // it('should skip streaming documents out if request.baucis.documents is present', function (done) {
+  //   var options = {
+  //     url: 'http://localhost:8012/api/vegetables/',
+  //     qs: { creamIt: true },
+  //     json: true
+  //   };
+  //   request.get(options, function (error, response, body) {
+  //     if (error) return done(error);
+  //     expect(response.statusCode).to.be(200);
+  //     expect(body).to.be('Devonshire Clotted Cream.');
+  //     done();
+  //   });
+  // });
 
 });

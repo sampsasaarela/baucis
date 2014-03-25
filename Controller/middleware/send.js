@@ -73,13 +73,11 @@ function remove (error, doc, push, next) {
     push(null, _.nil);
     return next();
   }
-
   doc.remove(function (error) {
     push(error, doc);
     return next();
   });
 }
-
 
 function etag (response) {
   return function (a, b) {
@@ -115,11 +113,15 @@ var decorator = module.exports = function (options, protect) {
 
   // Create the basic stream.
   protect.finalize(function (request, response, next) {
-    response.type('json');
-    // TODO allow setting request.baucis.documents instead of streaming
     var stream = request.baucis.query.stream();
     stream.on('error', next);
-    request.baucis.send = _(stream).otherwise([ errors.NotFound() ]).consume(check404);
+
+    response.type('json');
+
+    request.baucis.send = _(stream).otherwise([ errors.NotFound() ]);
+    request.baucis.send = request.baucis.send.consume(check404).stopOnError(next);
+    request.baucis.send = _(request.baucis.send.pipe(request.baucis.outgoing()));
+
     next();
   });
 

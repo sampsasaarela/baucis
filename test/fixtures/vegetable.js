@@ -108,9 +108,9 @@ var fixture = module.exports = {
     // Test streaming out through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamOut !== 'true') return next();
-      request.baucis.outgoing(_().map(function (doc) {
-        delete doc.name;
-        return doc;
+      request.baucis.outgoing(through(function (doc) {
+        doc.name = 'beam';
+        this.queue(doc);
       }));
       next();
     });
