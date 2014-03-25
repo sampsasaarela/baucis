@@ -73,7 +73,7 @@ var decorator = module.exports = function () {
   controller.query('post', function (request, response, next) {
     var Model = request.baucis.controller.get('model');
     var findBy = request.baucis.controller.get('findBy');
-    var url = 'http://voo.com';
+    var url = request.originalUrl || request.url;
     var incoming;
     // Map function to create a document from incoming JSON.
     function model (incoming) {
@@ -98,6 +98,8 @@ var decorator = module.exports = function () {
         return next();
       });
     }
+    // Add trailing slash to URL if needed.
+    if (url.lastIndexOf('/') !== (url.length - 1)) url += '/';
     // Set the status to 201 (Created).
     response.status(201);
     request.on('end', function () { console.log('REND') })
@@ -122,6 +124,5 @@ var decorator = module.exports = function () {
       // Finished here.
       next();
     });
-    console.log('OFF')
   });
 };
