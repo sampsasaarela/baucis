@@ -1,5 +1,6 @@
 // __Dependencies__
 var _ = require('highland');
+var errors = require('../../../errors');
 
 // __Private Module Members__
 // Parse incoming string into objects.  Works whether an array or single object
@@ -14,19 +15,25 @@ function parse () {
       return next();
     }
     if (chunk === _.nil) {
+      console.log('PRENDED')
       push(null, _.nil);
       return next();
     }
 
+    var match;
+    var head;
+    var brace;
+    var tail;
     var remaining = chunk.toString();
+
     while (remaining !== '') {
-      var match = remaining.match(/[\}\{]/);
+      match = remaining.match(/[\}\{]/);
       // The head of the string is all characters up to the first brace, if any.
-      var head = match ? remaining.substr(0, match.index) : remaining;
+      head = match ? remaining.substr(0, match.index) : remaining;
       // The first brace in the string, if any.
-      var brace = match ? match[0] : '';
+      brace = match ? match[0] : '';
       // The rest of the string, following the brace.
-      var tail = match ? remaining.substr(match.index + 1) : '';
+      tail = match ? remaining.substr(match.index + 1) : '';
 
       if (depth === 0) {
         // The parser is outside an object.
@@ -67,7 +74,6 @@ var decorator = module.exports = function () {
     var Model = request.baucis.controller.get('model');
     var findBy = request.baucis.controller.get('findBy');
     var url = 'http://voo.com';
-    var mapIn = request.baucis.mapIn || function (doc) { return doc };
     var incoming;
     // Map function to create a document from incoming JSON.
     function model (incoming) {
@@ -82,24 +88,27 @@ var decorator = module.exports = function () {
         return next();
       }
       if (unsaved === _.nil) {
+        console.log('ENDED')
         push(null, _.nil);
         return next();
       }
-
       unsaved.save(function (error, doc) {
+        console.log('SAVED')
         push(error, doc);
         return next();
       });
     }
     // Set the status to 201 (Created).
     response.status(201);
+    request.on('end', function () { console.log('REND') })
     // Check if the body was parsed by some external middleware e.g. `express.json`.
     // If so, create a stream from the POST'd document or documents.  Otherwise,
     // stream and parse the request.
     if (request.body) incoming = _([].concat(request.body));
     else incoming = _(request).consume(parse());
     // Process the incoming document or documents.
-    incoming = incoming.stopOnError(next).map(mapIn).map(model).consume(save).pluck(findBy);
+    incoming = incoming.pipe(request.baucis.incoming());
+    incoming = incoming.map(model).consume(save).pluck(findBy).stopOnError(next);
     incoming.toArray(function (ids) {
       var location;
       // Set the conditions used to build `request.baucis.query`.
@@ -113,5 +122,6 @@ var decorator = module.exports = function () {
       // Finished here.
       next();
     });
+    console.log('OFF')
   });
 };
