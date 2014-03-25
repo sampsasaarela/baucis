@@ -3,6 +3,7 @@ var _ = require('highland');
 var mongoose = require('mongoose');
 var express = require('express');
 var async = require('async');
+var through = require('through');
 var baucis = require('../..');
 var config = require('./config');
 
@@ -97,9 +98,9 @@ var fixture = module.exports = {
     // Test streaming in through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamIn !== 'true') return next();
-      request.baucis.incoming(_().map(function (doc) {
+      request.baucis.incoming(through(function (doc) {
         doc.name = 'boom';
-        return doc;
+        this.queue(doc);
       }));
       next();
     });

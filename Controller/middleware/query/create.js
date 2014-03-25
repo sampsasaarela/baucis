@@ -15,7 +15,6 @@ function parse () {
       return next();
     }
     if (chunk === _.nil) {
-      console.log('PRENDED')
       push(null, _.nil);
       return next();
     }
@@ -88,12 +87,10 @@ var decorator = module.exports = function () {
         return next();
       }
       if (unsaved === _.nil) {
-        console.log('ENDED')
         push(null, _.nil);
         return next();
       }
       unsaved.save(function (error, doc) {
-        console.log('SAVED')
         push(error, doc);
         return next();
       });
@@ -102,14 +99,13 @@ var decorator = module.exports = function () {
     if (url.lastIndexOf('/') !== (url.length - 1)) url += '/';
     // Set the status to 201 (Created).
     response.status(201);
-    request.on('end', function () { console.log('REND') })
     // Check if the body was parsed by some external middleware e.g. `express.json`.
     // If so, create a stream from the POST'd document or documents.  Otherwise,
     // stream and parse the request.
     if (request.body) incoming = _([].concat(request.body));
     else incoming = _(request).consume(parse());
     // Process the incoming document or documents.
-    incoming = incoming.pipe(request.baucis.incoming());
+    incoming = _(incoming.pipe(request.baucis.incoming()));
     incoming = incoming.map(model).consume(save).pluck(findBy).stopOnError(next);
     incoming.toArray(function (ids) {
       var location;
