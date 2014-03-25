@@ -1,4 +1,5 @@
 // __Dependencies__
+var _ = require('highland');
 var mongoose = require('mongoose');
 var express = require('express');
 var async = require('async');
@@ -96,8 +97,8 @@ var fixture = module.exports = {
     // Test streaming in through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamIn !== 'true') return next();
-      request.baucis.incoming(through(function () {
-        this.field = 'boom';
+      request.baucis.incoming(_().map(function (doc) {
+        doc.field = 'boom';
       }));
       next();
     });
@@ -105,8 +106,8 @@ var fixture = module.exports = {
     // Test streaming out through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamOut !== 'true') return next();
-      request.baucis.outgoing(through(function () {
-        this.field = 'beam';
+      request.baucis.outgoing(_().map(function (doc) {
+        doc.field = 'beam';
       }));
       next();
     });
