@@ -6,6 +6,8 @@ var errors = require('../../errors');
 // __Private Module Members__
 // A map function to stringify emitted entity.
 function stringify (a) { return JSON.stringify(a) }
+// A reduce that is used to create empty response body.
+function empty () { return '' }
 // A reduce function to count emitted entities.
 function count (a, b) { return a + 1 }
 // A consume function that emits an error for 404 state, or otherwise acts as a
@@ -71,7 +73,7 @@ function remove (error, doc, push, next) {
   }
 
   doc.remove(function (error) {
-    push(error);
+    push(error, doc);
     return next();
   });
 }
@@ -113,23 +115,24 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize(function (request, response, next) {
     response.type('json');
     // TODO allow setting request.baucis.documents instead of streaming
-    request.baucis.send = _(request.baucis.query.stream()).otherwise([ errors.NotFound() ])
-      .stopOnError(next).consume(check404);
+    request.baucis.send = _(request.baucis.query.stream())
+      .otherwise([ errors.NotFound() ]).consume(check404);
     next();
   });
 
   // HEAD
   protect.finalize('instance', 'head', function (request, response, next) {
-    request.baucis.send.fork().map(lastModified).resume();
+    request.baucis.send.observe().map(lastModified).resume();
     request.baucis.send = request.baucis.send.map(stringify);
-    request.baucis.send.fork().map(etag).resume();
-    request.baucis.send = request.baucis.send.reduce1(emptyString);
+    request.baucis.send.observe().map(etag).resume();
+    request.baucis.send = request.baucis.send.reduce1(empty);
     next();
   });
 
   protect.finalize('collection', 'head', function (request, response, next) {
     // TODO use es.wait for setting etag and lastModified on collections?
-    response.end();
+    request.baucis.send = request.baucis.send.reduce1(empty);
+    next();
   });
 
   // GET
@@ -168,7 +171,7 @@ var decorator = module.exports = function (options, protect) {
 
   protect.finalize(function (request, response, next) {
     if (request.baucis.count) request.baucis.send = request.baucis.send.reduce(0, count).map(stringify);
-    request.baucis.send.pipe(response);
+    request.baucis.send.stopOnError(next).pipe(response);
   });
 };
 
