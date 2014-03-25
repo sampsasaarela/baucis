@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.0
+-------
+Streamy goodness!  Documentation will be updated for v0.16.1.  Things are in flux...
+
 v0.16.0-alpha
 -------------
 Stream documents to manage resources more efficiently.  (Performance tests forthcoming.)
