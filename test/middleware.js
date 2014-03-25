@@ -87,7 +87,6 @@ describe('Middleware', function () {
       expect(body).to.have.property('name', 'zoom');
       done();
     });
-    done();
   });
 
   it('should allow custom stream handlers (OUT)', function (done) {
