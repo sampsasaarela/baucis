@@ -6,12 +6,43 @@ var errors = require('../../errors');
 // __Private Module Members__
 // A consume function that emits an error for 404 state, or otherwise acts as a
 // pass-through.
-function check404 (error, doc, push, next) {
+function check404 (error, item, push, next) {
   var done = _.compose(push, next);
-  if (error) return done(error);
+  if (error) done(error);
   if (item instanceof errors.NotFound) return done(item); // ERROR
-  done(null, item);
+  push(null, item);
+  next();
 }
+
+function singleOrArray () {
+  var first = false;
+  var multiple = false;
+
+  return es.through(
+    function (doc) {
+      if (!first) {
+        first = JSON.stringify(doc);
+      }
+      else if (!multiple) {
+        multiple = true;
+        this.emit('data', '[');
+        this.emit('data', first);
+        this.emit('data', ',\n')
+        this.emit('data', JSON.stringify(doc));
+      }
+      else {
+        this.emit('data', ',\n');
+        this.emit('data', JSON.stringify(doc));
+      }
+    },
+    function () {
+      if (!first) return this.emit('end');
+      else if (!multiple) this.emit('data', first);
+      else this.emit('data', ']');
+      this.emit('end');
+    }
+  );
+};
 
 function removeDocuments () {
   return es.map(function (doc, callback) {
@@ -45,7 +76,7 @@ var decorator = module.exports = function (options, protect) {
     response.type('json');
     // TODO allow setting request.baucis.documents instead of streaming
     request.baucis.send = _(request.baucis.query.stream()).otherwise([ errors.NotFound() ])
-      .stopOnError(next).map(check404);
+      .stopOnError(next).consume(check404);
     next();
   });
 
@@ -72,7 +103,7 @@ var decorator = module.exports = function (options, protect) {
   });
 
   protect.finalize('collection', 'get', function (request, response, next) {
-    request.baucis.send.invoke('stringify', JSON);
+    request.baucis.send = request.baucis.send.map(function (doc) { return JSON.stringify(doc) });
     next();
   });
 
