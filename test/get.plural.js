@@ -26,6 +26,24 @@ describe('GET plural', function () {
     });
   });
 
+  it("should return an array even for one document match", function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables?limit=1',
+      json: true
+    };
+    request.get(options, function (err, response, body) {
+      if (err) return done(err);
+      expect(response).to.have.property('statusCode', 200);
+      body.forEach(function(doc, i) {
+        var found = vegetables.some(function (vege) {
+          return vege._id.toString() === doc._id;
+        });
+        expect(found).to.be(true);
+      });
+      done();
+    });
+  });
+
   it('should not set Location header', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables',

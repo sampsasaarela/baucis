@@ -18,7 +18,7 @@ function check404 (error, item, push, next) {
   next();
 }
 // Emit a single instance or an array of instances.
-function singleOrArray () {
+function singleOrArray (alwaysArray) {
   var first = false;
   var multiple = false;
 
@@ -32,9 +32,11 @@ function singleOrArray () {
       // If no documents, simply end the stream.
       if (!first) return push(null, _.nil);
       // If only one document emit it unwrapped.
+      if (!multiple && alwaysArray) push(null, '[');
       if (!multiple) push(null, first);
       // For greater than one document, emit the closing array.
       else push(null, ']');
+      if (!multiple && alwaysArray) push(null, ']');
       // Done.  End the stream.
       push(null, _.nil);
       return next();
@@ -145,7 +147,7 @@ var decorator = module.exports = function (options, protect) {
 
   protect.finalize('collection', 'get', function (request, response, next) {
     request.baucis.send = request.baucis.send.map(stringify);
-    request.baucis.send = request.baucis.send.consume(singleOrArray());
+    request.baucis.send = request.baucis.send.consume(singleOrArray(true));
     next();
   });
 
