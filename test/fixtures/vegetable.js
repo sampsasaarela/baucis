@@ -11,51 +11,52 @@ var server;
 var controller;
 var subcontroller;
 
+// __Fixture Schemata__
+var Schema = mongoose.Schema;
+var Fungus = new Schema({ 'hyphenated-field-name': String });
+var Mineral = new Schema({ color: String });
+var Vegetable = new Schema({
+  name: { type: String, required: true },
+  lastModified: { type: Date, required: true, default: Date.now },
+  diseases: { type: [ String ], select: false },
+  species: { type: String, default: 'n/a', select: false },
+  related: { type: Schema.ObjectId, ref: 'vegetable' },
+  score: { type: Number, min: 1 }
+});
+
+Vegetable.pre('save', function (next) {
+  this.set('related', this._id);
+  next();
+});
+
+Vegetable.pre('save', function (next) {
+  this.set('lastModified', new Date());
+  next();
+});
+
+Vegetable.pre('save', function (next) {
+  fixture.saveCount += 1;
+  next();
+});
+
+Vegetable.pre('remove', function (next) {
+  fixture.removeCount += 1;
+  next();
+});
+
+
+
 // __Module Definition__
 var fixture = module.exports = {
-  init: function(done) {
-    var Schema = mongoose.Schema;
-
+  init: function (done) {
     mongoose.connect(config.mongo.url);
-
-    var Vegetable = new Schema({
-      name: { type: String, required: true },
-      lastModified: { type: Date, required: true, default: Date.now },
-      diseases: { type: [ String ], select: false },
-      species: { type: String, default: 'n/a', select: false },
-      related: { type: Schema.ObjectId, ref: 'vegetable' },
-      score: { type: Number, min: 1 }
-    });
-
-    fixture.saveCount = 0;
-    fixture.removeCount = 0;
-
-    Vegetable.pre('save', function (next) {
-      this.set('related', this._id);
-      next();
-    });
-
-    Vegetable.pre('save', function (next) {
-      this.set('lastModified', new Date());
-      next();
-    });
-
-    Vegetable.pre('save', function (next) {
-      fixture.saveCount += 1;
-      next();
-    });
-
-    Vegetable.pre('remove', function (next) {
-      fixture.removeCount += 1;
-      next();
-    });
-
-    var Fungus = new Schema({ 'hyphenated-field-name': String });
-    var Mineral = new Schema({ color: String });
 
     if (!mongoose.models['vegetable']) mongoose.model('vegetable', Vegetable);
     if (!mongoose.models['fungus']) mongoose.model('fungus', Fungus);
     if (!mongoose.models['mineral']) mongoose.model('mineral', Mineral);
+
+    fixture.saveCount = 0;
+    fixture.removeCount = 0;
 
     baucis.rest({
       singular: 'fungus',
@@ -90,8 +91,45 @@ var fixture = module.exports = {
     controller.documents(function (request, response, next) {
       if (request.query.testDocuments !== 'true') return next();
       var transformation = JSON.stringify(request.baucis.documents).substring(0, 6).split('');
-      //request.baucis.documents = transformation;
-      console.log(request.baucis.stream)
+      request.baucis.documents = transformation;
+      next();
+    });
+
+    // Test streaming in through custom handler
+    controller.request(function (request, response, next) {
+      if (request.query.streamIn !== 'true') return next();
+      request.baucis.incoming(through(function () {
+        this.field = 'boom';
+      }));
+      next();
+    });
+
+    // Test streaming out through custom handler
+    controller.request(function (request, response, next) {
+      if (request.query.streamOut !== 'true') return next();
+      request.baucis.outgoing(through(function () {
+        this.field = 'beam';
+      }));
+      next();
+    });
+
+    // Test that parsed body is respected
+    controller.request(function (request, response, next) {
+      if (request.query.parse !== 'true') return next();
+      express.json()(request, response, next);
+    });
+
+    // Test arbitrary documents
+    controller.request(function (request, response, next) {
+      if (request.query.creamIt !== 'true') return next();
+      request.baucis.documents = 'Devonshire Clotted Cream.';
+      next();
+    });
+
+    // Test 404 for documents
+    controller.request(function (request, response, next) {
+      if (request.query.emptyIt !== 'true') return next();
+      request.baucis.documents = 0;
       next();
     });
 
@@ -102,7 +140,7 @@ var fixture = module.exports = {
 
     done();
   },
-  deinit: function(done) {
+  deinit: function (done) {
     server.close();
     mongoose.disconnect();
     done();
