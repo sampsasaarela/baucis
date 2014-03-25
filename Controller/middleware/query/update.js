@@ -86,9 +86,6 @@ var decorator = module.exports = function () {
     wrapper[operator] = request.body;
     if (lock) request.baucis.conditions[versionKey] = updateVersion;
 
-    // TODO could validation be run by reloading the doc after update and running `validate`?
-    // TODO could even set back to the old data possibly if validate failed... maybe
-
     // Update the doc using the supplied operator and bypassing validation.
     Model.update(request.baucis.conditions, wrapper, next);
   });

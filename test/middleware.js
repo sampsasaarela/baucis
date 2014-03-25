@@ -107,8 +107,9 @@ describe('Middleware', function () {
     });
   });
 
-  // TODO
-  // it('should allow streaming out into request.baucis.documents', function (done) {
+  // TODO decide if these pending tests are needed
+  it('should prevent mixing streaming and documents middleware (maybe)');
+  it('should allow streaming out into request.baucis.documents');//, function (done) {
   //   // should set all fields to a string
   //   var options = {
   //     url: 'http://localhost:8012/api/vegetables/',
@@ -126,8 +127,7 @@ describe('Middleware', function () {
   //   });
   // });
 
-  // TODO
-  // it('should 404 if request.baucis.documents is undefined, null, or 0', function (done) {
+  it('should 404 if request.baucis.documents is undefined, null, or 0');//, function (done) {
   //       // should set all fields to a string
   //   var options = {
   //     url: 'http://localhost:8012/api/vegetables/',
@@ -142,8 +142,7 @@ describe('Middleware', function () {
   //   });
   // });
 
-  // TODO
-  // it('should skip streaming documents out if request.baucis.documents is present', function (done) {
+  it('should skip streaming documents out if request.baucis.documents is present');//, function (done) {
   //   var options = {
   //     url: 'http://localhost:8012/api/vegetables/',
   //     qs: { creamIt: true },

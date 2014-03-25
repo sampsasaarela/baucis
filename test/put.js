@@ -96,5 +96,7 @@ describe('PUT singular', function () {
     });
   });
 
+  it('should allow running validation with methods that currently bypass validation ... maybe');
+
 });
 

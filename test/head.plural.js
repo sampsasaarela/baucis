@@ -8,6 +8,8 @@ describe('HEAD plural', function () {
   beforeEach(fixtures.vegetable.create);
   after(fixtures.vegetable.deinit);
 
+  it('should set etag and Last-Modified ... if possible');
+
   it("should get the header", function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables',

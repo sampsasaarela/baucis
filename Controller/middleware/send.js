@@ -135,7 +135,6 @@ var decorator = module.exports = function (options, protect) {
   });
 
   protect.finalize('collection', 'head', function (request, response, next) {
-    // TODO use es.wait for setting etag and lastModified on collections?
     request.baucis.send = request.baucis.send.reduce1(empty);
     next();
   });

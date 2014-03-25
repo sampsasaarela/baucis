@@ -34,7 +34,7 @@ describe('POST plural', function () {
     });
   });
 
-  // TODO
+  // TODO decide about form support
   // it('should create a new object and return its ID (form)', function (done) {
   //   var options = {
   //     url: 'http://localhost:8012/api/vegetables/',
