@@ -44,8 +44,6 @@ Vegetable.pre('remove', function (next) {
   next();
 });
 
-
-
 // __Module Definition__
 var fixture = module.exports = {
   init: function (done) {
