@@ -213,7 +213,7 @@ describe('Queries', function () {
 
   it('should not return paging links if limit not set', function(done) {
     var options = {
-      url: 'http://localhost:8012/api/vegetables?sort=name',
+      url: 'http://localhost:8012/api/minerals?sort=name',
       json: true
     };
     request.get(options, function (error, response, body) {
@@ -223,6 +223,36 @@ describe('Queries', function () {
       expect(response.headers.link).to.not.contain('rel="last"');
       expect(response.headers.link).to.not.contain('rel="next"');
       expect(response.headers.link).to.not.contain('rel="previous"');
+      done();
+    });
+  });
+
+  it('should not return paging links if relations are not enabled', function(done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response).to.have.property('statusCode', 200);
+      expect(response.headers.link).to.be(undefined);
+      done();
+    });
+  });
+
+  it('should allow using relations: true with sorted queries', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/minerals?sort=color&limit=2&skip=2&select=-__v -_id',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response).to.have.property('statusCode', 200);
+      expect(response.headers.link).to.contain('rel="first"');
+      expect(response.headers.link).to.contain('rel="last"');
+      expect(response.headers.link).to.contain('rel="next"');
+      expect(response.headers.link).to.contain('rel="previous"');
+      expect(body).to.eql([ { color: 'Indigo' }, { color: 'Orange' } ]);
       done();
     });
   });

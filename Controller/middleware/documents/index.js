@@ -2,6 +2,4 @@
 var deco = require('deco');
 
 // __Module Definition__
-var middleware = module.exports = deco(__dirname, [
-  'linkHeader'
-]);
+var middleware = module.exports = deco(__dirname);

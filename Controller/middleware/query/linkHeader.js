@@ -32,6 +32,7 @@ var decorator = module.exports = function () {
   controller.query('collection', '*', function (request, response, next) {
     if (controller.get('relations') === false) return next();
 
+    var Model = request.baucis.controller.get('model');
     var makeLink = function (query) {
       var newQuery = deco.merge(request.query, query);
       var originalPath = request.originalUrl.split('?')[0];
@@ -44,7 +45,7 @@ var decorator = module.exports = function () {
     if (request.method !== 'GET') return done();
     if (!request.query.limit) return done();
 
-    request.baucis.query.count(function (error, count) {
+    Model.count(request.baucis.conditions, function (error, count) {
       if (error) return next(error);
 
       var limit = Number(request.query.limit);
