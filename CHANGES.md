@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.3
+-------
+Fix issue #131
+
 v0.16.2
 -------
 Add documentation for streaming and clean up documentation.
