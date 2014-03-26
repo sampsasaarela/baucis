@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.2
+-------
+Add documentation for streaming and clean up documentation.
+
 v0.16.1
 -------
 Republish failed `npm publish`.

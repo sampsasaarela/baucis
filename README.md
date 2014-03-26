@@ -1,66 +1,28 @@
-baucis v0.16.1
+baucis v0.16.2
 ==============
 
-Baucis is Express middleware that creates configurable REST APIs using Mongoose schemata.
+Baucis enables you to build scalable REST APIs using the open source tools and standards you and your team already know.
 
-Like Baucis and Philemon of old, this library provides REST to the weary traveler.  The goal is to create a JSON REST API for Mongoose & Express that matches as closely as possible the richness and versatility of the [HTTP 1.1 protocol](http://www.w3.org/Protocols/rfc2616/rfc2616.html).
+Baucis is tested with over 130 Mocha.js tests.  Baucis is used in production by at least one Fortune 500 company.
 
-[Baucis](https://en.wikipedia.org/wiki/Baucis_and_Philemon) shouldn't be confused with [Bacchus](https://en.wikipedia.org/wiki/Dionysus).
-
-Baucis uses [semver](http://semver.org).  Each new feature results in a minor version increase, each bug fix in a patch number increase.
-
-Baucis is tested with over 130 Mocha.js tests.
-
-<a href="https://www.gittip.com/wprl/">Donations via gittip.com are appreciated.</a>
-
-What's New
-----------
-
-*API VERSIONING!* (See farther down.)
+<a href="https://www.gittip.com/wprl/">Donations via gittip.com welcome.</a>
 
 Check the [change log](CHANGES.md) for info on all the latest features.
 
-[Swagger](https://developers.helloreverb.com/swagger/) support has been partially added.  More Swagger functionality is planned in the near future.
+Like Baucis and Philemon of old, the module provides REST to the weary traveler.  [Baucis](https://en.wikipedia.org/wiki/Baucis_and_Philemon) is not the same as [Bacchus](https://en.wikipedia.org/wiki/Dionysus).
 
-Want to check it out now?  Install the plugin:
+Features
+--------
 
-    npm install --save baucis-swagger
-
-Next, download the [swagger-ui](https://github.com/wordnik/swagger-ui) client.
-
-    git clone git@github.com:wordnik/swagger-ui.git
-    open swagger-ui/dist/index.html
-
-Then, create your API with the swagger option enabled:
-
-    var baucis = require('baucis');
-    var swagger = require('baucis-swagger');
-    app.use('/api', baucis());
-
-Point the swagger client at your API.  Something like:
-
-    http://localhost:8012/api/api-docs
-
-Now you have documentation and a test client!
-
-To customize the swagger definition, simply alter the controler's swagger data directly:
-
-    var controller = baucis.rest('sauce');
-
-    controller.swagger.apis.push({
-      'path': '/sauces/awesome',
-      'description': 'Awesome sauce.',
-      'operations': [
-        {
-          'httpMethod': 'GET',
-          'nickname': 'getAwesomeSauce',
-          'responseClass': 'Sauce',
-          'summary': 'Carolina BBQ Sauce.'
-        }
-      ]
-    });
-
-`controller.swagger.models` may also be directly modified.
+ * Automatically build APIs that are configurable Express controllers based on your Mongoose schemata.
+ * Takes full advantage of Node and Mongo for awesome scalability.
+ * Highly customizable, simple interface.
+ * Query your REST endpoints using the same JSON syntax as Mongoose.
+ * Controller-layer logic may be implented as Express middleware.
+ * Data-layer logic may be implemented as Mongoose middleware.
+ * Automatically generate Swagger definitions for the API.
+ * Version controllers using semver.
+ * 100% compatible with existing Express middleware such as passport.
 
 Examples
 --------
@@ -260,6 +222,49 @@ An example of embedding a controller within another controller
     // Embed the subcontroller at /foos/:fooId/bars
     controller.use(subcontroller);
 
+Swagger
+-------
+
+Want to check it out now?  Install the plugin:
+
+    npm install --save baucis-swagger
+
+Next, download the [swagger-ui](https://github.com/wordnik/swagger-ui) client.
+
+    git clone git@github.com:wordnik/swagger-ui.git
+    open swagger-ui/dist/index.html
+
+Then, create your API with the swagger option enabled:
+
+    var baucis = require('baucis');
+    var swagger = require('baucis-swagger');
+    app.use('/api', baucis());
+
+Point the swagger client at your API.  Something like:
+
+    http://localhost:8012/api/api-docs
+
+Now you have documentation and a test client!
+
+To customize the swagger definition, simply alter the controler's swagger data directly:
+
+    var controller = baucis.rest('sauce');
+
+    controller.swagger.apis.push({
+      'path': '/sauces/awesome',
+      'description': 'Awesome sauce.',
+      'operations': [
+        {
+          'httpMethod': 'GET',
+          'nickname': 'getAwesomeSauce',
+          'responseClass': 'Sauce',
+          'summary': 'Carolina BBQ Sauce.'
+        }
+      ]
+    });
+
+`controller.swagger.models` may also be directly modified.
+
 API Versioning
 --------------
 
@@ -275,10 +280,55 @@ Later, make requests and set the `API-Version` header to a [semver](http://semve
 
 API versioning is almost stable.  Names of controller parameters or request header may change.
 
+Streaming
+---------
+
+As of v0.16.0 baucis takes full advantage of Node streams internally to offer even more performance, especially when dealing with large datasets.  Both outgoing and incoming documents are streamed!  This means that large datasets do not need to be completely loaded into RAM before sending or receiving documents.
+
+Instead of accessing `request.body` or `request.baucis.documents`, you can add a transform stream to the incoming or outgoing document pipeline.
+
+Here's an example using the [through module](https://www.npmjs.org/package/through) to create a stream that checks for a forbidden sort of whiskey and alters the name of incoming (POSTed) documents.
+
+    controller.request(function (request, response, next) {
+      request.baucis.incoming(through(function (doc) {
+        if (doc.whiskey === 'Canadian') {
+          // Errors will be passed off to `next` later, and the stream will
+          // be stopped.
+          this.emit('error', new Error('Too smooth.'));
+          return;
+        }
+        doc.name = 'SHAZAM';
+        this.queue(doc);
+      });
+      next();
+    });
+
+Here's an example of how a stream that interacts with outgoing documents may be added:
+
+    controller.request(function (request, response, next) {
+      request.baucis.outgoing(through(function (doc) {
+        if (doc.owner !== request.user) {
+          // Errors will be passed off to `next` later, and the stream will
+          // be stopped.
+          this.emit('error', baucis.errors.Forbidden());
+          return;
+        }
+        delete doc.password;
+        this.queue(doc);
+      });
+      next();
+    });
+
+Migration notes:
+
+  * For POSTs, if `request.body` is present, the incoming request will be parsed before being streamed, negating many of the benefits of streaming.  However, especiall when POSTing only one new document at a time, this is not an issue.  If you want to POST many objects at once, using the default streaming behavior is highly recommened.
+  * The document stage of middleware will probably be deprecated in a coming release.  A feature to stream into `request.baucis.documents` for non-streaming access is being considered, however, so this feature and related areas are a bit unstable at the moment.
+
 Contact
 -------
 
- * http://kun.io/
  * @wprl
+ * https://linkedin.com/in/willprl
+ * william@kun.io
 
 &copy; 2012-2014 William P. Riley-Land
