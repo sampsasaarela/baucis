@@ -21,7 +21,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', vegetables.length - 1);
       done();
     });
@@ -34,7 +34,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', vegetables.length - 2);
       done();
     });
@@ -47,7 +47,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 1);
       done();
     });
@@ -60,7 +60,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 2);
       done();
     });
@@ -73,7 +73,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -86,7 +86,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -99,7 +99,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -112,7 +112,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -125,7 +125,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/May not set selected fields of populated document[.]/i);
       done();
     });
@@ -138,7 +138,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/Including excluded fields is not permitted[.]/i);
       done();
     });
@@ -151,7 +151,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/May not set selected fields of populated document[.]/i);
       done();
     });
@@ -164,7 +164,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       expect(body).to.match(/May not set selected fields of populated document[.]/i);
       done();
     });
@@ -177,7 +177,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 1);
       expect(body[0]).to.have.property('name', 'Radicchio')
       done();
@@ -191,10 +191,54 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body[0]).not.to.have.property('_id');
       expect(body[0]).not.to.have.property('name');
       done();
+    });
+  });
+
+  it('should not add query string to the search link (collection)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/minerals?sort=color',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      var expected = '</api/minerals>; rel="search", '
+        + '</api/minerals?sort=color>; rel="self"';
+      expect(response.statusCode).to.be(200);
+      expect(response.headers.link).to.be(expected);
+      done();
+    });
+  });
+
+  it('should not add query string to the search link (instance)', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/minerals',
+      json: true
+    };
+
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+
+      var id = body[0]._id;
+      var options = {
+        url: 'http://localhost:8012/api/minerals/' + id + '?sort=color',
+        json: true
+      };
+
+      request.get(options, function (error, response, body) {
+        if (error) return done(error);
+
+        var expected = '</api/minerals>; rel="collection", '
+          + '</api/minerals>; rel="search", '
+          + '</api/minerals/' + id + '>; rel="edit", '
+          + '</api/minerals/' + id + '>; rel="self"';
+        expect(response.statusCode).to.be(200);
+        expect(response.headers.link).to.be(expected);
+        done();
+      });
     });
   });
 
@@ -205,7 +249,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       done();
     });
@@ -218,7 +262,9 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
+      expect(response.headers.link).to.contain('rel="self"');
+      expect(response.headers.link).to.contain('rel="search"');
       expect(response.headers.link).to.not.contain('rel="first"');
       expect(response.headers.link).to.not.contain('rel="last"');
       expect(response.headers.link).to.not.contain('rel="next"');
@@ -234,7 +280,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers.link).to.be(undefined);
       done();
     });
@@ -247,7 +293,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers.link).to.contain('rel="first"');
       expect(response.headers.link).to.contain('rel="last"');
       expect(response.headers.link).to.contain('rel="next"');
@@ -264,7 +310,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       expect(response.headers.link).to.contain('rel="next"');
       done();
@@ -278,7 +324,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       expect(response.headers.link).to.contain('rel="previous"');
       done();
@@ -292,7 +338,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       expect(response.headers.link).not.to.contain('rel="previous"');
       done();
@@ -306,7 +352,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       expect(response.headers.link).not.to.contain('rel="next"');
       done();
@@ -321,7 +367,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       expect(response.headers.link).to.contain('rel="next"');
       var links = parselinks(response.headers.link);
@@ -338,7 +384,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
 
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
 
       var links = parselinks(response.headers.link);
@@ -349,7 +395,7 @@ describe('Queries', function () {
         json: true
       };
       request.get(options, function (error, response, body) {
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         done();
       })
     });
@@ -362,7 +408,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       var links = parselinks(response.headers.link);
       expect(links).to.have.property('previous');
@@ -371,7 +417,7 @@ describe('Queries', function () {
         json: true
       };
       request.get(options, function (error, response, body) {
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         done();
       })
     });
@@ -384,7 +430,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       var links = parselinks(response.headers.link);
       expect(links).to.have.property('first');
@@ -393,7 +439,7 @@ describe('Queries', function () {
         json: true
       };
       request.get(options, function (error, response, body) {
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         done();
       })
     });
@@ -406,7 +452,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('link');
       var links = parselinks(response.headers.link);
       expect(links).to.have.property('last');
@@ -415,7 +461,7 @@ describe('Queries', function () {
         json: true
       };
       request.get(options, function (error, response, body) {
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         done();
       });
     });
@@ -428,7 +474,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(8);
       done();
     });
@@ -441,7 +487,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).not.to.be(8);
       done();
     });
@@ -454,7 +500,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 500);
+      expect(response.statusCode).to.be(500);
       done();
     });
   });
@@ -466,7 +512,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(8);
       done();
     });
@@ -479,7 +525,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(8);
       done();
     });
@@ -492,7 +538,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(8);
       done();
     });
@@ -505,7 +551,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 403);
+      expect(response.statusCode).to.be(403);
       done();
     });
   });
@@ -517,7 +563,7 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 404);
+      expect(response.statusCode).to.be(404);
       done();
     });
   });

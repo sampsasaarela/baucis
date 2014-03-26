@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.4
+-------
+Fix issue #141
+
 v0.16.3
 -------
 Fix issue #131

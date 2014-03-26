@@ -21,7 +21,7 @@ var decorator = module.exports = function () {
     response.links({
       collection: linkBase,
       search: linkBase,
-      edit: url.resolve(linkBase, request.params.id),
+      edit: linkBase + '/' + request.params.id,
       self: originalPath
     });
 
@@ -33,13 +33,16 @@ var decorator = module.exports = function () {
     if (controller.get('relations') === false) return next();
 
     var Model = request.baucis.controller.get('model');
+    var originalPath = request.originalUrl.split('?')[0];
+    // Used to create a link from current URL with new query string.
     var makeLink = function (query) {
       var newQuery = deco.merge(request.query, query);
-      var originalPath = request.originalUrl.split('?')[0];
       return originalPath + '?' + qs.stringify(newQuery);
     };
+    // Response Link header links.
+    var links = { search: originalPath, self: makeLink() };
+    // Call this function to set response links then move on to next middleware.
     var done = function () { response.links(links), next() };
-    var links = { search: makeLink(), self: makeLink() };
 
     // Add paging links unless these conditions are met.
     if (request.method !== 'GET') return done();
