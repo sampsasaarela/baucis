@@ -16,6 +16,7 @@ var decorator = module.exports = function () {
   controller.request(function (request, response, next) {
     if (request.baucis) return next(errors.Configuration('Baucis request property already created!'));
     request.baucis = {};
+    request.baucis.api = controller.get('api');
     request.baucis.controller = controller;
     if (controller.enabled('x-powered-by')) response.set('X-Powered-By', 'Baucis');
     next();
