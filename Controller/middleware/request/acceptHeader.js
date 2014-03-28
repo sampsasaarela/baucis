@@ -7,7 +7,7 @@ var decorator = module.exports = function () {
 
     if (putOff && postOff) return next();
 
-    response.set('Accept', 'application/json, application/x-www-form-urlencoded');
+    response.set('Accept', 'application/json');
     next();
   });
 };

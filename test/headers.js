@@ -37,7 +37,7 @@ describe('Headers', function () {
     request.head(options, function (error, response, body) {
       if (error) return done(error);
       expect(response).to.have.property('statusCode', 200);
-      expect(response.headers).to.have.property('accept', 'application/json, application/x-www-form-urlencoded');
+      expect(response.headers).to.have.property('accept', 'application/json');
       done();
     });
   });
