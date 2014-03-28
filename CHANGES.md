@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.5
+-------
+Fix issue #142.  Also, use event-stream over highland.
+
 v0.16.4
 -------
 Fix issue #141

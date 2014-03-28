@@ -1,5 +1,7 @@
 // __Dependencies__
 var express = require('express');
+var through = require('through');
+var es = require('event-stream');
 var errors = require('../../../errors');
 
 // __Private Module Members__
@@ -7,7 +9,29 @@ var validOperators = [ '$set', '$push', '$pull' ];
 
 // __Module Definition__
 var decorator = module.exports = function () {
+  // You can only PUT one document at a time, so just use the built-in
+  // JSON parser.
   this.query('instance', 'put', express.json());
+  // If there's a body, send it through any user-added streams.
+  this.query('instance', 'put', function (request, response, next) {
+    if (request.body === undefined) return next();
+
+    var pipes = es.pipeline(
+      // Read in the request body as a JSON stream.
+      es.readArray([request.body]),
+      // Pipe through user streams, if any.
+      request.baucis.incoming(),
+      // Update the request body with updated documents and continue.
+      es.writeArray(function (error, documents) {
+        if (error) return next(error);
+        request.body = documents[0];
+        next();
+      })
+    );
+
+    pipes.on('error', next);
+    pipes.on('end', next);
+  });
 
   this.query('instance', 'put', function (request, response, next) {
     var bodyId = request.body[request.baucis.controller.get('findBy')];

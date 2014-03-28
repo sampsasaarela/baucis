@@ -1,17 +1,13 @@
 // __Dependencies__
-var _ = require('highland');
-var errors = require('../../../errors');
+var es = require('event-stream');
 
 // __Private Module Members__
 function addUserStream () {
   var streams = [];
   return function (stream) {
     if (stream) return streams.push(stream);
-    var chain = _();
-    streams.forEach(function (s) {
-      chain = chain.pipe(s);
-    });
-    return chain;
+    if (streams.length > 0) return es.pipeline.apply(es, streams);
+    return es.through();
   }
 }
 

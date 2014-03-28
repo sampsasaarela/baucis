@@ -58,7 +58,7 @@ describe('Middleware', function () {
     });
   });
 
-  it('should allow custom stream handlers (IN)', function (done) {
+  it('should allow custom stream handlers (IN/POST)', function (done) {
     // should set all fields to a string
     var options = {
       url: 'http://localhost:8012/api/vegetables/',
@@ -69,6 +69,23 @@ describe('Middleware', function () {
       if (error) return done(error);
       expect(response.statusCode).to.be(201);
       expect(body).to.have.property('_id');
+      expect(body).to.have.property('name', 'boom');
+      done();
+    });
+  });
+
+  it('should allow custom stream handlers (IN/PUT)', function (done) {
+    // should set all fields to a string
+    var radicchio = vegetables[7];
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/' + radicchio._id,
+      qs: { streamIn: true },
+      json: { name: 'zoom' }
+    };
+    request.put(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.have.property('_id', radicchio._id.toString());
       expect(body).to.have.property('name', 'boom');
       done();
     });
