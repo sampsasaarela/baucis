@@ -104,6 +104,16 @@ var fixture = module.exports = {
       next();
     });
 
+    // Test streaming in through custom handler
+    controller.request(function (request, response, next) {
+      if (request.query.streamInFunction !== 'true') return next();
+      request.baucis.incoming(function (doc, callback) {
+        doc.name = 'bimm';
+        callback(null, doc);
+      });
+      next();
+    });
+
     // Test streaming out through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamOut !== 'true') return next();

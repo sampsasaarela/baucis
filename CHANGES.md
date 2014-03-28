@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.10
+--------
+Allow passing in map function to incoming/outgoing user streams.  It's turned into a stream internally.
+
 v0.16.9
 -------
 Add experimental `Api.setFormatter` method.

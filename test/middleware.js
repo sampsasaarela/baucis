@@ -91,6 +91,22 @@ describe('Middleware', function () {
     });
   });
 
+  it('should allow custom stream handlers (FUNCTION)', function (done) {
+    // should set all fields to a string
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      qs: { streamInFunction: true },
+      json: { name: 'zoom' }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      expect(body).to.have.property('_id');
+      expect(body).to.have.property('name', 'bimm');
+      done();
+    });
+  });
+
   it('should skip streaming documents in if request.body is already present', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables/',
