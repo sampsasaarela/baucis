@@ -4,6 +4,7 @@ var deco = require('deco');
 var express = require('express');
 var mongoose = require('mongoose');
 var semver = require('semver');
+var es = require('event-stream');
 var errors = require('./errors');
 var Controller = require('./Controller');
 var Release = require('./Release');
@@ -17,6 +18,48 @@ function getMatchingReleases (releases, range) {
 
   return matching;
 }
+
+// Default formatter — emit a single JSON object or an array of them.
+function singleOrArray (alwaysArray) {
+  var first = false;
+  var multiple = false;
+
+  return es.through(
+    function (doc) {
+      // Start building the output.  If this is the first document,
+      // store it for a moment.
+      if (!first) {
+        first = doc;
+        return;
+      }
+      // If this is the second document, output array opening and the two documents
+      // separated by a comma.
+      if (!multiple) {
+        multiple = true;
+        this.emit('data', '[');
+        this.emit('data', JSON.stringify(first));
+        this.emit('data', ',\n')
+        this.emit('data', JSON.stringify(doc));
+        return;
+      }
+      // For all documents after the second, emit a comma preceding the document.
+      this.emit('data', ',\n');
+      this.emit('data', JSON.stringify(doc));
+    },
+    function () {
+      // If no documents, simply end the stream.
+      if (!first) return this.emit('end');
+      // If only one document emit it unwrapped, unless always returning an array.
+      if (!multiple && alwaysArray) this.emit('data', '[');
+      if (!multiple) this.emit('data', JSON.stringify(first));
+      // For greater than one document, emit the closing array.
+      else this.emit('data', ']');
+      if (!multiple && alwaysArray) this.emit('data', ']');
+      // Done.  End the stream.
+      this.emit('end');
+    }
+  );
+};
 
 // __Module Definition__
 var Api = module.exports = deco(function (options) {
@@ -137,6 +180,12 @@ var Api = module.exports = deco(function (options) {
     // Add the controller to the controllers to be published.
     controllersFor[range].push(controller);
     return controller;
+  };
+
+  api.formatters = function (response, callback) {
+    response.format({
+      json: function () { callback(null, singleOrArray) }
+    });
   };
 });
 

@@ -6,48 +6,7 @@ var errors = require('../../errors');
 // __Private Module Members__
 // A map that is used to create empty response body.
 function empty (doc, callback) { callback(null, '') }
-// Emit a single instance or an array of instances.
-function singleOrArray (alwaysArray) {
-  var first = false;
-  var multiple = false;
-
-  return es.through(
-    function (doc) {
-      // Start building the output.  If this is the first document,
-      // store it for a moment.
-      if (!first) {
-        first = doc;
-        return;
-      }
-      // If this is the second document, output array opening and the two documents
-      // separated by a comma.
-      if (!multiple) {
-        multiple = true;
-        this.emit('data', '[');
-        this.emit('data', JSON.stringify(first));
-        this.emit('data', ',\n')
-        this.emit('data', JSON.stringify(doc));
-        return;
-      }
-      // For all documents after the second, emit a comma preceding the document.
-      this.emit('data', ',\n');
-      this.emit('data', JSON.stringify(doc));
-    },
-    function () {
-      // If no documents, simply end the stream.
-      if (!first) return this.emit('end');
-      // If only one document emit it unwrapped, unless always returning an array.
-      if (!multiple && alwaysArray) this.emit('data', '[');
-      if (!multiple) this.emit('data', JSON.stringify(first));
-      // For greater than one document, emit the closing array.
-      else this.emit('data', ']');
-      if (!multiple && alwaysArray) this.emit('data', ']');
-      // Done.  End the stream.
-      this.emit('end');
-    }
-  );
-};
-
+// Generate a respone Etag
 function etag (response) {
   return es.map(function (doc, callback) {
     var hash = crypto.createHash('md5');
@@ -58,7 +17,7 @@ function etag (response) {
     callback(null, doc);
   });
 }
-
+// Generate a Last-Modified header
 function lastModified (response, lastModifiedPath) {
   return es.map(function (doc, callback) {
     if (!response.get('Last-Modified') && lastModifiedPath) {
@@ -67,7 +26,7 @@ function lastModified (response, lastModifiedPath) {
     callback(null, doc);
   });
 }
-
+// Build a reduce stream.
 function reduce (accumulated, f) {
   return es.through(
     function (doc) {
@@ -79,7 +38,7 @@ function reduce (accumulated, f) {
     }
   );
 }
-
+// Count emissions.
 function count () {
   return reduce(0, function (a, b) { return a + 1 });
 }
@@ -109,11 +68,10 @@ var decorator = module.exports = function (options, protect) {
       // Apply user streams.
       request.baucis.outgoing()
     );
-    response.format({
-      json: function () {
-        request.baucis.formatter = singleOrArray;
-        next();
-      }
+    request.baucis.api.formatters(response, function (error, formatter) {
+      if (error) next(error);
+      request.baucis.formatter = formatter;
+      next();
     });
   });
 
