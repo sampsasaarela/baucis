@@ -9,28 +9,39 @@ var validOperators = [ '$set', '$push', '$pull' ];
 
 // __Module Definition__
 var decorator = module.exports = function () {
-  // You can only PUT one document at a time, so just use the built-in
-  // JSON parser.
-  this.query('instance', 'put', express.json());
   // If there's a body, send it through any user-added streams.
   this.query('instance', 'put', function (request, response, next) {
-    if (request.body === undefined) return next();
+    var parser;
+    var incoming;
+
+    // Check if the body was parsed by some external middleware e.g. `express.json`.
+    // If so, create a stream from the PUT'd document.
+    if (request.body) {
+      incoming = es.readArray([ request.body ]);
+    }
+    // Otherwise, stream and parse the request.
+    else {
+      parser = request.baucis.api.parser(request.get('content-type'));
+      if (!parser) return next(errors.UnsupportedMediaType());
+      incoming = es.pipeline(request, parser);
+    }
 
     var pipes = es.pipeline(
       // Read in the request body as a JSON stream.
-      es.readArray([request.body]),
+      incoming,
       // Pipe through user streams, if any.
       request.baucis.incoming(),
       // Update the request body with updated documents and continue.
       es.writeArray(function (error, documents) {
         if (error) return next(error);
+        if (documents.length !== 1) return next(errors.BadRequest('Must PUT exactly one update document.'));
         request.body = documents[0];
         next();
       })
     );
 
     pipes.on('error', next);
-    pipes.on('end', next);
+    //pipes.on('end', next);
   });
 
   this.query('instance', 'put', function (request, response, next) {

@@ -29,7 +29,7 @@ describe('Headers', function () {
     });
   });
 
-  it('should send 406 when the requested type is not accepted', function (done) {
+  it('should send 406 Not Acceptable when the requested type is not accepted', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables',
       headers: {
@@ -39,6 +39,20 @@ describe('Headers', function () {
     request.head(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(406);
+      done();
+    });
+  });
+
+  it('should send 415 Unsupported Media Type when the request content type cannot be parsed', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables',
+      headers: {
+        'Content-Type': 'application/xml'
+      }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(415);
       done();
     });
   });

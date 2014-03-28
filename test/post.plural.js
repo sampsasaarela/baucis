@@ -77,6 +77,18 @@ describe('POST plural', function () {
     });
   });
 
+  it('should 400 if no document sent', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/',
+      json: []
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.equal(400);
+      done();
+    });
+  });
+
   it('should fire pre save Mongoose middleware', function (done) {
     fixtures.vegetable.saveCount = 0;
 

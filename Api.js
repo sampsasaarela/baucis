@@ -10,7 +10,7 @@ var Controller = require('./Controller');
 var Release = require('./Release');
 
 // __Private Module Members__
-
+var parsers = {};
 var formatters = {};
 
 function getMatchingReleases (releases, range) {
@@ -62,6 +62,60 @@ function singleOrArray (alwaysArray) {
     }
   );
 };
+
+// Default parser.  Parses incoming JSON string into an object orobjects.
+// Works whether an array or single object is sent as the request body.  It's
+// very lenient with input outside of objects.
+function JSONParser () {
+  var depth = 0;
+  var buffer = '';
+
+  return es.through(
+    function (chunk) {
+    var match;
+    var head;
+    var brace;
+    var tail;
+    var remaining = chunk.toString();
+
+    while (remaining !== '') {
+      match = remaining.match(/[\}\{]/);
+      // The head of the string is all characters up to the first brace, if any.
+      head = match ? remaining.substr(0, match.index) : remaining;
+      // The first brace in the string, if any.
+      brace = match ? match[0] : '';
+      // The rest of the string, following the brace.
+      tail = match ? remaining.substr(match.index + 1) : '';
+
+      if (depth === 0) {
+        // The parser is outside an object.
+        // Ignore the head of the string.
+        // Add brace if it's an open brace.
+        if (brace === '{') {
+          depth += 1;
+          buffer += brace;
+        }
+      }
+      else {
+        // The parser is inside an object.
+        // Add the head of the string to the buffer.
+        buffer += head;
+        // Increase or decrease depth if a brace was found.
+        if (brace === '{') depth += 1;
+        else if (brace === '}') depth -= 1;
+        // Add the brace to the buffer.
+        buffer += brace;
+        // If the object ended, emit it.
+        if (depth === 0) {
+          this.emit('data', JSON.parse(buffer));
+          buffer = '';
+        }
+      }
+      // Move on to the unprocessed remainder of the string.
+      remaining = tail;
+    }
+  });
+}
 
 // __Module Definition__
 var Api = module.exports = deco(function (options) {
@@ -161,6 +215,7 @@ var Api = module.exports = deco(function (options) {
       else if (error instanceof errors.MethodNotAllowed) response.status(405);
       else if (error instanceof errors.LockConflict) response.status(409);
       else if (error instanceof mongoose.Error.VersionError) response.status(409);
+      else if (error instanceof errors.UnsupportedMediaType) response.status(415);
       else if (error instanceof mongoose.Error.ValidationError) response.status(422);
       else return next(error);
 
@@ -197,7 +252,19 @@ var Api = module.exports = deco(function (options) {
     formatters[mime] = function (callback) { return function () { callback(null, f) } };
   };
 
+  api.parser = function (mime) {
+    mime = mime || 'application/json';
+    var handler = parsers[mime];
+    return handler ? handler() : false;
+  };
+
+  // Adds a parser for the given mime type.  Needs a function that returns a stream.
+  api.setParser = function (mime, f) {
+    parsers[mime] = f;
+  };
+
   api.setFormatter('application/json', singleOrArray);
+  api.setParser('application/json', JSONParser);
 });
 
 Api.factory(express);

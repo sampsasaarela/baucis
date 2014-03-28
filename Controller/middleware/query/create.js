@@ -3,60 +3,6 @@ var es = require('event-stream');
 var util = require('util');
 var errors = require('../../../errors');
 
-// __Private Module Members__
-// Parse incoming string into objects.  Works whether an array or single object
-// is sent as the request body.  It's very lenient with input outside of objects.
-function parse () {
-  var depth = 0;
-  var buffer = '';
-
-  return es.through(
-    function (chunk) {
-    var match;
-    var head;
-    var brace;
-    var tail;
-    var remaining = chunk.toString();
-
-    while (remaining !== '') {
-      match = remaining.match(/[\}\{]/);
-      // The head of the string is all characters up to the first brace, if any.
-      head = match ? remaining.substr(0, match.index) : remaining;
-      // The first brace in the string, if any.
-      brace = match ? match[0] : '';
-      // The rest of the string, following the brace.
-      tail = match ? remaining.substr(match.index + 1) : '';
-
-      if (depth === 0) {
-        // The parser is outside an object.
-        // Ignore the head of the string.
-        // Add brace if it's an open brace.
-        if (brace === '{') {
-          depth += 1;
-          buffer += brace;
-        }
-      }
-      else {
-        // The parser is inside an object.
-        // Add the head of the string to the buffer.
-        buffer += head;
-        // Increase or decrease depth if a brace was found.
-        if (brace === '{') depth += 1;
-        else if (brace === '}') depth -= 1;
-        // Add the brace to the buffer.
-        buffer += brace;
-        // If the object ended, emit it.
-        if (depth === 0) {
-          this.emit('data', JSON.parse(buffer));
-          buffer = '';
-        }
-      }
-      // Move on to the unprocessed remainder of the string.
-      remaining = tail;
-    }
-  });
-}
-
 // __Module Definition__
 var decorator = module.exports = function () {
   var controller = this;
@@ -65,6 +11,8 @@ var decorator = module.exports = function () {
     var Model = request.baucis.controller.get('model');
     var findBy = request.baucis.controller.get('findBy');
     var url = request.originalUrl || request.url;
+    var contentType;
+    var parser;
     var incoming;
     var pipes;
     // Add trailing slash to URL if needed.
@@ -72,10 +20,16 @@ var decorator = module.exports = function () {
     // Set the status to 201 (Created).
     response.status(201);
     // Check if the body was parsed by some external middleware e.g. `express.json`.
-    // If so, create a stream from the POST'd document or documents.  Otherwise,
-    // stream and parse the request.
-    if (request.body) incoming = es.readArray([].concat(request.body));
-    else incoming = es.pipeline(request, parse());
+    // If so, create a stream from the POST'd document or documents.
+    if (request.body) {
+      incoming = es.readArray([].concat(request.body));
+    }
+    // Otherwise, stream and parse the request.
+    else {
+      parser = request.baucis.api.parser(request.get('content-type'));
+      if (!parser) return next(errors.UnsupportedMediaType());
+      incoming = es.pipeline(request, parser);
+    }
     // Process the incoming document or documents.
     pipes = es.pipeline(
       incoming,

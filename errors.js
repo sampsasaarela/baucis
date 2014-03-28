@@ -12,6 +12,9 @@ var errors = module.exports = {
   Forbidden: deco(setMessage),
   MethodNotAllowed: deco(setMessage),
   ValidationError: deco(setMessage),
+  UnsupportedMediaType: deco(function (message) {
+    this.message = message || 'Could not parse that content type.';
+  }),
   NotFound: deco(function (message) {
     this.message = message || 'No documents matched that query.';
   }),

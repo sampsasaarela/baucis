@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.12
+--------
+Send 415 on unparseable request content type.  Also added experimental `Api.setParser` method.
+
 v0.16.11
 --------
 Ensure 406 is sent on requests with Accept header that cannot be fulfilled.  Fix bug with calling `api.setFormatter`.

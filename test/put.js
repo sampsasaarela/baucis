@@ -46,6 +46,54 @@ describe('PUT singular', function () {
     });
   });
 
+  it("should 400 on no document", function (done) {
+    var radicchio = vegetables[7];
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/' + radicchio._id,
+      json: true
+    };
+    request.get(options, function (err, response, body) {
+      if (err) return done(err);
+      expect(response).to.have.property('statusCode', 200);
+      expect(body).to.have.property('name', 'Radicchio');
+
+      // put the leek on the server
+      var options = {
+        url: 'http://localhost:8012/api/vegetables/' + radicchio._id,
+        json: null
+      };
+      request.put(options, function (err, response, body) {
+        if (err) return done(err);
+        expect(response).to.have.property('statusCode', 400);
+        done();
+      });
+    });
+  });
+
+  it("should 400 on multiple documents", function (done) {
+    var radicchio = vegetables[7];
+    var options = {
+      url: 'http://localhost:8012/api/vegetables/' + radicchio._id,
+      json: true
+    };
+    request.get(options, function (err, response, body) {
+      if (err) return done(err);
+      expect(response).to.have.property('statusCode', 200);
+      expect(body).to.have.property('name', 'Radicchio');
+
+      // put the leek on the server
+      var options = {
+        url: 'http://localhost:8012/api/vegetables/' + radicchio._id,
+        json: [ { name: 'Pea Shoot' }, { name: 'Bitter Melon' } ]
+      };
+      request.put(options, function (err, response, body) {
+        if (err) return done(err);
+        expect(response).to.have.property('statusCode', 400);
+        done();
+      });
+    });
+  });
+
   it('should only allow updates', function (done) {
     var id = 'badbadbadbadbadbadbadbad';
     var options = {
