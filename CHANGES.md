@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.6
+-------
+Update dependency for Express to 3.5.
+
 v0.16.5
 -------
 Fix issue #142.  Also, use event-stream over highland.
