@@ -2,8 +2,6 @@
 var stream = require('stream');
 var es = require('event-stream');
 
-console.log(stream.Writable)
-
 // __Private Module Members__
 function addUserStream () {
   var streams = [];
