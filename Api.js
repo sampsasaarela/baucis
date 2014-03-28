@@ -11,6 +11,8 @@ var Release = require('./Release');
 
 // __Private Module Members__
 
+var formatters = {};
+
 function getMatchingReleases (releases, range) {
   var matching = releases.filter(function (release) {
     return semver.satisfies(release, range);
@@ -183,10 +185,19 @@ var Api = module.exports = deco(function (options) {
   };
 
   api.formatters = function (response, callback) {
-    response.format({
-      json: function () { callback(null, singleOrArray) }
+    var handlers = {};
+    Object.keys(formatters).map(function (mime) {
+      handlers[mime] = formatters['json'](callback);
     });
+    response.format(handlers);
   };
+
+  // Adds a formatter for the given mime type.  Needs a function that returns a stream.
+  api.setFormatter = function (mime, f) {
+    formatters[mime] = function (callback) { return function () { callback(null, f) } };
+  };
+
+  api.setFormatter('json', singleOrArray);
 });
 
 Api.factory(express);

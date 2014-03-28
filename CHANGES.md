@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.9
+-------
+Add experimental `Api.setFormatter` method.
+
 v0.16.8
 -------
 Fix incorrect Accept header.
