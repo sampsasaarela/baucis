@@ -23,21 +23,22 @@ describe('Headers', function () {
     };
     request.head(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('allow', 'HEAD,GET,POST,PUT,DELETE');
       done();
     });
   });
 
-  it('should set accept', function (done) {
+  it('should send 406 when the requested type is not accepted', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables',
-      json: true
+      headers: {
+        'Accept': 'application/xml'
+      }
     };
     request.head(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
-      expect(response.headers).to.have.property('accept', 'application/json');
+      expect(response.statusCode).to.be(406);
       done();
     });
   });
@@ -49,7 +50,7 @@ describe('Headers', function () {
     };
     request.head(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(response.headers).to.have.property('x-powered-by', 'Baucis');
       done();
     });

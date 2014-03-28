@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.11
+--------
+Ensure 406 is sent on requests with Accept header that cannot be fulfilled.  Fix bug with calling `api.setFormatter`.
+
 v0.16.10
 --------
 Allow passing in map function to incoming/outgoing user streams.  It's turned into a stream internally.

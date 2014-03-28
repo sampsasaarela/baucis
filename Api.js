@@ -187,7 +187,7 @@ var Api = module.exports = deco(function (options) {
   api.formatters = function (response, callback) {
     var handlers = {};
     Object.keys(formatters).map(function (mime) {
-      handlers[mime] = formatters['json'](callback);
+      handlers[mime] = formatters[mime](callback);
     });
     response.format(handlers);
   };
@@ -197,7 +197,7 @@ var Api = module.exports = deco(function (options) {
     formatters[mime] = function (callback) { return function () { callback(null, f) } };
   };
 
-  api.setFormatter('json', singleOrArray);
+  api.setFormatter('application/json', singleOrArray);
 });
 
 Api.factory(express);
