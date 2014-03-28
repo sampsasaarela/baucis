@@ -120,7 +120,7 @@ describe('Versioning', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response.headers).to.have.property('vary', 'API-Version');
+      expect(response.headers).to.have.property('vary', 'API-Version, Accept');
       done();
     });
   });

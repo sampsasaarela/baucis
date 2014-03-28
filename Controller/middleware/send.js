@@ -109,7 +109,12 @@ var decorator = module.exports = function (options, protect) {
       // Apply user streams.
       request.baucis.outgoing()
     );
-    next();
+    response.format({
+      json: function () {
+        request.baucis.formatter = singleOrArray;
+        next();
+      }
+    });
   });
 
   // HEAD
@@ -138,7 +143,7 @@ var decorator = module.exports = function (options, protect) {
       request.baucis.send,
       lastModified(response, controller.get('lastModified')),
       etag(response),
-      singleOrArray()
+      request.baucis.formatter()
     );
     next();
   });
@@ -146,7 +151,7 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize('collection', 'get', function (request, response, next) {
     request.baucis.send = es.pipeline(
       request.baucis.send,
-      request.baucis.count ? es.pipeline(count(), es.stringify()) : singleOrArray(true)
+      request.baucis.count ? es.pipeline(count(), es.stringify()) : request.baucis.formatter(true)
     );
     next();
   });
@@ -155,7 +160,7 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize('collection', 'post', function (request, response, next) {
     request.baucis.send = es.pipeline(
       request.baucis.send,
-      singleOrArray()
+      request.baucis.formatter()
     );
     next();
   });
@@ -164,7 +169,7 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize('put', function (request, response, next) {
     request.baucis.send = es.pipeline(
       request.baucis.send,
-      es.stringify()
+      request.baucis.formatter()
     );
     next();
   });
