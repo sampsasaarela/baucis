@@ -758,4 +758,6 @@ describe('Controllers', function () {
     });
   });
 
+  it('should not have the API reference set when using publish: false')
+
 });

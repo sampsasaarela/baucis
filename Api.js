@@ -131,6 +131,7 @@ var Api = module.exports = deco(function (options) {
     var controller = Controller(options);
     var range = controller.get('versions');
     if (!semver.validRange(range)) throw errors.Configuration('Controller version range was not a valid semver range.');
+    controller.set('api', api);
     // Create an array for this range if it hasn't been registered yet.
     if (!controllersFor[range]) controllersFor[range] = [];
     // Add the controller to the controllers to be published.
