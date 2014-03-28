@@ -5,7 +5,6 @@ var deco = require('deco');
 var middleware = module.exports = deco(__dirname, [
   'deprecated',
   'allowHeader',
-  'acceptHeader',
   'checkMethodSupported',
   'validateId',
   'setConditions',
