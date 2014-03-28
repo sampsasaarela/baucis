@@ -1,4 +1,4 @@
-baucis v0.16.7
+baucis v0.16.8
 ==============
 
 Baucis enables you to build scalable REST APIs using the open source tools and standards you and your team already know.
