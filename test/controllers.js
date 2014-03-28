@@ -15,7 +15,15 @@ describe('Controllers', function () {
 
   it('should allow passing string name only to create', function (done) {
     var makeController = function () {
-      baucis.rest({ singular: 'store', publish: false });
+      baucis.rest('unmade');
+    };
+    expect(makeController).to.not.throwException();
+    done();
+  });
+
+  it('should allow passing string name only to create', function (done) {
+    var makeController = function () {
+      baucis.rest({ model: mongoose.model('unmade'), publish: false });
     };
     expect(makeController).to.not.throwException();
     done();

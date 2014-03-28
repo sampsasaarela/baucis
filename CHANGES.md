@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.7
+-------
+Allow passing in a mongoose model to the `model` controller option, in addition to string name.
+
 v0.16.6
 -------
 Update dependency for Express to 3.5.

@@ -8,11 +8,19 @@ var decorator = module.exports = function (options, protect) {
   if (!options.model && !options.singular) throw errors.Configuration('Must provide the Mongoose schema name.');
 
   var controller = this;
-  var model = mongoose.model(options.model || options.singular);
-  var modelName = model.modelName;
+  var model;
+  var modelName;
   var findByPath;
   var deselected = [];
-
+  // If no model passed in, use the singular name to get the model from mongoose.
+  if (!options.model) model = mongoose.model(options.singular);
+  // If a model name was passed in, load from mongoose.
+  else if (typeof options.model === 'string') model = mongoose.model(options.model);
+  // Otherwise, assume it's a model and use it straight.
+  else model = options.model;
+  // Set the model name.
+  modelName = model.modelName;
+  // Check for a few configuration errors.
   if (options.basePath && options.basePath !== '/') {
     if (options.basePath.indexOf('/') !== 0) throw errors.Configuration('basePath must start with a "/"');
     if (options.basePath[options.basePath.length - 1] === '/') throw errors.Configuration('basePath must not end with a "/"');
