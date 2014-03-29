@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.13
+--------
+Fix missing dependency on event-stream.
+
 v0.16.12
 --------
 Send 415 on unparseable request content type.  Also added experimental `Api.setParser` method.
