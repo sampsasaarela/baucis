@@ -31,35 +31,32 @@ var decorator = module.exports = function (options, protect) {
       throw errors.Configuration('findBy path for model "' + modelName + '" not unique.');
     }
   }
-
-  var basePath = options.basePath ? options.basePath : '/';
+  // Initialize & calculate base paths.
+  var basePath = options['basePath'] = options.basePath ? options.basePath : '/';
   var separator = (basePath === '/' ? '' : '/');
-  var basePathWithId = basePath + separator + ':id';
-  var basePathWithOptionalId = basePath + separator + ':id?';
-
+  var basePathWithId = options['basePathWithId'] = basePath + separator + ':id';
+  var basePathWithOptionalId = options['basePathWithOptionalId'] = basePath + separator + ':id?';
+  // Store naming, model, and schema.
   options['model'] = model;
   options['modelName'] = modelName;
   options['schema'] = model.schema;
   options['singular'] = options.singular || modelName;
   options['plural'] = options.plural || lingo.en.pluralize(options.singular);
-
-  options['basePath'] = basePath;
-  options['basePathWithId'] = basePathWithId;
-  options['basePathWithOptionalId'] = basePathWithOptionalId;
-
+  // Find deselected paths in the schema.
   model.schema.eachPath(function (name, path) {
     if (path.options.select === false) deselected.push(name);
   });
+  // Add deselected paths from the controller.
   if (options.select) {
     options.select.split(/\s+/).forEach(function (path) {
       var match = /^(?:[-](\w+))$/.exec(path);
       if (match) deselected.push(match[1]);
     });
   }
-  // Filter to unique paths
+  // Filter deselected to unique paths.
   options['deselected paths'] = deselected.filter(function(path, position) {
     return deselected.indexOf(path) === position;
   });
-
+  // Pass changes to options down stream.
   protect.options(options);
 };
