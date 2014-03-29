@@ -2,7 +2,7 @@
   "name": "baucis",
   "author": "William Riley-Land <william@kun.io>",
   "homepage": "https://github.com/wprl/baucis",
-  "version": "0.16.13",
+  "version": "0.16.14",
   "main": "index.js",
   "scripts": {
     "test": "mocha --bail --timeout 5000 --globals vegetables"
@@ -48,7 +48,7 @@
     "passport-local": "~0.1.6",
     "request": "~2.21.0",
     "parse-links": "0.0.1",
-    "mongoose": "~3.8.1",
+    "mongoose": "^3.8.8",
     "express": "~3.4.6",
     "through": "~2.3.4"
   }

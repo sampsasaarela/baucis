@@ -8,6 +8,5 @@ var middleware = module.exports = deco(__dirname, [
   'update',
   'buildQuery',
   'applyQueryOptions',
-  'linkHeader',
-  'applySortOption'
+  'linkHeader'
 ]);

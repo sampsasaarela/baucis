@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.14
+--------
+Add distinct request query option.
+
 v0.16.13
 --------
 Fix missing dependency on event-stream.

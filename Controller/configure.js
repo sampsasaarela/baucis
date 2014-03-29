@@ -49,7 +49,7 @@ var decorator = module.exports = function (options, protect) {
   // Add deselected paths from the controller.
   if (options.select) {
     options.select.split(/\s+/).forEach(function (path) {
-      var match = /^(?:[-](\w+))$/.exec(path);
+      var match = /^(?:[-]((?:[\w]|[-])+)\b)$/.exec(path);
       if (match) deselected.push(match[1]);
     });
   }

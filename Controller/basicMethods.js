@@ -11,7 +11,7 @@ var decorator = module.exports = function (options) {
   controller.checkBadSelection = function (select) {
     var bad = false;
     controller.get('deselected paths').forEach(function (path) {
-      var badPath = new RegExp('\\b[+]?' + path + '\\b', 'i');
+      var badPath = new RegExp('[+]?' + path + '\\b', 'i');
       if (badPath.exec(select)) bad = true;
     });
     return bad;

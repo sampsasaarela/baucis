@@ -568,4 +568,52 @@ describe('Queries', function () {
     });
   });
 
+  it('should allow querying for distinct values', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables?distinct=name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      body.sort();
+      expect(body).to.have.property('length', 8);
+      expect(body[0]).to.be('Carrot');
+      expect(body[1]).to.be('Lima Bean');
+      expect(body[2]).to.be('Pea');
+      expect(body[3]).to.be('Radicchio');
+      expect(body[4]).to.be('Shitake');
+      expect(body[5]).to.be('Spinach');
+      expect(body[6]).to.be('Turnip');
+      expect(body[7]).to.be('Zucchini');
+      done();
+    });
+  });
+
+  it('should allow querying for distinct values restricted by conditions', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables?distinct=name&conditions={ "name": "Carrot" }',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.have.property('length', 1);
+      expect(body[0]).to.be('Carrot');
+      done();
+    });
+  });
+
+  it('should not allow querying for distinct values of deselected paths', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/fungi?distinct=hyphenated-field-name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(403);
+      done();
+    });
+  });
+
 });

@@ -50,10 +50,15 @@ var decorator = module.exports = function (options, protect) {
   // Create the basic stream.
   protect.finalize(function (request, response, next) {
     var count = 0;
-    response.type('json');
+    var documents = request.baucis.documents;
+
+    // If documents were set in the baucis hash, use them.
+    if (documents) documents = es.readArray([].concat(documents));
+    // Otherwise, stream the relevant documents from Mongo, based on constructed query.
+    else documents = request.baucis.query.stream();
+
     request.baucis.send = es.pipeline(
-      // Stream the relevant documents from Mongo, based on constructed query.
-      request.baucis.query.stream(),
+      documents,
       // Check for 404.
       es.through(
         function (doc) {

@@ -1,4 +1,4 @@
-baucis v0.16.13
+baucis v0.16.14
 ===============
 
 Baucis enables you to build scalable REST APIs using the open source tools and standards you and your team already know.
@@ -98,6 +98,7 @@ Query Options
 | sort | Sort response documents by the given criteria.  `sort: 'foo -bar'`' sorts the collection by `foo` in ascending order, then by `bar` in descending order. |
 | populate | Set which fields should be populated for response documents.  See the Mongoose [population documentation](http://mongoosejs.com/docs/populate.html) for more information. |
 | count | May be set to true for GET requests to specify that a count should be returned instead of documents |
+| distinct | Set to a path name to query for distinct valuse for that path matching given conditions. |
 | hint | Add an index hint to the query (must be enabled per controller).
 | comment | Add a comment to a query (must be enabled per controller).
 
