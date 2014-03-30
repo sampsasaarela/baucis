@@ -1,5 +1,5 @@
 // __Dependencies__
-var errors = require('../../../errors');
+var errors = require('../errors');
 
 // __Private Module Members__
 

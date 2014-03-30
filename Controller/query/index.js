@@ -3,10 +3,10 @@ var deco = require('deco');
 
 // __Module Definition__
 var middleware = module.exports = deco(__dirname, [
-  'deprecated',
-  'allowHeader',
-  'checkMethodSupported',
-  'validateId',
-  'setConditions',
-  'streams'
+  // __Query-Stage Middleware__
+  'create',
+  'update',
+  'build',
+  'options',
+  'links'
 ]);

@@ -1,7 +1,7 @@
 // __Dependencies__
 var express = require('express');
 var es = require('event-stream');
-var errors = require('../../../errors');
+var errors = require('../../errors');
 
 // __Private Module Members__
 var validOperators = [ '$set', '$push', '$pull' ];

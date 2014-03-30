@@ -8,9 +8,20 @@ var Controller = module.exports = deco(function (name, protect) {
 });
 
 Controller.factory(express);
+
 Controller.decorators(__dirname, [ 'configure' ]);
 Controller.decorators(deco.builtin.setOptions);
-Controller.decorators(__dirname, [ 'basicMethods', 'middleware' ]);
+Controller.decorators(__dirname, [
+  'utilities',
+  'stages',
+  'activation',
+  'initialize',
+  'request',
+  'query',
+  'documents',
+  'send'
+]);
+
 Controller.defaults({
   findBy: '_id',
   'allow set': false,
