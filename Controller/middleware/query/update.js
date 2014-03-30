@@ -41,7 +41,6 @@ var decorator = module.exports = function () {
     );
 
     pipes.on('error', next);
-    //pipes.on('end', next);
   });
 
   this.query('instance', 'put', function (request, response, next) {
