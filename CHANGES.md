@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.16
+--------
+Move JSON parser and formatter to a separate module.
+
 v0.16.15
 --------
 Fix outdated require.

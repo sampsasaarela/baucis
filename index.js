@@ -4,6 +4,9 @@ var Api = require('./Api');
 var Release = require('./Release');
 var Controller = require('./Controller');
 var errors = require('./errors');
+var plugins = {
+  json: require('baucis-json')
+};
 
 // __Private Module Members__
 var instance = Api();
@@ -24,6 +27,9 @@ baucis.Api = Api;
 baucis.Release = Release;
 baucis.Controller = Controller;
 baucis.errors = errors;
+
+// __Plugins__
+plugins.json.apply(baucis);
 
 // __Public Methods__
 baucis.rest = function (options) {
