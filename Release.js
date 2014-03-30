@@ -7,9 +7,12 @@ var errors = require('./errors');
 // __Module Definition__
 var Release = module.exports = deco(function (options) {
   var release = this;
+  var message;
 
-  if (!options.controllers) throw errors.Configuration('There are no controllers in release "' + options.release + '".');
-  if (options.controllers.length === 0) throw errors.Configuration('There are no controllers in release "' + options.release + '".');
+  if (!Array.isArray(options.controllers) || options.controllers.length === 0) {
+    message = 'There are no controllers in release "' + options.release + '".';
+    throw errors.Configuration(message);
+  }
 
   // Mount all published controllers for this version.
   options.controllers.forEach(function (controller) {
