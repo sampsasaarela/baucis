@@ -1,6 +1,5 @@
 // __Dependencies__
 var express = require('express');
-var through = require('through');
 var es = require('event-stream');
 var errors = require('../../../errors');
 

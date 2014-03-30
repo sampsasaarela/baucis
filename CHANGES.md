@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.15
+--------
+Fix outdated require.
+
 v0.16.14
 --------
 Add distinct request query option.
