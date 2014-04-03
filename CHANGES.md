@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.17
+--------
+Use tilde instead of caret so older npms don't fall over!
+
 v0.16.16
 --------
 Move JSON parser and formatter to a separate module.
