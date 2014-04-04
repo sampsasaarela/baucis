@@ -36,7 +36,14 @@ var decorator = module.exports = function () {
       request.baucis.incoming(),
       // Map function to create a document from incoming JSON.
       es.map(function (incoming, callback) {
-        var doc = new Model();
+        var doc;
+        if (incoming.__t && Model.discriminators) {
+          if (!Model.discriminators[incoming.__t]) return callback(errors.BadRequest('Specified discriminator does not exist.'));
+          doc = new Model.discriminators[incoming.__t];
+        }
+        else {
+          doc = new Model();
+        }
         doc.set(incoming);
         callback(null, doc);
       }),

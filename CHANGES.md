@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.18
+-------
+Discriminators - correctly handle POST.  The correct model is used based on the `__t` that is passed in the request body.
+
 v0.16.17
 --------
 Use tilde instead of caret so older npms don't fall over!
