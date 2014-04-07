@@ -1,5 +1,6 @@
 // __Dependencies__
 var express = require('express');
+var util = require('util');
 var es = require('event-stream');
 var errors = require('../../errors');
 
@@ -14,7 +15,7 @@ var decorator = module.exports = function () {
     var incoming;
 
     // Check if the body was parsed by some external middleware e.g. `express.json`.
-    // If so, create a stream from the PUT'd document.
+    // If so, create a one-document stream from the parsed body.
     if (request.body) {
       incoming = es.readArray([ request.body ]);
     }
@@ -33,7 +34,9 @@ var decorator = module.exports = function () {
       // Update the request body with updated documents and continue.
       es.writeArray(function (error, documents) {
         if (error) return next(error);
-        if (documents.length !== 1) return next(errors.BadRequest('Must PUT exactly one update document.'));
+        if (documents.length !== 1) {
+          return next(errors.BadRequest('The request body must contain exactly one update document'));
+        }
         request.body = documents[0];
         next();
       })
@@ -44,7 +47,9 @@ var decorator = module.exports = function () {
 
   this.query('instance', 'put', function (request, response, next) {
     var bodyId = request.body[request.baucis.controller.get('findBy')];
-    if (bodyId && request.params.id !== bodyId) return next(errors.BadRequest('ID mismatch'));
+    if (bodyId && request.params.id !== bodyId) {
+      return next(errors.BadRequest("The ID of the update document did not match the URL's document ID"));
+    }
     next();
   });
 
@@ -55,7 +60,9 @@ var decorator = module.exports = function () {
     var versionKey = request.baucis.controller.get('schema').get('versionKey');
     var updateVersion = request.body[versionKey] !== undefined ? Number(request.body[versionKey]) : null;
 
-    if (!Number.isFinite(updateVersion)) return next(errors.BadRequest('Must supply update version when locking is enabled.'));
+    if (!Number.isFinite(updateVersion)) {
+      return next(errors.BadRequest('Locking is enabled, so the target version must be provided in the request body using path "%s"', versionKey));
+    }
     next();
   });
 
@@ -64,12 +71,16 @@ var decorator = module.exports = function () {
     var operator = request.headers['x-baucis-update-operator'];
     if (!operator) return next();
 
-    if (validOperators.indexOf(operator) === -1) return next(errors.BadRequest('Unsupported update operator: ' + operator));
+    if (validOperators.indexOf(operator) === -1) {
+      return next(errors.BadRequest('The requested update operator "%s" is not supported', operator));
+    }
     // Ensure that some paths have been enabled for the operator.
-    if (!request.baucis.controller.get('allow ' + operator)) return next(errors.Forbidden('Update operator not enabled for this controller: ' + operator));
+    if (!request.baucis.controller.get('allow ' + operator)) {
+      return next(errors.Forbidden('The requested update operator "%s" is not enabled for this resource', operator));
+    }
     // Make sure paths have been whitelisted for this operator.
     if (request.baucis.controller.checkBadUpdateOperatorPaths(operator, Object.keys(request.body))) {
-      return next(errors.Forbidden("Can't use update operator with non-whitelisted paths."));
+      return next(errors.Forbidden('This update path is forbidden for the requested update operator "%s"', operator));
     }
     next();
   });
@@ -92,7 +103,10 @@ var decorator = module.exports = function () {
 
       if (lock) {
         // Make sure the version key was selected.
-        if (!doc.isSelected(versionKey)) return next(errors.BadRequest('Version key "'+ versionKey + '" was not selected.'));
+        if (!doc.isSelected(versionKey)) {
+          // TODO autofix for the user?
+          return next(errors.BadRequest('The version key "%s" must be selected', versionKey));
+        }
         // Update and current version have been found.  Check if they're equal.
         if (updateVersion !== doc[versionKey]) return next(errors.LockConflict());
         // One is not allowed to set __v and increment in the same update.

@@ -17,7 +17,7 @@ describe('GET plural', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       body.forEach( function(doc, i) {
       	var found = vegetables.some(function (vege) {
       	  return vege._id.toString() === doc._id;
@@ -35,7 +35,7 @@ describe('GET plural', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       body.forEach(function(doc, i) {
         var found = vegetables.some(function (vege) {
           return vege._id.toString() === doc._id;

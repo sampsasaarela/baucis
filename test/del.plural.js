@@ -15,7 +15,7 @@ describe('DEL plural', function () {
     };
     request.del(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       // Check that the correct number were deleted.
       expect(body).to.be(8);
       done();

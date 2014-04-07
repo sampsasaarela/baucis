@@ -19,7 +19,7 @@ describe('Subcontrollers', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 2);
       expect(body[0]).to.have.property('name', 'Alice');
       done();

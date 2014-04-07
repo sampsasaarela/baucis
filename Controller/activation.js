@@ -7,7 +7,7 @@ var parseActivateParameters = function (stage, params) {
   var options;
   var argumentsArray = Array.prototype.slice.call(params);
 
-  options = last(0, ['howMany', 'verbs', 'middleware'], argumentsArray);
+  options = last(0, ['endpoint', 'verbs', 'middleware'], argumentsArray);
   options.stage = stage;
 
   return factor(options);
@@ -36,7 +36,7 @@ function isInvalidVerb (s) {
   return /^head|get|put|post|del$/.exec(s) ? false : true;
 }
 
-// Parse middleware into an array of middleware definitions for each howMany and verb
+// Parse middleware into an array of middleware definitions for each endpoint and verb
 function factor (options) {
   var factored = [];
   var verbString = options.verbs;
@@ -47,24 +47,27 @@ function factor (options) {
   if (!verbString || verbString === '*') verbString = 'head get post put del';
   verbs = verbString.split(/\s+/);
 
-  if (!options.stage) throw errors.Configuration('Must supply stage.');
-  if (verbs.some(isInvalidVerb)) throw errors.Configuration('Unrecognized verb.');
-  if (options.howMany && options.howMany !== 'instance' && options.howMany !== 'collection') {
-    throw errors.Configuration('Unrecognized howMany: ' + options.howMany);
+  verbs.forEach(function (verb) {
+    if (isInvalidVerb(verb)) throw errors.Configuration('Unrecognized HTTP method: "%s"', verb);
+  });
+
+  if (!options.stage) throw errors.Configuration('The middleware stage was not provided');
+  if (options.endpoint && options.endpoint !== 'instance' && options.endpoint !== 'collection') {
+    throw errors.Configuration('End-point type must be either "instance" or "collection," not "%s"', options.endpoint);
   }
   // Middleware function or array
   if (!Array.isArray(options.middleware) && typeof options.middleware !== 'function') {
-    throw errors.Configuration('Middleware must be an array or function.');
+    throw errors.Configuration('Middleware must be an array or function');
   }
-  // Check howMany is valid
-  if (options.howMany !== undefined && options.howMany !== 'instance' && options.howMany !== 'collection') {
-    throw errors.Configuration('Unrecognized howMany: "' + options.howMany + '".');
+  // Check endpoint is valid
+  if (options.endpoint !== undefined && options.endpoint !== 'instance' && options.endpoint !== 'collection') {
+    throw errors.Configuration('End-point type must be either "instance" or "collection," not "%s"', options.endpoint);
   }
 
   verbs.forEach(function (verb) {
-    // Add definitions for one or both `howManys`.
-    if (options.howMany !== 'collection') factored.push({ stage: options.stage, howMany: 'instance', verb: verb, middleware: options.middleware });
-    if (options.howMany !== 'instance') factored.push({ stage: options.stage, howMany: 'collection', verb: verb, middleware: options.middleware });
+    // Add definitions for one or both `endpoints`.
+    if (options.endpoint !== 'collection') factored.push({ stage: options.stage, endpoint: 'instance', verb: verb, middleware: options.middleware });
+    if (options.endpoint !== 'instance') factored.push({ stage: options.stage, endpoint: 'collection', verb: verb, middleware: options.middleware });
   });
 
   return factored;
@@ -77,12 +80,12 @@ var decorator = module.exports = function (options, protect) {
 
   // A method used to activate middleware for a particular stage.
   function activate (definition) {
-    var path = definition.howMany === 'instance' ? controller.get('basePathWithId') : controller.get('basePath');
+    var path = definition.endpoint === 'instance' ? controller.get('basePathWithId') : controller.get('basePath');
     protect.controllerForStage[definition.stage][definition.verb](path, definition.middleware);
   }
 
   // __Protected Instance Methods__
-  protect.finalize = function (howMany, verbs, middleware) {
+  protect.finalize = function (endpoint, verbs, middleware) {
     var definitions = parseActivateParameters('finalize', arguments);
     definitions.forEach(activate);
     return controller;
@@ -91,21 +94,21 @@ var decorator = module.exports = function (options, protect) {
   // __Public Instance Methods__
 
   // A method used to activate request-stage middleware.
-  controller.request = function (howMany, verbs, middleware) {
+  controller.request = function (endpoint, verbs, middleware) {
     var definitions = parseActivateParameters('request', arguments);
     definitions.forEach(activate);
     return controller;
   };
 
   // A method used to activate query-stage middleware.
-  controller.query = function (howMany, verbs, middleware) {
+  controller.query = function (endpoint, verbs, middleware) {
     var definitions = parseActivateParameters('query', arguments);
     definitions.forEach(activate);
     return controller;
   };
 
   // A method used to activate document-stage middleware.
-  controller.documents = function (howMany, verbs, middleware) {
+  controller.documents = function (endpoint, verbs, middleware) {
     var definitions = parseActivateParameters('documents', arguments);
     definitions.forEach(activate);
     return controller;

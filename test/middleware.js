@@ -169,6 +169,7 @@ describe('Middleware', function () {
   //   request.get(options, function (error, response, body) {
   //     if (error) return done(error);
   //     expect(response.statusCode).to.be(404);
+  //     expect(body).to.be(1234);
   //     done();
   //   });
   // });

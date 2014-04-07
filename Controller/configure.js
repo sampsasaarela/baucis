@@ -5,7 +5,9 @@ var errors = require('../errors');
 
 // __Module Definition__
 var decorator = module.exports = function (options, protect) {
-  if (!options.model && !options.singular) throw errors.Configuration('Must provide the Mongoose schema name.');
+  if (!options.model && !options.singular) {
+    throw errors.Configuration('Must provide one or both of `singular` and `model` options');
+  }
 
   var controller = this;
   var model;
@@ -22,13 +24,17 @@ var decorator = module.exports = function (options, protect) {
   modelName = model.modelName;
   // Check for a few configuration errors.
   if (options.basePath && options.basePath !== '/') {
-    if (options.basePath.indexOf('/') !== 0) throw errors.Configuration('basePath must start with a "/"');
-    if (options.basePath[options.basePath.length - 1] === '/') throw errors.Configuration('basePath must not end with a "/"');
+    if (options.basePath.indexOf('/') !== 0) {
+      throw errors.Configuration('`basePath` must start with a "/"');
+    }
+    if (options.basePath[options.basePath.length - 1] === '/') {
+      throw errors.Configuration('`basePath` must not end with a "/"');
+    }
   }
   if (options.findBy && options.findBy !== '_id') {
     findByPath = model.schema.path(options.findBy);
     if (!findByPath.options.unique && !(findByPath.options.index && findByPath.options.index.unique)) {
-      throw errors.Configuration('findBy path for model "' + modelName + '" not unique.');
+      throw errors.Configuration('`findBy` path for model "%s" must be unique', modelName);
     }
   }
   // Initialize & calculate base paths.

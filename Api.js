@@ -31,7 +31,9 @@ var Api = module.exports = deco(function (options) {
     var range = controller.get('versions');
 
     var matchingReleases = getMatchingReleases(releases, range);
-    if (matchingReleases.length === 0) throw errors.Configuration("The controller version range \"" + range + "\" doesn't satisfy any API release.");
+    if (matchingReleases.length === 0) {
+      throw errors.Configuration('The controller version range "%s" doesn\'t satisfy any API release', range);
+    }
 
     // Find overlapping ranges.  A range overlaps if it shares any API release
     // versions with another range.
@@ -45,7 +47,9 @@ var Api = module.exports = deco(function (options) {
     var ok = overlapping.every(function (range) {
       return controllersFor[range].every(function (otherController) {
         if (controller === otherController) return true;
-        if (controller.get('plural') === otherController.get('plural')) throw errors.Configuration('Controller "' + controller.get('plural') + '" exists more than once in a release.');
+        if (controller.get('plural') === otherController.get('plural')) {
+          throw errors.Configuration('Controller "%s" exists more than once in a release', controller.get('plural'));
+        }
         return controller.get('plural') !== otherController.get('plural');
       });
     });
@@ -61,7 +65,10 @@ var Api = module.exports = deco(function (options) {
     var releaseControllers;
     var controllersForRelease = {};
 
-    if (!releases.every(semver.valid.bind(semver))) throw errors.Configuration('Invalid semver API release version.');
+    releases.forEach(function (release) {
+      if (semver.valid(release)) return;
+      throw errors.Configuration('Release version "%s" is not a valid semver version', release);
+    });
 
     // Ensure all controllers satisfy some version range.
     Object.keys(controllersFor).forEach(function (range) {
@@ -87,6 +94,25 @@ var Api = module.exports = deco(function (options) {
       });
     });
 
+    // Check the requested API version is valid.
+    api.use(function (request, response, next) {
+      var range = request.headers['api-version'] || '*';
+      if (semver.validRange(range)) return next();
+      next(errors.BadRequest('The requested API version range "%s" was not a valid semver range', range));
+    });
+
+    // Check for API version unsatisfied and give a 400 if no versions match.
+    api.use(function (request, response, next) {
+      var range = request.headers['api-version'] || '*';
+      var apiVersionMatch = releaseControllers.some(function (releaseController) {
+        var release = releaseController.get('release');
+        return semver.satisfies(release, range);
+      });
+
+      if (apiVersionMatch) return next();
+      next(errors.BadRequest('The requested API version range "%s" could not be satisfied', range));
+    });
+
     // Add a middleware chain that checks the version requested and uses the
     // highest version middleware that matches the requested range.
     releaseControllers.forEach(function (releaseController) {
@@ -95,7 +121,6 @@ var Api = module.exports = deco(function (options) {
         var range = request.headers['api-version'] || '*';
         var release = releaseController.get('release');
         var satisfied = semver.satisfies(release, range);
-
         // Short-circuit this release if the version doesn't satisfy the version range.
         if (!satisfied) return next();
         // Otherwise, let the request fall through to this version's middleware.
@@ -105,25 +130,17 @@ var Api = module.exports = deco(function (options) {
       });
     });
 
-    // Error checking
+    // __Error Handling__
+
     api.use(function (error, request, response, next) {
       if (!error) return next();
-
       // Always set status when possible.
-      if (error instanceof errors.BadRequest) response.status(400);
-      else if (error instanceof errors.Deprecated) response.status(400);
-      else if (error instanceof errors.Forbidden) response.status(403);
-      else if (error instanceof errors.NotFound) response.status(404);
-      else if (error instanceof errors.MethodNotAllowed) response.status(405);
-      else if (error instanceof errors.LockConflict) response.status(409);
+      if (error instanceof errors.BaucisError) response.status(error.status);
       else if (error instanceof mongoose.Error.VersionError) response.status(409);
-      else if (error instanceof errors.UnsupportedMediaType) response.status(415);
       else if (error instanceof mongoose.Error.ValidationError) response.status(422);
       else return next(error);
-
       // Handle some errors.
       if (error instanceof mongoose.Error.ValidationError) return response.json(error.errors);
-
       // Pass the rest on.
       next(error);
     });
@@ -132,7 +149,9 @@ var Api = module.exports = deco(function (options) {
   api.rest = function (options) {
     var controller = Controller(options);
     var range = controller.get('versions');
-    if (!semver.validRange(range)) throw errors.Configuration('Controller version range was not a valid semver range.');
+    if (!semver.validRange(range)) {
+      throw errors.Configuration('Controller version range "%s" was not a valid semver range', range);
+    }
     controller.set('api', api);
     // Create an array for this range if it hasn't been registered yet.
     if (!controllersFor[range]) controllersFor[range] = [];
@@ -142,7 +161,11 @@ var Api = module.exports = deco(function (options) {
   };
 
   api.formatters = function (response, callback) {
-    var handlers = {};
+    var handlers = {
+      default: function () {
+        callback(errors.NotAcceptable());
+      }
+    };
     Object.keys(formatters).map(function (mime) {
       handlers[mime] = formatters[mime](callback);
     });

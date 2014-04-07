@@ -114,7 +114,7 @@ describe('Controllers', function () {
     var makeController = function () {
       baucis.rest({ singular: 'cheese', findBy: 'color', publish: false });
     };
-    expect(makeController).to.throwException(/findBy path for model "cheese" not unique[.]/);
+    expect(makeController).to.throwException(/^`findBy` path for model "cheese" must be unique [(]500[)][.]$/);
     done();
   });
 
@@ -399,14 +399,14 @@ describe('Controllers', function () {
   it('should disallow unrecognized verbs', function (done) {
     var controller = baucis.rest({ singular: 'store', publish: false });
     var register = function () { controller.request('get dude', function () {}) };
-    expect(register).to.throwException(/Unrecognized verb./);
+    expect(register).to.throwException(/^Unrecognized HTTP method: "dude" [(]500[)][.]$/);
     done();
   });
 
   it('should disallow unrecognized howManys', function (done) {
     var controller = baucis.rest({ singular: 'store', publish: false });
     var register = function () { controller.request('gargoyle', 'get put', function () {}) };
-    expect(register).to.throwException(/Unrecognized howMany: gargoyle/);
+    expect(register).to.throwException(/^End-point type must be either "instance" or "collection," not "gargoyle" [(]500[)][.]$/);
     done();
   });
 
@@ -454,7 +454,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(400);
-      expect(body).to.contain('The &quot;X-Baucis-Push header&quot; is deprecated.  Use &quot;X-Baucis-Update-Operator: $push&quot; instead.');
+      expect(body).to.be('Bad Request: The `X-Baucis-Push` header is deprecated.  Use `X-Baucis-Update-Operator: $push` instead (400).');
       done();
     });
   });
@@ -469,7 +469,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.contain('Update operator not enabled for this controller: $push');
+      expect(body).to.be('Forbidden: The requested update operator &quot;$push&quot; is not enabled for this resource (403).');
       done();
     });
   });
@@ -484,7 +484,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.contain("Can't use update operator with non-whitelisted paths.");
+      expect(body).to.be('Forbidden: This update path is forbidden for the requested update operator &quot;$push&quot; (403).');
       done();
     });
   });
@@ -518,7 +518,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.contain('Update operator not enabled for this controller: $pull');
+      expect(body).to.be('Forbidden: The requested update operator &quot;$pull&quot; is not enabled for this resource (403).');
       done();
     });
   });
@@ -533,7 +533,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.contain("Can't use update operator with non-whitelisted paths.");
+      expect(body).to.be('Forbidden: This update path is forbidden for the requested update operator &quot;$pull&quot; (403).');
       done();
     });
   });
@@ -578,7 +578,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.contain('Update operator not enabled for this controller: $set');
+      expect(body).to.be('Forbidden: The requested update operator &quot;$set&quot; is not enabled for this resource (403).');
       done();
     });
   });
@@ -593,7 +593,7 @@ describe('Controllers', function () {
     request.put(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.contain("Can't use update operator with non-whitelisted paths.");
+      expect(body).to.be('Forbidden: This update path is forbidden for the requested update operator &quot;$set&quot; (403).');
       done();
     });
   });
@@ -695,6 +695,7 @@ describe('Controllers', function () {
       if (error) return done(error);
       expect(response.statusCode).to.be(405);
       expect(response.headers).to.have.property('allow', 'HEAD,POST,PUT,DELETE');
+      expect(body).to.be('Method Not Allowed: The requested method has been disabled for this resource (405).');
       done();
     });
   });
@@ -704,6 +705,7 @@ describe('Controllers', function () {
       if (error) return done(error);
       expect(response.statusCode).to.be(405);
       expect(response.headers).to.have.property('allow', 'HEAD,GET,POST,PUT');
+      expect(body).to.be('Method Not Allowed: The requested method has been disabled for this resource (405).');
       done();
     });
   });
@@ -713,9 +715,10 @@ describe('Controllers', function () {
       url: 'http://localhost:8012/api/beans/bad',
       json: true
     };
-    request.head(options, function (error, response, body) {
+    request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(400);
+      expect(body).to.be('Bad Request: The requested document ID &quot;bad&quot; is not a valid document ID (400).');
       done();
     });
   });
@@ -725,9 +728,10 @@ describe('Controllers', function () {
       url: 'http://localhost:8012/api/deans/0booze',
       json: true
     };
-    request.head(options, function (error, response, body) {
+    request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(400);
+      expect(body).to.be('Bad Request: The requested document ID &quot;0booze&quot; is not a valid document ID (400).');
       done();
     });
   });
@@ -745,7 +749,7 @@ describe('Controllers', function () {
     });
   });
 
-  it('should allow setting model indepentally of name', function (done) {
+  it('should allow setting model independently of name', function (done) {
     var options = {
       url: 'http://localhost:8012/api/timeentries/Camembert',
       json: true

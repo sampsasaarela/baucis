@@ -9,7 +9,7 @@ var decorator = module.exports = function () {
     var distinct = request.query.distinct;
     if (!distinct) return next();
     if (request.baucis.controller.get('deselected paths').indexOf(distinct) !== -1) {
-      return next(errors.Forbidden());
+      return next(errors.Forbidden('You may not find distinct values for the requested path'));
     }
     Model.distinct(distinct, request.baucis.conditions, function (error, values) {
       if (error) return next(error);
@@ -35,10 +35,10 @@ var decorator = module.exports = function () {
     if (!select) return next();
 
     if (select.indexOf('+') !== -1) {
-      return next(errors.Forbidden('Including excluded fields is not permitted.'));
+      return next(errors.Forbidden('Including excluded fields is not permitted'));
     }
     if (request.baucis.controller.checkBadSelection(select)) {
-      return next(errors.Forbidden('Including excluded fields is not permitted.'));
+      return next(errors.Forbidden('Including excluded fields is not permitted'));
     }
 
     request.baucis.query.select(select);
@@ -60,11 +60,11 @@ var decorator = module.exports = function () {
       populate.forEach(function (field) {
         if (error) return;
         if (request.baucis.controller.checkBadSelection(field.path || field)) {
-          return error = errors.Forbidden('Including excluded fields is not permitted.');
+          return error = errors.Forbidden('Including excluded fields is not permitted');
         }
         // Don't allow selecting fields from client when populating
         if (field.select) {
-          return error = errors.Forbidden('May not set selected fields of populated document.');
+          return error = errors.Forbidden('Selecting fields of populated documents is not permitted');
         }
 
         request.baucis.query.populate(field);
@@ -113,7 +113,7 @@ var decorator = module.exports = function () {
         request.baucis.query.hint(hint);
       }
       else {
-        return next(errors.Forbidden('Hints are not enabled for this resource.'));
+        return next(errors.Forbidden('Hints are not enabled for this resource'));
       }
     }
 

@@ -36,9 +36,10 @@ describe('Headers', function () {
         'Accept': 'application/xml'
       }
     };
-    request.head(options, function (error, response, body) {
+    request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(406);
+      expect(body).to.be('Not Acceptable: The requested content type could not be provided (406).');
       done();
     });
   });
@@ -53,6 +54,7 @@ describe('Headers', function () {
     request.post(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(415);
+      expect(body).to.be("Unsupported Media Type: No parser is available for this request's content type (415).");
       done();
     });
   });

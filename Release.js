@@ -10,8 +10,7 @@ var Release = module.exports = deco(function (options) {
   var message;
 
   if (!Array.isArray(options.controllers) || options.controllers.length === 0) {
-    message = 'There are no controllers in release "' + options.release + '".';
-    throw errors.Configuration(message);
+    throw errors.Configuration('There are no controllers in release "%s"', options.release);
   }
 
   // Mount all published controllers for this version.

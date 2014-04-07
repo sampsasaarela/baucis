@@ -74,7 +74,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/Including excluded fields is not permitted[.]/i);
+      expect(body).to.be('Forbidden: Including excluded fields is not permitted (403).');
       done();
     });
   });
@@ -87,7 +87,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/Including excluded fields is not permitted[.]/i);
+      expect(body).to.be('Forbidden: Including excluded fields is not permitted (403).');
       done();
     });
   });
@@ -100,7 +100,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/Including excluded fields is not permitted[.]/i);
+      expect(body).to.be('Forbidden: Including excluded fields is not permitted (403).');
       done();
     });
   });
@@ -113,7 +113,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/Including excluded fields is not permitted[.]/i);
+      expect(body).to.be('Forbidden: Including excluded fields is not permitted (403).');
       done();
     });
   });
@@ -126,7 +126,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/May not set selected fields of populated document[.]/i);
+      expect(body).to.be('Forbidden: Selecting fields of populated documents is not permitted (403).');
       done();
     });
   });
@@ -139,7 +139,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/Including excluded fields is not permitted[.]/i);
+      expect(body).to.be('Forbidden: Including excluded fields is not permitted (403).');
       done();
     });
   });
@@ -152,7 +152,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/May not set selected fields of populated document[.]/i);
+      expect(body).to.be('Forbidden: Selecting fields of populated documents is not permitted (403).');
       done();
     });
   });
@@ -165,7 +165,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
-      expect(body).to.match(/May not set selected fields of populated document[.]/i);
+      expect(body).to.be('Forbidden: Selecting fields of populated documents is not permitted (403).');
       done();
     });
   });
@@ -500,7 +500,8 @@ describe('Queries', function () {
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(500);
+      expect(response.statusCode).to.be(400);
+      expect(body).to.be('Bad Request: The requested query hint is invalid (400).')
       done();
     });
   });
@@ -552,6 +553,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
+      expect(body).to.be('Forbidden: Hints are not enabled for this resource (403).')
       done();
     });
   });
@@ -564,6 +566,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(404);
+      expect(body).to.be('Not Found: No document matched the requested query (404).');
       done();
     });
   });
@@ -612,6 +615,7 @@ describe('Queries', function () {
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(403);
+      expect(body).to.be('Forbidden: You may not find distinct values for the requested path (403).')
       done();
     });
   });

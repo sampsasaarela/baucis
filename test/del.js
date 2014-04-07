@@ -22,13 +22,14 @@ describe('DELETE singular', function () {
         json: true
       };
 
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.be(1); // count of deleted objects
 
     	request.del(options, function (error, response, body) {
     	  if (error) return done(error);
 
-        expect(response).to.have.property('statusCode', 404);
+        expect(response.statusCode).to.be(404);
+        expect(body).to.be('Not Found: No document matched the requested query (404).');
     	  done();
     	});
     });

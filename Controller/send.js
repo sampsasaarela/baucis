@@ -150,7 +150,10 @@ var decorator = module.exports = function (options, protect) {
   });
 
   protect.finalize(function (request, response, next) {
-    request.baucis.send.on('error', next);
+    request.baucis.send.on('error', function (error) {
+      if (error.message !== 'bad hint') return next(error);
+      next(errors.BadRequest('The requested query hint is invalid'));
+    });
     request.baucis.send.pipe(response);
   });
 };

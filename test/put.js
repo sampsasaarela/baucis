@@ -16,7 +16,7 @@ describe('PUT singular', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('name', 'Radicchio');
 
       // put the leek on the server
@@ -28,7 +28,7 @@ describe('PUT singular', function () {
       };
       request.put(options, function (err, response, body) {
         if (err) return done(err);
-        expect(response).to.have.property('statusCode', 200);
+        expect(response.statusCode).to.be(200);
         expect(response.headers).to.not.have.property('location');
 
         var leekId = radicchio._id;
@@ -38,7 +38,7 @@ describe('PUT singular', function () {
         };
         request.get(options, function (err, response, body) {
           if (err) return done(err);
-          expect(response).to.have.property('statusCode', 200);
+          expect(response.statusCode).to.be(200);
           expect(body).to.have.property('name', 'Leek');
           done();
         });
@@ -54,7 +54,7 @@ describe('PUT singular', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('name', 'Radicchio');
 
       // put the leek on the server
@@ -64,7 +64,8 @@ describe('PUT singular', function () {
       };
       request.put(options, function (err, response, body) {
         if (err) return done(err);
-        expect(response).to.have.property('statusCode', 400);
+        expect(response.statusCode).to.be(400);
+        expect(body).to.be('Bad Request: The request body must contain exactly one update document (400).');
         done();
       });
     });
@@ -78,7 +79,7 @@ describe('PUT singular', function () {
     };
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 200);
+      expect(response.statusCode).to.be(200);
       expect(body).to.have.property('name', 'Radicchio');
 
       // put the leek on the server
@@ -88,7 +89,8 @@ describe('PUT singular', function () {
       };
       request.put(options, function (err, response, body) {
         if (err) return done(err);
-        expect(response).to.have.property('statusCode', 400);
+        expect(response.statusCode).to.be(400);
+        expect(body).to.be('Bad Request: The request body must contain exactly one update document (400).');
         done();
       });
     });
@@ -103,7 +105,8 @@ describe('PUT singular', function () {
     // First check it's not there
     request.get(options, function (err, response, body) {
       if (err) return done(err);
-      expect(response).to.have.property('statusCode', 404);
+      expect(response.statusCode).to.be(404);
+      expect(body).to.be('Not Found: No document matched the requested query (404).');
 
       // Attempt to update non-existant doc
       var options = {
@@ -112,7 +115,8 @@ describe('PUT singular', function () {
       };
       request.put(options, function (err, response, body) {
         if (err) return done(err);
-        expect(response).to.have.property('statusCode', 404);
+        expect(response.statusCode).to.be(404);
+        expect(body).to.be('Not Found: No document matched the requested query (404).');
 
         // Make sure it wasn't created
         var options = {
@@ -121,7 +125,8 @@ describe('PUT singular', function () {
         };
         request.get(options, function (err, response, body) {
           if (err) return done(err);
-          expect(response).to.have.property('statusCode', 404);
+          expect(response.statusCode).to.be(404);
+          expect(body).to.be('Not Found: No document matched the requested query (404).');
           done();
         });
       });
