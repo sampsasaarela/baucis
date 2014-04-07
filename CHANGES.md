@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.16.21
+--------
+Update dependency for deco.
+
 v0.16.20
 --------
 Updated outdated dependencies.
