@@ -2,7 +2,7 @@
   "name": "baucis",
   "author": "William Riley-Land <william@kun.io>",
   "homepage": "https://github.com/wprl/baucis",
-  "version": "0.16.19",
+  "version": "0.16.20",
   "main": "index.js",
   "scripts": {
     "test": "mocha --bail --timeout 5000 --globals vegetables"
@@ -42,13 +42,13 @@
     "express": "~3.5.1"
   },
   "devDependencies": {
-    "mocha": "~1.8.2",
-    "async": "~0.2.9",
-    "expect.js": "~0.2.0",
-    "passport": "~0.1.17",
-    "passport-local": "~0.1.6",
-    "request": "~2.21.0",
-    "parse-links": "0.0.1",
+    "mocha": "~1.18.2",
+    "async": "~0.7.0",
+    "expect.js": "~0.3.1",
+    "passport": "~0.2.0",
+    "passport-local": "~1.0.0",
+    "request": "~2.34.0",
+    "parse-links": "~0.1.0",
     "mongoose": "~3.8.8",
     "express": "~3.5.1",
     "through": "~2.3.4"

@@ -1,8 +1,16 @@
 Baucis Change Log
 =================
 
+v0.16.20
+--------
+Updated outdated dependencies.
+
+v0.16.19
+--------
+Improve error messages, correct some status codes, fix issue #147.
+
 v0.16.18
--------
+--------
 Discriminators - correctly handle POST.  The correct model is used based on the `__t` that is passed in the request body.
 
 v0.16.17
