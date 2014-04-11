@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.18.0
+-------
+Use the mongoose `toCollectionName` util method, instead of the lingo module.
+
 v0.17.0
 -------
 Deprecate `documents` stage of middleware.

@@ -1,6 +1,6 @@
 // __Dependencies__
 var mongoose = require('mongoose');
-var lingo = require('lingo');
+var utils = require('mongoose/lib/utils');
 var errors = require('../errors');
 
 // __Module Definition__
@@ -47,7 +47,7 @@ var decorator = module.exports = function (options, protect) {
   options['modelName'] = modelName;
   options['schema'] = model.schema;
   options['singular'] = options.singular || modelName;
-  options['plural'] = options.plural || lingo.en.pluralize(options.singular);
+  options['plural'] = options.plural || utils.toCollectionName(options.singular, mongoose.options);
   // Find deselected paths in the schema.
   model.schema.eachPath(function (name, path) {
     if (path.options.select === false) deselected.push(name);
