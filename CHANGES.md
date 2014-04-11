@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.17.0
+-------
+Deprecate `documents` stage of middleware.
+
 v0.16.21
 --------
 Update dependency for deco.

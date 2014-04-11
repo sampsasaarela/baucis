@@ -87,13 +87,6 @@ var fixture = module.exports = {
       next();
     });
 
-    controller.documents(function (request, response, next) {
-      if (request.query.testDocuments !== 'true') return next();
-      var transformation = JSON.stringify(request.baucis.documents).substring(0, 6).split('');
-      request.baucis.documents = transformation;
-      next();
-    });
-
     // Test streaming in through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamIn !== 'true') return next();

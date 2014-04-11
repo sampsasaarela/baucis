@@ -431,7 +431,7 @@ describe('Controllers', function () {
     var controller = baucis.rest({ singular: 'store', publish: false });
     var register = function () {
       controller.request('post', function () {});
-      controller.documents('post', function () {});
+      controller.query('post', function () {});
     };
 
     expect(register).not.to.throwException();

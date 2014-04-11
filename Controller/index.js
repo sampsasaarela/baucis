@@ -18,7 +18,6 @@ Controller.decorators(__dirname, [
   'initialize',
   'request',
   'query',
-  'documents',
   'send'
 ]);
 

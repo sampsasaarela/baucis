@@ -1,5 +1,5 @@
-baucis v0.16.21
-===============
+baucis v0.17.0
+==============
 
 Baucis enables you to build scalable REST APIs using the open source tools and standards you and your team already know.
 
@@ -150,10 +150,9 @@ Baucis adds middleware registration functions for three stages of the request cy
 | Name | Description |
 | ---- | ----------- |
 | request | This stage of middleware will be called after baucis applies defaults based on the request, but before the Mongoose query is generated |
-| query | This stage of middleware will be called after baucis applies defaults to the Mongoose query object, but before the documents or count are retrieved from the database.  The query can be accessed in your custom middleware via `request.baucis.query`.  Query middleware cannot be added explicitly for POST and will be ignored when added for POST implicitly.  |
-| documents | This stage of middleware will be called after baucis executes the query, but before the documents or count are sent in the response.  The documents/count can be accessed in your custom middleware via `request.baucis.documents`.  |
+| query | This stage of middleware will be called after baucis applies defaults to the Mongoose query object, but before the documents are streamed out through the response.  The query can be accessed in your custom middleware via `request.baucis.query`.  Query middleware cannot be added explicitly for POST and will be ignored when added for POST implicitly.  |
 
-Each of these functions has three forms:
+These two functions have three forms:
 
 To apply middleware to all API routes, just pass the function or array to the method for the appropriate stage:
 
@@ -162,7 +161,7 @@ To apply middleware to all API routes, just pass the function or array to the me
       return response.send(401);
     });
 
-    controller.documents(function (request, response, next) {
+    controller.query(function (request, response, next) {
       if (typeof request.baucis.documents === 'number') return next();
       if (!Array.isArray(request.baucis.documents)) return next();
 
@@ -333,7 +332,7 @@ Here's an example of how a stream that interacts with outgoing documents may be 
 Migration notes:
 
   * For POSTs, if `request.body` is present, the incoming request will be parsed before being streamed, negating many of the benefits of streaming.  However, especiall when POSTing only one new document at a time, this is not an issue.  If you want to POST many objects at once, using the default streaming behavior is highly recommened.
-  * The document stage of middleware will probably be deprecated in a coming release.  A feature to stream into `request.baucis.documents` for non-streaming access is being considered, however, so this feature and related areas are a bit unstable at the moment.
+  * The document stage of middleware has been deprecated.  Use an outgoing through stream instead.
 
 Contact
 -------

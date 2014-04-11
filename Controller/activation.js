@@ -109,8 +109,6 @@ var decorator = module.exports = function (options, protect) {
 
   // A method used to activate document-stage middleware.
   controller.documents = function (endpoint, verbs, middleware) {
-    var definitions = parseActivateParameters('documents', arguments);
-    definitions.forEach(activate);
-    return controller;
+    throw new errors.Deprecated('The documents stage of middleware has been deprecated.  Use an outgoing through stream instead.')
   };
 };

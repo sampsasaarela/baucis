@@ -9,7 +9,6 @@ var decorator = module.exports = function (options, protect) {
     initial: express(),
     request: express(),
     query: express(),
-    documents: express(),
     finalize: express()
   };
   var initial = controllerForStage.initial;
@@ -19,7 +18,6 @@ var decorator = module.exports = function (options, protect) {
   controller.use(controllerForStage.initial);
   controller.use(controllerForStage.request);
   controller.use(controllerForStage.query);
-  controller.use(controllerForStage.documents);
   controller.use(controllerForStage.finalize);
 
   Object.keys(controllerForStage).forEach(function (stage) {
