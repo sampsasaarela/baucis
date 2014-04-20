@@ -84,7 +84,7 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize('instance', 'head', function (request, response, next) {
     request.baucis.send = es.pipeline(
       request.baucis.send,
-      lastModified(response, controller.get('lastModified')),
+      lastModified(response, controller.get('lastModified')), // TODO Only add if enabled
       es.stringify(),
       etag(response),
       es.map(empty)
@@ -104,7 +104,7 @@ var decorator = module.exports = function (options, protect) {
   protect.finalize('instance', 'get', function (request, response, next) {
     request.baucis.send = es.pipeline(
       request.baucis.send,
-      lastModified(response, controller.get('lastModified')),
+      lastModified(response, controller.get('lastModified')), // TODO only add if enabled
       etag(response),
       request.baucis.formatter()
     );

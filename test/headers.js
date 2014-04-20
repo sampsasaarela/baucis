@@ -59,6 +59,21 @@ describe('Headers', function () {
     });
   });
 
+  it('should match the correct MIME type, ignoring extra options and linear whitespace', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/vegetables',
+      headers: {
+        'Content-Type': '     application/json        ;       charset=UTF-8    cheese=roquefort      '
+      },
+      json: { name: 'Tomatillo' }
+    };
+    request.post(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(201);
+      done();
+    });
+  });
+
   it('should set X-Powered-By', function (done) {
     var options = {
       url: 'http://localhost:8012/api/vegetables',

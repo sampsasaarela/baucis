@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.18.1
+-------
+Fix an issue where the request's content type would not be recognized when it used a MIME type parameter. (#152)
+
 v0.18.0
 -------
 Use the mongoose `toCollectionName` util method, instead of the lingo module.
