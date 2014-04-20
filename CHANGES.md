@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.18.2
+-------
+Don't try to set the Last-Modified header if the feature isn't enabled (fix #157).
+
 v0.18.1
 -------
 Fix an issue where the request's content type would not be recognized when it used a MIME type parameter. (#152)
