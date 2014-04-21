@@ -54,7 +54,6 @@ var decorator = module.exports = function (options, protect) {
     pipeline(es.through(
       function (body) {
         count += 1;
-        console.log('CONT: %s', count)
         if (count === 2) {
           next(errors.BadRequest('The request body contained more than one update document'));
           return;
