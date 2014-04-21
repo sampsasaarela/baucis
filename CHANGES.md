@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.18.4
+-------
+Internal refactor to use protected pipeline method for internal as well as external stream interfaces.
+
 v0.18.3
 -------
 Update to use the latest `baucis-json`.

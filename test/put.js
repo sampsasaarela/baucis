@@ -65,7 +65,7 @@ describe('PUT singular', function () {
       request.put(options, function (err, response, body) {
         if (err) return done(err);
         expect(response.statusCode).to.be(400);
-        expect(body).to.be('Bad Request: The request body must contain exactly one update document (400).');
+        expect(body).to.be('Bad Request: The request body did not contain an update document (400).');
         done();
       });
     });
@@ -82,7 +82,7 @@ describe('PUT singular', function () {
       expect(response.statusCode).to.be(200);
       expect(body).to.have.property('name', 'Radicchio');
 
-      // put the leek on the server
+      // Put some veggies on the server.
       var options = {
         url: 'http://localhost:8012/api/vegetables/' + radicchio._id,
         json: [ { name: 'Pea Shoot' }, { name: 'Bitter Melon' } ]
@@ -90,7 +90,7 @@ describe('PUT singular', function () {
       request.put(options, function (err, response, body) {
         if (err) return done(err);
         expect(response.statusCode).to.be(400);
-        expect(body).to.be('Bad Request: The request body must contain exactly one update document (400).');
+        expect(body).to.be('Bad Request: The request body contained more than one update document (400).');
         done();
       });
     });

@@ -47,24 +47,19 @@ function count () {
 var decorator = module.exports = function (options, protect) {
   var controller = this;
 
-  function pipeline (request, stream) {
-    if (!request.baucis.send) request.baucis.send = stream;
-    else request.baucis.send = es.pipeline(request.baucis.send, stream);
-  }
-
   // Create the basic stream.
   protect.finalize(function (request, response, next) {
     var count = 0;
     var documents = request.baucis.documents;
 
-    // If documents were set in the baucis hash, use them.
-    if (documents) documents = es.readArray([].concat(documents));
-    // Otherwise, stream the relevant documents from Mongo, based on constructed query.
-    else documents = request.baucis.query.stream();
+    var pipeline = request.baucis.send = protect.pipeline();
 
-    pipeline(request, documents);
+    // If documents were set in the baucis hash, use them.
+    if (documents) pipeline(es.readArray([].concat(documents)));
+    // Otherwise, stream the relevant documents from Mongo, based on constructed query.
+    else pipeline(request.baucis.query.stream());
     // Check for 404.
-    pipeline(request, es.through(
+    pipeline(es.through(
       function (doc) {
         count += 1;
         this.emit('data', doc);
@@ -75,7 +70,7 @@ var decorator = module.exports = function (options, protect) {
       }
     ));
     // Apply user streams.
-    pipeline(request, request.baucis.outgoing());
+    pipeline(request.baucis.outgoing());
     // Set the document formatter based on the Accept header of the request.
     request.baucis.api.formatters(response, function (error, formatter) {
       if (error) next(error);
@@ -87,67 +82,67 @@ var decorator = module.exports = function (options, protect) {
   // HEAD
   protect.finalize('instance', 'head', function (request, response, next) {
     var modified = controller.get('lastModified');
-    if (modified) pipeline(request, lastModified(response, modified));
-    pipeline(request, es.stringify());
-    pipeline(request, etag(response));
-    pipeline(request, es.map(empty));
+    if (modified) request.baucis.send(lastModified(response, modified));
+    request.baucis.send(es.stringify());
+    request.baucis.send(etag(response));
+    request.baucis.send(es.map(empty));
     next();
   });
 
   protect.finalize('collection', 'head', function (request, response, next) {
-    pipeline(request, es.map(empty));
+    request.baucis.send(es.map(empty));
     next();
   });
 
   // GET
   protect.finalize('instance', 'get', function (request, response, next) {
     var modified = controller.get('lastModified');
-    if (modified) pipeline(request, lastModified(response, modified));
-    pipeline(request, etag(response));
-    pipeline(request, request.baucis.formatter());
+    if (modified) request.baucis.send(lastModified(response, modified));
+    request.baucis.send(etag(response));
+    request.baucis.send(request.baucis.formatter());
     next();
   });
 
   protect.finalize('collection', 'get', function (request, response, next) {
     if (request.baucis.count) {
-      pipeline(request, count());
-      pipeline(request, es.stringify());
+      request.baucis.send(count());
+      request.baucis.send(es.stringify());
     }
     else {
-      pipeline(request, request.baucis.formatter(true));
+      request.baucis.send(request.baucis.formatter(true));
     }
     next();
   });
 
   // POST
   protect.finalize('collection', 'post', function (request, response, next) {
-    pipeline(request, request.baucis.formatter());
+    request.baucis.send(request.baucis.formatter());
     next();
   });
 
   // PUT
   protect.finalize('put', function (request, response, next) {
-    pipeline(request, request.baucis.formatter());
+    request.baucis.send(request.baucis.formatter());
     next();
   });
 
   // DELETE
   protect.finalize('del', function (request, response, next) {
     // Remove each document from the database.
-    pipeline(request, es.map(function (doc, callback) {
-      doc.remove(callback);
-    }));
-    pipeline(request, count());
-    pipeline(request, es.stringify());
+    request.baucis.send(function (doc, callback) { doc.remove(callback) });
+    // Respond with the count of deleted documents.
+    request.baucis.send(count());
+    request.baucis.send(es.stringify());
     next();
   });
 
   protect.finalize(function (request, response, next) {
-    request.baucis.send.on('error', function (error) {
+    var out = request.baucis.send();
+    out.on('error', function (error) {
       if (error.message !== 'bad hint') return next(error);
       next(errors.BadRequest('The requested query hint is invalid'));
     });
-    request.baucis.send.pipe(response);
+    out.pipe(response);
   });
 };
 
