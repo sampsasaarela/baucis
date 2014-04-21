@@ -79,7 +79,7 @@ var decorator = module.exports = function (options, protect) {
     pipeline(request.baucis.outgoing());
     // Set the document formatter based on the Accept header of the request.
     request.baucis.api.formatters(response, function (error, formatter) {
-      if (error) next(error);
+      if (error) return next(error);
       request.baucis.formatter = formatter;
       next();
     });

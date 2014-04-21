@@ -1,9 +1,13 @@
 Baucis Change Log
 =================
 
+v0.19.1
+-------
+Fix #159.
+
 v0.19.0
 -------
-Add context to incoming and outgoing user streams. (Fix #151)
+Add context to incoming and outgoing user streams. (Fix #151).
 
 v0.18.4
 -------
