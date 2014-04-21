@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.18.3
+-------
+Update to use the latest `baucis-json`.
+
 v0.18.2
 -------
 Don't try to set the Last-Modified header if the feature isn't enabled (fix #157).

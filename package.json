@@ -2,7 +2,7 @@
   "name": "baucis",
   "author": "William Riley-Land <william@kun.io>",
   "homepage": "https://github.com/wprl/baucis",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "main": "index.js",
   "scripts": {
     "test": "mocha --bail --timeout 5000 --globals vegetables"
@@ -34,7 +34,7 @@
     "semver": "~2.2.1",
     "deco": "~0.10.2",
     "event-stream": "~3.1.1",
-    "baucis-json": "0.0.3"
+    "baucis-json": "~0.1.0"
   },
   "peerDependencies": {
     "mongoose": "~3.8.1",
