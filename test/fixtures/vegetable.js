@@ -90,9 +90,9 @@ var fixture = module.exports = {
     // Test streaming in through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamIn !== 'true') return next();
-      request.baucis.incoming(es.map(function (doc, callback) {
-        doc.name = 'boom';
-        callback(null, doc);
+      request.baucis.incoming(es.map(function (context, callback) {
+        context.incoming.name = 'boom';
+        callback(null, context);
       }));
       next();
     });
@@ -100,9 +100,9 @@ var fixture = module.exports = {
     // Test streaming in through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamInFunction !== 'true') return next();
-      request.baucis.incoming(function (doc, callback) {
-        doc.name = 'bimm';
-        callback(null, doc);
+      request.baucis.incoming(function (context, callback) {
+        context.incoming.name = 'bimm';
+        callback(null, context);
       });
       next();
     });
@@ -110,9 +110,9 @@ var fixture = module.exports = {
     // Test streaming out through custom handler
     controller.request(function (request, response, next) {
       if (request.query.streamOut !== 'true') return next();
-      request.baucis.outgoing(es.map(function (doc, callback) {
-        doc.name = 'beam';
-        callback(null, doc);
+      request.baucis.outgoing(es.map(function (context, callback) {
+        context.doc.name = 'beam';
+        callback(null, context);
       }));
       next();
     });

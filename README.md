@@ -1,4 +1,4 @@
-baucis v0.18.4
+baucis v0.19.0
 ==============
 
 Baucis enables you to build scalable REST APIs using the open source tools and standards you and your team already know.
@@ -290,41 +290,51 @@ Instead of accessing `request.body` or `request.baucis.documents`, you can add a
 As a shortcut, a map function can be passed in.  It will be used to create a map stream internally.
 
     controller.request(function (request, response, next) {
-      request.baucis.incoming(function (doc, callback) {
-        doc.name = 'Feverfew';
-        callback(null, doc);
+      request.baucis.incoming(function (context, callback) {
+        context.doc.name = 'Feverfew';
+        callback(null, context);
       });
       next();
     });
 
-Passing in through streams is also allowed.  Here's an example using the [through module](https://www.npmjs.org/package/through) to create a stream that checks for a forbidden sort of whiskey and alters the name of incoming (POSTed) documents.
+Passing in through streams is also allowed.  Here's an example using the [through module](https://www.npmjs.org/package/through) to create a stream that checks for a forbidden sort of whiskey and alters the name of incoming (POSTed) documents.  For both POST and PUT requests, the context contains the incoming request body.
 
     controller.request(function (request, response, next) {
-      request.baucis.incoming(through(function (doc) {
-        if (doc.whiskey === 'Canadian') {
+      request.baucis.incoming(through(function (context) {
+        if (context.incoming.whiskey === 'Canadian') {
           // Errors will be passed off to `next` later, and the stream will
           // be stopped.
           this.emit('error', new Error('Too smooth.'));
           return;
         }
-        doc.name = 'SHAZAM';
-        this.queue(doc);
+        context.incoming.name = 'SHAZAM';
+        this.queue(context);
       }));
+      next();
+    });
+
+For PUT requests, the context will contain both the incoming request body, and the document to update:
+
+    controller.request('put', function (request, response, next) {
+      request.baucis.incoming(function (context, callback) {
+        if (context.incoming.mochi === context.doc.mochi) return callback();
+        callback(baucis.errors.Forbidden('The mochi field is read-only.'));
+      });
       next();
     });
 
 Here's an example of how a stream that interacts with outgoing documents may be added:
 
     controller.request(function (request, response, next) {
-      request.baucis.outgoing(through(function (doc) {
-        if (doc.owner !== request.user) {
+      request.baucis.outgoing(through(function (context) {
+        if (context.doc.owner !== request.user) {
           // Errors will be passed off to `next` later, and the stream will
           // be stopped.
           this.emit('error', baucis.errors.Forbidden());
           return;
         }
-        delete doc.password;
-        this.queue(doc);
+        delete context.doc.password;
+        this.queue(context);
       }));
       next();
     });

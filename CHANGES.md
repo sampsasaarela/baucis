@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.19.0
+-------
+Add context to incoming and outgoing user streams. (Fix #151)
+
 v0.18.4
 -------
 Internal refactor to use protected pipeline method for internal as well as external stream interfaces.

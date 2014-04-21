@@ -15,6 +15,7 @@ var decorator = module.exports = function (options, protect) {
     var parser;
     var count = 0;
     var operator = request.headers['x-baucis-update-operator'];
+    var versionKey = controller.get('schema').get('versionKey');
     var pipeline = protect.pipeline();
     // Check if the body was parsed by some external middleware e.g. `express.json`.
     // If so, create a one-document stream from the parsed body.
@@ -28,31 +29,69 @@ var decorator = module.exports = function (options, protect) {
       pipeline(request);
       pipeline(parser);
     }
+    // Set up the stream context.
+    pipeline(function (body, callback) {
+      var context = { doc: undefined, incoming: body };
+      callback(null, context);
+    });
+    // Load the Mongoose document and add it to the context, unless this is a
+    // special update operator.
+    if (!operator) {
+      pipeline(function (context, callback) {
+        var Model = request.baucis.controller.get('model');
+        Model.findOne(request.baucis.conditions).exec(function (error, doc) {
+          if (error) return callback(error);
+          if (!doc) return callback(errors.NotFound());
+          // Add the Mongoose document to the context.
+          callback(null, { doc: doc, incoming: context.incoming });
+        });
+      });
+    }
     // Pipe through user streams, if any.
     pipeline(request.baucis.incoming());
     // If the document ID is present, ensure it matches the ID in the URL.
-    pipeline(function (body, callback) {
+    pipeline(function (context, callback) {
       var findBy = request.baucis.controller.get('findBy');
-      var bodyId = body[findBy];
-      if (bodyId === undefined) return callback(null, body);
-      if (bodyId === request.params.id) return callback(null, body);
+      var bodyId = context.incoming[findBy];
+      if (bodyId === undefined) return callback(null, context);
+      if (bodyId === request.params.id) return callback(null, context);
       callback(errors.BadRequest("The ID of the update document did not match the URL's document ID"));
     });
     // Ensure the request includes a finite object version if locking is enabled.
-    pipeline(function (body, callback) {
-      if (!controller.get('locking')) return callback(null, body);
-
-      var versionKey = request.baucis.controller.get('schema').get('versionKey');
-      var updateVersion = body[versionKey];
-
-      if (updateVersion === undefined || !Number.isFinite(Number(updateVersion))) {
-        return callback(errors.BadRequest('Locking is enabled, so the target version must be provided in the request body using path "%s"', versionKey));
+    if (controller.get('locking')) {
+      pipeline(function (context, callback) {
+        var updateVersion = context.incoming[versionKey];
+        if (updateVersion === undefined || !Number.isFinite(Number(updateVersion))) {
+          return callback(errors.BadRequest('Locking is enabled, so the target version must be provided in the request body using path "%s"', versionKey));
+        }
+        callback(null, context);
+      });
+      // Add some locking checks only applicable to the default update operator.
+      if (!operator) {
+        // Make sure the version key was selected.
+        pipeline(function (context, callback) {
+          if (!context.doc.isSelected(versionKey)) {
+            callback(errors.BadRequest('The version key "%s" must be selected', versionKey));
+            return;
+          }
+          // Pass through.
+          callback(null, context);
+        });
+        pipeline(function (context, callback) {
+          var updateVersion = Number(context.incoming[versionKey]);
+          // Update and current version have been found.  Check if they're equal.
+          if (updateVersion !== context.doc[versionKey]) return callback(errors.LockConflict());
+          // One is not allowed to set __v and increment in the same update.
+          delete context.incoming[versionKey];
+          context.doc.increment();
+          // Pass through.
+          callback(null, context);
+        });
       }
-      callback(null, body);
-    });
+    }
     // Ensure there is exactly one update document.
     pipeline(es.through(
-      function (body) {
+      function (context) {
         count += 1;
         if (count === 2) {
           next(errors.BadRequest('The request body contained more than one update document'));
@@ -60,73 +99,53 @@ var decorator = module.exports = function (options, protect) {
         }
         if (count > 1) return;
 
-        this.emit('data', body);
+        this.emit('data', context);
       },
       function () {
         if (count === 0) {
           next(errors.BadRequest('The request body did not contain an update document'));
         }
+        this.emit('end');
       }
     ));
-    // Default update operator.
+    // Finish up for the default update operator.
     if (!operator) {
-      pipeline(function (body, callback) {
-        var Model = request.baucis.controller.get('model');
-
-        Model.findOne(request.baucis.conditions, function (error, doc) {
-          if (error) return next(error);
-          if (!doc) return next(errors.NotFound());
-
-          // TODO here
-
-          var lock = request.baucis.controller.get('locking') === true;
-          var versionKey = request.baucis.controller.get('schema').get('versionKey');
-          var updateVersion = body[versionKey] !== undefined ? Number(body[versionKey]) : null;
-
-          if (lock) {
-            // Make sure the version key was selected.
-            if (!doc.isSelected(versionKey)) {
-              // TODO autofix for the user?
-              return next(errors.BadRequest('The version key "%s" must be selected', versionKey));
-            }
-            // Update and current version have been found.  Check if they're equal.
-            if (updateVersion !== doc[versionKey]) return next(errors.LockConflict());
-            // One is not allowed to set __v and increment in the same update.
-            delete body[versionKey];
-            doc.increment();
-          }
-
-          doc.set(body);
-          doc.save(next);
-        });
+      // Update the Mongoose document with the request body.
+      pipeline(function (context, callback) {
+        context.doc.set(context.incoming);
+        // Pass through.
+        callback(null, context);
       });
+      // Save the Mongoose document.
+      pipeline(function (context, callback) { context.doc.save(callback); });
     }
-    // Non-default update operator (bypasses validation).
+    // Finish up for a non-default update operator (bypasses validation).
     else {
-      pipeline(function (body, callback) {
-        var lock = request.baucis.controller.get('locking') === true;
-        var versionKey = request.baucis.controller.get('schema').get('versionKey');
-        var updateVersion = body[versionKey] !== undefined ? Number(body[versionKey]) : null;
+      pipeline(function (context, callback) {
+        var updateVersion = context.incoming[versionKey] !== undefined ? Number(context.incoming[versionKey]) : null;
         var Model = request.baucis.controller.get('model');
         var wrapper = {};
 
         if (validOperators.indexOf(operator) === -1) {
-          return next(errors.BadRequest('The requested update operator "%s" is not supported', operator));
+          callback(errors.BadRequest('The requested update operator "%s" is not supported', operator));
+          return;
         }
         // Ensure that some paths have been enabled for the operator.
         if (!request.baucis.controller.get('allow ' + operator)) {
-          return next(errors.Forbidden('The requested update operator "%s" is not enabled for this resource', operator));
+          callback(errors.Forbidden('The requested update operator "%s" is not enabled for this resource', operator));
+          return;
         }
         // Make sure paths have been whitelisted for this operator.
-        if (request.baucis.controller.checkBadUpdateOperatorPaths(operator, Object.keys(body))) {
-          return next(errors.Forbidden('This update path is forbidden for the requested update operator "%s"', operator));
+        if (request.baucis.controller.checkBadUpdateOperatorPaths(operator, Object.keys(context.incoming))) {
+          callback(errors.Forbidden('This update path is forbidden for the requested update operator "%s"', operator));
+          return;
         }
 
-        wrapper[operator] = body;
-        if (lock) request.baucis.conditions[versionKey] = updateVersion;
+        wrapper[operator] = context.incoming;
+        if (controller.get('locking')) request.baucis.conditions[versionKey] = updateVersion;
 
         // Update the doc using the supplied operator and bypassing validation.
-        Model.update(request.baucis.conditions, wrapper, next);
+        Model.update(request.baucis.conditions, wrapper, callback);
       });
     }
 

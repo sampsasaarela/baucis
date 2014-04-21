@@ -150,5 +150,6 @@ describe('PUT singular', function () {
   });
 
   it('should allow running validation with methods that currently bypass validation ... maybe');
+  it('should always select the version key when locking is enabled ... maybe');
 });
 
