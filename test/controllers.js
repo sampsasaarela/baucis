@@ -762,6 +762,28 @@ describe('Controllers', function () {
     });
   });
 
-  it('should not have the API reference set when using publish: false')
+  it('should handle unique key error as a validation error', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/cheeses',
+      json: true,
+      body: { name: 'Gorgonzola', color: 'Green' }
+    };
+    request.post(options, function (err, response, body) {
+      if (err) return done(err);
+      expect(response.statusCode).to.be(201);
+      request.post(options, function (err, response, body) {
+        if (err) return done(err);
+        expect(response.statusCode).to.be(422);
+        expect(body).to.have.property('name');
+        expect(body.name).to.have.property('message', 'Path `name` (Gorgonzola) must be unique.');
+        expect(body.name).to.have.property('originalMessage', 'E11000 duplicate key error index: xXxBaUcIsTeStXxX.cheeses.$name_1  dup key: { : "Gorgonzola" }');
+        expect(body.name).to.have.property('name', 'MongoError');
+        expect(body.name).to.have.property('path', 'name');
+        expect(body.name).to.have.property('type', 'unique');
+        expect(body.name).to.have.property('value', 'Gorgonzola');
+        done();
+      });
+    });
+  });
 
 });

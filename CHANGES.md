@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.19.2
+-------
+Handle duplicate key error as a 422.  (Fix #160).
+
 v0.19.1
 -------
 Fix #159.
