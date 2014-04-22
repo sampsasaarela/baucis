@@ -1,7 +1,7 @@
 // __Dependencies__
 var es = require('event-stream');
 var crypto = require('crypto');
-var errors = require('../errors');
+var BaucisError = require('../BaucisError');
 
 // __Private Module Members__
 // A map that is used to create empty response body.
@@ -71,7 +71,7 @@ var decorator = module.exports = function (options, protect) {
         this.emit('data', context);
       },
       function () {
-        if (count === 0) this.emit('error', errors.NotFound());
+        if (count === 0) this.emit('error', BaucisError.NotFound());
         else this.emit('end');
       }
     ));
@@ -87,21 +87,21 @@ var decorator = module.exports = function (options, protect) {
 
   // HEAD
   protect.finalize('instance', 'head', function (request, response, next) {
-    var modified = controller.get('lastModified');
+    var modified = controller.lastModified();
     if (modified) request.baucis.send(lastModified(response, modified));
     request.baucis.send(etag(response));
-    request.baucis.send(es.map(empty));
+    request.baucis.send(empty);
     next();
   });
 
   protect.finalize('collection', 'head', function (request, response, next) {
-    request.baucis.send(es.map(empty));
+    request.baucis.send(empty);
     next();
   });
 
   // GET
   protect.finalize('instance', 'get', function (request, response, next) {
-    var modified = controller.get('lastModified');
+    var modified = controller.lastModified();
     if (modified) request.baucis.send(lastModified(response, modified));
     request.baucis.send(etag(response));
     request.baucis.send(redoc);
@@ -149,9 +149,8 @@ var decorator = module.exports = function (options, protect) {
     var out = request.baucis.send();
     out.on('error', function (error) {
       if (error.message !== 'bad hint') return next(error);
-      next(errors.BadRequest('The requested query hint is invalid'));
+      next(BaucisError.BadRequest('The requested query hint is invalid'));
     });
     out.pipe(response);
   });
 };
-

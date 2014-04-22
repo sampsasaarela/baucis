@@ -10,7 +10,10 @@ var decorator = module.exports = function (options, protect) {
     var streams = [];
     return function (transmute) {
       // If it's a stream, add it to the reserve pipeline.
-      if (transmute && (transmute.writable || transmute.readable)) return streams.push(transmute);
+      if (transmute && (transmute.writable || transmute.readable)) {
+        streams.push(transmute);
+        return;
+      }
       // If it's a function, create a map stream with it.
       if (transmute) return streams.push(es.map(transmute));
       // If called without arguments, return a pipeline linking all streams.

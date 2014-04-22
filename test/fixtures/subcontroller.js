@@ -5,8 +5,21 @@ var config = require('./config');
 
 var app;
 var server;
-var controller;
-var subcontroller;
+
+var User = new mongoose.Schema({
+  name: String,
+  tasks: [{ type: mongoose.Schema.ObjectId, ref: 'task' }]
+});
+var Task = new mongoose.Schema({
+  name: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }
+});
+
+mongoose.model('user', User);
+mongoose.model('task', Task);
 
 var fixture = module.exports = {
   init: function (done) {
@@ -14,42 +27,23 @@ var fixture = module.exports = {
 
     mongoose.connect(config.mongo.url);
 
-    var User = new mongoose.Schema({ name: String });
-    var Task = new mongoose.Schema({
-      name: String,
-      user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
-      }
+    var users = baucis.rest('user');
+    var tasks = users.vivify('tasks');
+
+    users.request(function (request, response, next) {
+      if (request.baucis.controller === users) return next();
+      next(new Error('request.baucis.controller set incorrectly!'));
     });
 
-    if (!mongoose.models['user']) mongoose.model('user', User);
-    if (!mongoose.models['task']) mongoose.model('task', Task);
-
-    var taskSubcontroller = baucis.rest({
-      singular: 'task',
-      basePath: '/:_id/tasks',
-      publish: false
+    tasks.request(function (request, response, next) {
+      if (request.baucis.controller === tasks) return next();
+      next(new Error('request.baucis.controller set incorrectly!'));
     });
 
-    taskSubcontroller.query(function (request, response, next) {
+    tasks.query(function (request, response, next) {
       request.baucis.query.where('user', request.params._id);
       next();
     });
-
-    taskSubcontroller.request(function (request, response, next) {
-      if (request.baucis.controller === taskSubcontroller) return next();
-      next(new Error('request.baucis.controller set incorrectly!'));
-    });
-
-    var userController = baucis.rest('user');
-
-    userController.request(function (request, response, next) {
-      if (request.baucis.controller === userController) return next();
-      next(new Error('request.baucis.controller set incorrectly!'));
-    });
-
-    userController.use(taskSubcontroller);
 
     app = express();
     app.use('/api', baucis());

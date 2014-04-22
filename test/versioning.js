@@ -70,35 +70,37 @@ describe('Versioning', function () {
   });
 
   it('should catch controllers that are added twice to overlapping API dependencies', function (done) {
-    baucis.rest({ singular: 'party', versions: '>0.0.0' });
-    baucis.rest({ singular: 'party', versions: '<2' });
-    expect(baucis.bind(baucis)).to.throwException(/^Controller "parties" exists more than once in a release [(]500[)][.]$/);
+    baucis.rest('party').versions('>0.0.0');
+    baucis.rest('party').versions('<2');
+    expect(baucis.bind(baucis)).to.throwException(/^Controllers with path "\/parties" exist more than once in a release that overlaps "<2" [(]500[)][.]$/);
     done();
   });
 
   it('should catch controllers that are added twice to the same release', function (done) {
-    baucis.rest({ singular: 'party', versions: '0.0.1' });
-    baucis.rest({ singular: 'party', versions: '0.0.1' });
-    expect(baucis.bind(baucis)).to.throwException(/^Controller "parties" exists more than once in a release [(]500[)][.]$/);
+    baucis.rest('party').versions('0.0.1');
+    baucis.rest('party').versions('0.0.1');
+    expect(baucis.bind(baucis)).to.throwException(/^Controllers with path "\/parties" exist more than once in a release that overlaps "0.0.1" [(]500[)][.]$/);
     done();
   });
 
   it('should catch controllers with invalid version range', function (done) {
-    var fn = baucis.rest.bind(baucis, { singular: 'party', versions: 'abc' });
+    var fn = function () {
+      baucis.rest('party').versions('abc');
+    };
     expect(fn).to.throwException(/^Controller version range "abc" was not a valid semver range [(]500[)][.]$/);
     done();
   });
 
   it('should cause an error whne a release has no controllers', function (done) {
-    baucis.rest({ singular: 'party', versions: '1.5.7' });
+    baucis.rest('party').versions('1.5.7');
     var fn = baucis.bind(baucis, { releases: [ '0.0.1', '1.5.7' ]});
     expect(fn).to.throwException(/^There are no controllers in release "0[.]0[.]1" [(]500[)][.]$/);
     done();
   });
 
   it("should catch controllers where the API version range doesn't satisfy any releases", function (done) {
-    baucis.rest({ singular: 'party', versions: '0.0.1' });
-    baucis.rest({ singular: 'party', versions: '1.4.6' });
+    baucis.rest('party').versions('0.0.1');
+    baucis.rest('party').versions('1.4.6');
     expect(baucis.bind(baucis)).to.throwException(/^The controller version range "1[.]4[.]6" doesn't satisfy any API release [(]500[)][.]$/);
     done();
   });
@@ -130,7 +132,7 @@ describe('Versioning', function () {
 
   it('should send "409 Conflict" if there is a version conflict', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/versioned/liens',
+      url: 'http://localhost:8012/api/versioned/pumpkins',
       json: true,
       body: { title: 'Franklin' }
     };
@@ -139,7 +141,7 @@ describe('Versioning', function () {
       expect(response.statusCode).to.be(201);
 
       var options = {
-        url: 'http://localhost:8012/api/versioned/liens/' + body._id,
+        url: 'http://localhost:8012/api/versioned/pumpkins/' + body._id,
         json: true,
         body: { title: 'Ranken', __v: 0 }
       };
@@ -161,16 +163,16 @@ describe('Versioning', function () {
 
   it('should send "409 Conflict" if there is a version conflict (greater than)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/versioned/liens',
+      url: 'http://localhost:8012/api/versioned/pumpkins',
       json: true,
-      body: { title: 'Smithton' }
+      body: { name: 'Red' }
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(200);
 
       var options = {
-        url: 'http://localhost:8012/api/versioned/liens/' + body[1]._id,
+        url: 'http://localhost:8012/api/versioned/pumpkins/' + body[1]._id,
         json: true,
         body: { __v: body[1].__v + 10 }
       };
@@ -185,7 +187,7 @@ describe('Versioning', function () {
 
   it('should not send "409 Conflict" if there is no version conflict (equal)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/versioned/liens',
+      url: 'http://localhost:8012/api/versioned/pumpkins',
       json: true
     };
     request.get(options, function (error, response, body) {
@@ -193,7 +195,7 @@ describe('Versioning', function () {
       expect(response.statusCode).to.be(200);
 
       var options = {
-        url: 'http://localhost:8012/api/versioned/liens/' + body[1]._id,
+        url: 'http://localhost:8012/api/versioned/pumpkins/' + body[1]._id,
         json: true,
         body: { __v: body[1].__v }
       };
@@ -207,7 +209,7 @@ describe('Versioning', function () {
 
   it('should cause an error if locking is enabled and no version is selected on the doc', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/versioned/liens',
+      url: 'http://localhost:8012/api/versioned/pumpkins',
       json: true
     };
     request.get(options, function (error, response, body) {
@@ -215,7 +217,7 @@ describe('Versioning', function () {
       expect(response.statusCode).to.be(200);
 
       var options = {
-        url: 'http://localhost:8012/api/versioned/liens/' + body[0]._id,
+        url: 'http://localhost:8012/api/versioned/pumpkins/' + body[0]._id,
         json: true,
         body: { title: 'Forest Expansion' }
       };

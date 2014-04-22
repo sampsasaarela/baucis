@@ -4,18 +4,16 @@ var express = require('express');
 // __Module Definition__
 var decorator = module.exports = function (options, protect) {
   var controller = this;
-
+  var originalGet = controller.get;
+  var initial = express();
   var controllerForStage = protect.controllerForStage = {
-    initial: express(),
+    initial: initial,
     request: express(),
     query: express(),
     finalize: express()
   };
-  var initial = controllerForStage.initial;
-  var originalGet = controller.get;
-
   // __Stage Controllers__
-  controller.use(controllerForStage.initial);
+  controller.use(initial);
   controller.use(controllerForStage.request);
   controller.use(controllerForStage.query);
   controller.use(controllerForStage.finalize);

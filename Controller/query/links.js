@@ -9,7 +9,7 @@ var decorator = module.exports = function () {
 
   // Add "Link" header field, with some basic defaults
   controller.query('instance', '*', function (request, response, next) {
-    if (controller.get('relations') === false) return next();
+    if (controller.relations() === false) return next();
 
     var originalPath = request.originalUrl.split('?')[0];
     var originalPathParts = originalPath.split('/');
@@ -30,9 +30,8 @@ var decorator = module.exports = function () {
 
   // Add "Link" header field, with some basic defaults (for collection routes)
   controller.query('collection', '*', function (request, response, next) {
-    if (controller.get('relations') === false) return next();
+    if (controller.relations() === false) return next();
 
-    var Model = request.baucis.controller.get('model');
     var originalPath = request.originalUrl.split('?')[0];
     // Used to create a link from current URL with new query string.
     var makeLink = function (query) {
@@ -48,7 +47,7 @@ var decorator = module.exports = function () {
     if (request.method !== 'GET') return done();
     if (!request.query.limit) return done();
 
-    Model.count(request.baucis.conditions, function (error, count) {
+    controller.model().count(request.baucis.conditions, function (error, count) {
       if (error) return next(error);
 
       var limit = Number(request.query.limit);

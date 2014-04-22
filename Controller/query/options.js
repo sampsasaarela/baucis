@@ -1,17 +1,29 @@
 // __Dependencies__
-var errors = require('../../errors');
+var BaucisError = require('../../BaucisError');
 
 // __Module Definition__
 var decorator = module.exports = function () {
+  var controller = this;
+
+  function checkBadSelection (select) {
+    var bad = false;
+    controller.deselected().forEach(function (path) {
+      var badPath = new RegExp('[+]?' + path + '\\b', 'i');
+      if (badPath.exec(select)) bad = true;
+    });
+    return bad;
+  }
+
   // Perform distinct query.
   this.query(function (request, response, next) {
-    var Model = request.baucis.controller.get('model');
     var distinct = request.query.distinct;
     if (!distinct) return next();
-    if (request.baucis.controller.get('deselected paths').indexOf(distinct) !== -1) {
-      return next(errors.Forbidden('You may not find distinct values for the requested path'));
+    if (controller.deselected(distinct)) {
+      next(BaucisError.Forbidden('You may not find distinct values for the requested path'));
+      return;
     }
-    Model.distinct(distinct, request.baucis.conditions, function (error, values) {
+    var query = controller.model().distinct(distinct, request.baucis.conditions);
+    query.exec(function (error, values) {
       if (error) return next(error);
       request.baucis.documents = values;
       next();
@@ -19,14 +31,14 @@ var decorator = module.exports = function () {
   });
   // Apply incoming request sort.
   this.query(function (request, response, next) {
-    if (request.query.sort) request.baucis.query.sort(request.query.sort);
+    var sort = request.query.sort;
+    if (sort) request.baucis.query.sort(sort);
     next();
   });
   // Apply controller select options to the query.
   this.query(function (request, response, next) {
-    var select = request.baucis.controller.get('select');
-    if (!select) return next();
-    request.baucis.query.select(select);
+    var select = controller.select();
+    if (select) request.baucis.query.select(select);
     next();
   });
   // Apply incoming request select to the query.
@@ -35,10 +47,10 @@ var decorator = module.exports = function () {
     if (!select) return next();
 
     if (select.indexOf('+') !== -1) {
-      return next(errors.Forbidden('Including excluded fields is not permitted'));
+      return next(BaucisError.Forbidden('Including excluded fields is not permitted'));
     }
-    if (request.baucis.controller.checkBadSelection(select)) {
-      return next(errors.Forbidden('Including excluded fields is not permitted'));
+    if (checkBadSelection(select)) {
+      return next(BaucisError.Forbidden('Including excluded fields is not permitted'));
     }
 
     request.baucis.query.select(select);
@@ -59,12 +71,12 @@ var decorator = module.exports = function () {
 
       populate.forEach(function (field) {
         if (error) return;
-        if (request.baucis.controller.checkBadSelection(field.path || field)) {
-          return error = errors.Forbidden('Including excluded fields is not permitted');
+        if (checkBadSelection(field.path || field)) {
+          return error = BaucisError.Forbidden('Including excluded fields is not permitted');
         }
         // Don't allow selecting fields from client when populating
         if (field.select) {
-          return error = errors.Forbidden('Selecting fields of populated documents is not permitted');
+          return error = BaucisError.Forbidden('Selecting fields of populated documents is not permitted');
         }
 
         request.baucis.query.populate(field);
@@ -90,32 +102,27 @@ var decorator = module.exports = function () {
   });
   // Check for query comment.
   this.query(function (request, response, next) {
-    if (request.query.comment) {
-      if (request.baucis.controller.get('allow comments') === true) {
-        request.baucis.query.comment(request.query.comment);
-      }
-      else {
-        console.warn('Query comment was ignored.');
-      }
-    }
+    var comment = request.query.comment;
+    if (!comment) return next();
+    if (controller.comments()) request.baucis.query.comment(comment);
+    else console.warn('Query comment was ignored.');
     next();
   });
   // Check for query hint.
   this.query(function (request, response, next) {
     var hint = request.query.hint;
 
-    if (hint) {
-      if (request.baucis.controller.get('allow hints') === true) {
-        if (typeof hint === 'string') hint = JSON.parse(hint);
-        Object.keys(hint).forEach(function (path) {
-          hint[path] = Number(hint[path]);
-        });
-        request.baucis.query.hint(hint);
-      }
-      else {
-        return next(errors.Forbidden('Hints are not enabled for this resource'));
-      }
+    if (!hint) return next();
+    if (!controller.hints()) {
+      return next(BaucisError.Forbidden('Hints are not enabled for this resource'));
     }
+
+    if (typeof hint === 'string') hint = JSON.parse(hint);
+    // Convert the value for each path from stirng to number.
+    Object.keys(hint).forEach(function (path) {
+      hint[path] = Number(hint[path]);
+    });
+    request.baucis.query.hint(hint);
 
     next();
   });

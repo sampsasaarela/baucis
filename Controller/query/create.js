@@ -1,18 +1,16 @@
 // __Dependencies__
 var es = require('event-stream');
 var util = require('util');
-var errors = require('../../errors');
+var BaucisError = require('../../BaucisError');
 
 // __Module Definition__
 var decorator = module.exports = function (options, protect) {
   var controller = this;
 
   controller.query('post', function (request, response, next) {
-    var Model = request.baucis.controller.get('model');
-    var findBy = request.baucis.controller.get('findBy');
     var url = request.originalUrl || request.url;
+    var findBy = controller.findBy();
     var pipeline = protect.pipeline();
-    var contentType;
     var parser;
     // Add trailing slash to URL if needed.
     if (url.lastIndexOf('/') === (url.length - 1)) url = url.slice(0, url.length - 1);
@@ -26,7 +24,7 @@ var decorator = module.exports = function (options, protect) {
     // Otherwise, stream and parse the request.
     else {
       parser = request.baucis.api.parser(request.get('content-type'));
-      if (!parser) return next(errors.UnsupportedMediaType());
+      if (!parser) return next(BaucisError.UnsupportedMediaType());
       pipeline(request);
       pipeline(parser);
     }
@@ -38,23 +36,23 @@ var decorator = module.exports = function (options, protect) {
     pipeline(request.baucis.incoming());
     // Map function to create a document from incoming JSON and update the context.
     pipeline(function (context, callback) {
+      var transformed = { incoming: context.incoming };
+      var Model = controller.model();
       var type = context.incoming.__t;
       var Discriminator = type ? Model.discriminators[type] : undefined;
-      if (type) {
-        if (!Discriminator) {
-          callback(errors.BadRequest("A document's type did not match any known discriminators for this resource"));
+      if (type && !Discriminator) {
+          callback(BaucisError.BadRequest("A document's type did not match any known discriminators for this resource"));
           return;
         }
-        doc = new Discriminator();
-      }
-      else {
-        doc = new Model();
-      }
-      callback(null, { incoming: context.incoming, doc: doc });
+      // Create the document using either the model or child model.
+      if (type) transformed.doc = new Discriminator();
+      else transformed.doc = new Model();
+      // Transformation complete.
+      callback(null, transformed);
     });
     // Update the new Mongoose document with the incoming data.
     pipeline(function (context, callback) {
-      doc.set(context.incoming);
+      context.doc.set(context.incoming);
       callback(null, context);
     });
     // Save each document.
@@ -65,7 +63,9 @@ var decorator = module.exports = function (options, protect) {
       });
     });
     // Map the saved documents to document IDs.
-    pipeline(function (context, callback) { callback(null, context.doc.get(findBy)) });
+    pipeline(function (context, callback) {
+      callback(null, context.doc.get(findBy));
+    });
     // Write the IDs to an array and process them.
     var s = pipeline();
     s.on('error', next);
@@ -76,7 +76,7 @@ var decorator = module.exports = function (options, protect) {
       // Set the conditions used to build `request.baucis.query`.
       var conditions = request.baucis.conditions[findBy] = { $in: ids };
       // Check for at least one document.
-      if (ids.length === 0) return next(errors.BadRequest('The request body must contain at least one document'));
+      if (ids.length === 0) return next(BaucisError.BadRequest('The request body must contain at least one document'));
       // Set the `Location` header if at least one document was sent.
       if (ids.length === 1) location = url + '/' + ids[0];
       else location = util.format('%s?conditions={ "%s": %s }', url, findBy, JSON.stringify(conditions));

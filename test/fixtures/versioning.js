@@ -5,42 +5,26 @@ var config = require('./config');
 
 var app;
 var server;
-var controller;
-var subcontroller;
+var Schema = mongoose.Schema;
+var Party = new Schema({ hobbits: Number, dwarves: Number });
+var Dungeon = new Schema({ treasures: Number });
+var Pumpkin = new Schema({ title: String });
+
+mongoose.model('party', Party);
+mongoose.model('dungeon', Dungeon);
+mongoose.model('pumpkin', Pumpkin);
 
 var fixture = module.exports = {
   init: function (done) {
-    var Schema = mongoose.Schema;
 
     mongoose.connect(config.mongo.url);
 
-    var Party = new Schema({ hobbits: Number, dwarves: Number });
-    var Dungeon = new Schema({ treasures: Number });
-
-    if (!mongoose.models['party']) mongoose.model('party', Party);
-    if (!mongoose.models['dungeon']) mongoose.model('dungeon', Dungeon);
-
     app = express();
 
-    baucis.rest({
-      singular: 'party',
-      versions: '1.x'
-    });
-
-    baucis.rest({
-      singular: 'party',
-      versions: '2.1.0'
-    });
-
-    baucis.rest({
-      singular: 'party',
-      versions: '~3'
-    });
-
-    baucis.rest({
-      singular: 'lien',
-      locking: true
-    });
+    baucis.rest('party').versions('1.x');
+    baucis.rest('party').versions('2.1.0');
+    baucis.rest('party').versions('~3');
+    baucis.rest('pumpkin').locking(true);
 
     app.use('/api/versioned', baucis({
       releases: [ '1.0.0', '2.1.0', '3.0.1' ]

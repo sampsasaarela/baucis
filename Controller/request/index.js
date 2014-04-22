@@ -3,8 +3,7 @@ var deco = require('deco');
 
 // __Module Definition__
 var middleware = module.exports = deco(__dirname, [
-  'deprecated',
-  'headers',
+  'allow',
   'validation',
   'conditions',
   'streams'

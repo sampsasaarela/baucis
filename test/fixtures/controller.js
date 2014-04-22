@@ -5,141 +5,100 @@ var config = require('./config');
 
 var app;
 var server;
-var controller;
-var subcontroller;
+var Schema = mongoose.Schema;
+
+var Stores = new Schema({
+  name: { type: String, required: true, unique: true },
+  tools: [{ type: mongoose.Schema.ObjectId, ref: 'tool' }],
+  mercoledi: Boolean
+});
+
+var Tools = new Schema({
+  name: { type: String, required: true },
+  store: { type: String, required: true },
+  bogus: { type: Boolean, default: false, required: true }
+});
+
+var Cheese = new Schema({
+  name: { type: String, required: true, unique: true },
+  color: { type: String, required: true, select: false },
+  molds: [ String ],
+  arbitrary: [{
+    goat: Boolean,
+    champagne: String,
+    llama: [ Number ]
+  }]
+});
+
+var Beans = new Schema({ koji: Boolean });
+var Deans = new Schema({ room: { type: Number, unique: true } });
+var Liens = new Schema({ title: String });
+var Fiends = new Schema({ average: Number });
+var Unmades = new Schema({ mode: Number });
+
+mongoose.model('tool', Tools);
+mongoose.model('store', Stores);
+mongoose.model('cheese', Cheese);
+mongoose.model('bean', Beans);
+mongoose.model('dean', Deans);
+mongoose.model('lien', Liens);
+mongoose.model('fiend', Fiends);
+mongoose.model('unmade', Unmades);
 
 var fixture = module.exports = {
   init: function (done) {
-    var Schema = mongoose.Schema;
-
     mongoose.connect(config.mongo.url);
 
-    var Stores = new Schema({
-      name: { type: String, required: true, unique: true },
-      mercoledi: Boolean
-    });
-
-    var Tools = new Schema({
-      name: { type: String, required: true },
-      bogus: { type: Boolean, default: false, required: true }
-    });
-
-    var Cheese = new Schema({
-      name: { type: String, required: true, unique: true },
-      color: { type: String, required: true, select: false },
-      molds: [ String ],
-      arbitrary: [{
-        goat: Boolean,
-        champagne: String,
-        llama: [ Number ]
-      }]
-    });
-
-    var Beans = new Schema({ koji: Boolean });
-    var Deans = new Schema({ room: { type: Number, unique: true } });
-    var Liens = new Schema({ title: String });
-    var Fiends = new Schema({ average: Number });
-    var Unmades = new Schema({ mode: Number });
-
-    if (!mongoose.models['tool']) mongoose.model('tool', Tools);
-    if (!mongoose.models['store']) mongoose.model('store', Stores);
-    if (!mongoose.models['cheese']) mongoose.model('cheese', Cheese);
-    if (!mongoose.models['bean']) mongoose.model('bean', Beans);
-    if (!mongoose.models['dean']) mongoose.model('dean', Deans);
-    if (!mongoose.models['lien']) mongoose.model('lien', Liens);
-    if (!mongoose.models['fiend']) mongoose.model('fiend', Fiends);
-    if (!mongoose.models['unmade']) mongoose.model('unmade', Unmades);
-
-    // Tools embedded controller
-    subcontroller = baucis.rest({
-      singular: 'tool',
-      basePath: '/:storeId/tools',
-      publish: false
-    });
-
-    subcontroller.request(function (request, response, next) {
-      if (request.baucis.controller === subcontroller) return next();
-      next(new Error('request.baucis.controller set incorrectly!'));
-    });
-
-    subcontroller.query(function (request, response, next) {
-      request.baucis.query.where('bogus', false);
-      next();
-    });
-
     // Stores controller
-    controller = baucis.rest({
-      singular: 'store',
-      findBy: 'name'
-    });
+    var stores = baucis.rest('store').findBy('name');
 
-    controller.use('/binfo', function (request, response, next) {
+    stores.use('/binfo', function (request, response, next) {
       response.json('Poncho!');
     });
 
-    controller.use(function (request, response, next) {
+    stores.use(function (request, response, next) {
       response.set('X-Poncho', 'Poncho!');
       next();
     });
 
-    controller.get('/info', function (request, response, next) {
+    stores.get('/info', function (request, response, next) {
       response.json('OK!');
     });
 
-    controller.get('/:id/arbitrary', function (request, response, next) {
+    stores.get('/:id/arbitrary', function (request, response, next) {
       response.json(request.params.id);
     });
 
-    controller.use(subcontroller);
-
-    controller.request(function (request, response, next) {
-      if (request.baucis.controller === controller) return next();
+    stores.request(function (request, response, next) {
+      if (request.baucis.controller === stores) return next();
       next(new Error('request.baucis.controller set incorrectly!'));
     });
 
-    baucis.rest({
-      singular: 'cheese',
-      select: '-_id color name',
-      findBy: 'name',
-      'allow $push': 'molds arbitrary arbitrary.$.llama',
-      'allow $set': 'molds arbitrary.$.champagne',
-      'allow $pull': 'molds arbitrary.$.llama'
+    // Tools embedded controller
+    var storeTools = stores.vivify('tools');
+
+    storeTools.request(function (request, response, next) {
+      if (request.baucis.controller === storeTools) return next();
+      next(new Error('request.baucis.controller set incorrectly!'));
     });
 
-    baucis.rest({
-      model: 'cheese',
-      singular: 'timeentry',
-      plural: 'timeentries',
-      findBy: 'name'
+    storeTools.query(function (request, response, next) {
+      request.baucis.query.where('bogus', false);
+      next();
     });
 
-    baucis.rest({
-      singular: 'bean',
-      get: false
-    });
+    var cheesy = baucis.rest('cheese').select('-_id color name').findBy('name');
+    cheesy.operators('$push', 'molds arbitrary arbitrary.$.llama');
+    cheesy.operators('$set', 'molds arbitrary.$.champagne');
+    cheesy.operators('$pull', 'molds arbitrary.$.llama');
 
-    baucis.rest({
-      singular: 'dean',
-      findBy: 'room',
-      get: false
-    });
-
-    baucis.rest({
-      singular: 'lien',
-      del: false
-    });
-
-    baucis.rest({
-      model: 'fiend',
-      singular: 'mean',
-      locking: true
-    });
-
-    baucis.rest({
-      singular: 'store',
-      plural: 'baloo',
-      findBy: 'name'
-    });
+    baucis.rest('cheese').singular('timeentry').plural('timeentries').findBy('name');
+    baucis.rest('bean').methods('get', false);
+    baucis.rest('dean').findBy('room').methods('get', false);
+    baucis.rest('lien').methods('del', false);
+    baucis.rest('fiend').singular('mean').locking(true);
+    baucis.rest('store').plural('baloo').findBy('name');
+    baucis.rest('store').plural('baloo').path('linseed.oil');
 
     app = express();
     app.use('/api', baucis());
@@ -167,7 +126,7 @@ var fixture = module.exports = {
           // create stores and tools
           mongoose.model('store').create(
             ['Westlake', 'Corner'].map(function (name) { return { name: name } }),
-            function (error) {
+            function (error, store) {
               if (error) return done(error);
 
               var cheeses = [
@@ -185,7 +144,7 @@ var fixture = module.exports = {
                 if (error) return done(error);
 
                 mongoose.model('tool').create(
-                  ['Hammer', 'Saw', 'Axe'].map(function (name) { return { name: name } }),
+                  ['Hammer', 'Saw', 'Axe'].map(function (name) { return { store: store.name, name: name } }),
                   done
                 );
               });

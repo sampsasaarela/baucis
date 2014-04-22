@@ -13,19 +13,28 @@ describe('Controllers', function () {
   beforeEach(fixtures.controller.create);
   after(fixtures.controller.deinit);
 
-  it('should allow passing string name only to create', function (done) {
-    var makeController = function () {
-      baucis.rest('unmade');
-    };
+  it('should allow passing string name to create', function (done) {
+    var makeController = function () { baucis.Controller('unmade') };
+    makeController();
     expect(makeController).to.not.throwException();
     done();
   });
 
-  it('should allow passing string name only to create', function (done) {
-    var makeController = function () {
-      baucis.rest({ model: mongoose.model('unmade'), publish: false });
-    };
+  it('should allow passing a model to create', function (done) {
+    var makeController = function () { baucis.Controller(mongoose.model('unmade')) };
     expect(makeController).to.not.throwException();
+    done();
+  });
+
+  it('should not allow leaving off arguments to create', function (done) {
+    var makeController = function () { baucis.Controller() };
+    expect(makeController).to.throwException(/You must pass in a model or model name [(]500[)][.]/);
+    done();
+  });
+
+  it('should not allow weird arguments to create', function (done) {
+    var makeController = function () { baucis.Controller({}) };
+    expect(makeController).to.throwException(/You must pass in a model or model name [(]500[)][.]/);
     done();
   });
 
@@ -112,7 +121,7 @@ describe('Controllers', function () {
 
   it('should disallow adding a non-unique findBy field', function (done) {
     var makeController = function () {
-      baucis.rest({ singular: 'cheese', findBy: 'color', publish: false });
+      baucis.Controller('cheese').findBy('color');
     };
     expect(makeController).to.throwException(/^`findBy` path for model "cheese" must be unique [(]500[)][.]$/);
     done();
@@ -122,7 +131,7 @@ describe('Controllers', function () {
     var makeController = function () {
       var rab = new mongoose.Schema({ 'arb': { type: String, unique: true } });
       mongoose.model('rab', rab);
-      baucis.rest({ singular: 'rab', findBy: 'arb', publish: false });
+      baucis.Controller('rab').findBy('arb');
     };
     expect(makeController).not.to.throwException();
     done();
@@ -132,7 +141,7 @@ describe('Controllers', function () {
     var makeController = function () {
       var barb = new mongoose.Schema({ 'arb': { type: String, index: { unique: true } } });
       mongoose.model('barb', barb);
-      baucis.rest({ singular: 'barb', findBy: 'arb', publish: false });
+      baucis.Controller('barb').findBy('arb');
     };
     expect(makeController).not.to.throwException();
     done();
@@ -167,7 +176,7 @@ describe('Controllers', function () {
   it('should still allow using baucis routes when adding arbitrary routes', function (done) {
     var options = {
       url: 'http://localhost:8012/api/stores',
-      qs: { select: '-_id -__v', sort: 'name' },
+      qs: { select: '-_id -__v -tools', sort: 'name' },
       json: true
     };
     request.get(options, function (err, response, body) {
@@ -178,16 +187,43 @@ describe('Controllers', function () {
     });
   });
 
+  it('should 404 when parentId is not found', function (done) {
+    // TODO should still validate parentId for 400
+    var options = {
+      url: 'http://localhost:8012/api/stores/Mom+Pop/tools?sort=name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(404);
+      expect(body).to.be('Not Found: No document matched the requested query (404).');
+      done();
+    });
+  });
+
+  it('should 404 when restricted query has no results', function (done) {
+    // TODO should still validate parentId for 400
+    var options = {
+      url: 'http://localhost:8012/api/stores/Corner/tools?sort=name',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+      expect(response.statusCode).to.be(404);
+      expect(body).to.be('Not Found: No document matched the requested query (404).');
+      done();
+    });
+  });
+
   it('should allow mounting of subcontrollers (GET plural)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+      url: 'http://localhost:8012/api/stores/Westlake/tools?sort=name',
       json: true
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
       expect(response.statusCode).to.be(200);
       expect(body).to.have.property('length', 3);
-      expect(body[0]).to.have.property('name', 'Axe');
       done();
     });
   });
@@ -201,13 +237,14 @@ describe('Controllers', function () {
       if (error) return done(error);
       expect(response.statusCode).to.be(201);
       expect(body).to.have.property('bogus', false);
+      expect(body).to.have.property('store', '123');
       done();
     });
   });
 
   it('should allow mounting of subcontrollers (DEL plural)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/stores/123/tools',
+      url: 'http://localhost:8012/api/stores/Westlake/tools',
       json: true
     };
     request.del(options, function (error, response, body) {
@@ -220,7 +257,7 @@ describe('Controllers', function () {
 
   it('should allow mounting of subcontrollers (GET singular)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+      url: 'http://localhost:8012/api/stores/Westlake/tools?sort=name',
       json: true
     };
     request.get(options, function (error, response, body) {
@@ -231,7 +268,7 @@ describe('Controllers', function () {
 
       var id = body[0]._id;
       var options = {
-        url: 'http://localhost:8012/api/stores/123/tools/' + id,
+        url: 'http://localhost:8012/api/stores/Westlake/tools/' + id,
         json: true
       };
       request.get(options, function (error, response, body) {
@@ -245,7 +282,7 @@ describe('Controllers', function () {
 
   it('should allow mounting of subcontrollers (PUT singular)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/stores/123/tools',
+      url: 'http://localhost:8012/api/stores/Westlake/tools',
       json: true
     };
     request.get(options, function (error, response, body) {
@@ -254,7 +291,7 @@ describe('Controllers', function () {
 
       var id = body[0]._id;
       var options = {
-        url: 'http://localhost:8012/api/stores/123/tools/' + id,
+        url: 'http://localhost:8012/api/stores/Westlake/tools/' + id,
         json: { name: 'Screwdriver' }
       };
       request.put(options, function (error, response, body) {
@@ -269,7 +306,7 @@ describe('Controllers', function () {
 
   it('should allow mounting of subcontrollers (DEL singular)', function (done) {
     var options = {
-      url: 'http://localhost:8012/api/stores/123/tools?sort=name',
+      url: 'http://localhost:8012/api/stores/Westlake/tools?sort=name',
       json: true
     };
     request.get(options, function (error, response, body) {
@@ -280,7 +317,7 @@ describe('Controllers', function () {
 
       var id = body[0]._id;
       var options = {
-        url: 'http://localhost:8012/api/stores/123/tools/' + id,
+        url: 'http://localhost:8012/api/stores/Westlake/tools/' + id,
         json: true
       };
       request.del(options, function (error, response, body) {
@@ -397,21 +434,21 @@ describe('Controllers', function () {
   });
 
   it('should disallow unrecognized verbs', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
+    var controller = baucis.Controller('store');
     var register = function () { controller.request('get dude', function () {}) };
     expect(register).to.throwException(/^Unrecognized HTTP method: "dude" [(]500[)][.]$/);
     done();
   });
 
   it('should disallow unrecognized howManys', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
+    var controller = baucis.Controller('store');
     var register = function () { controller.request('gargoyle', 'get put', function () {}) };
     expect(register).to.throwException(/^End-point type must be either "instance" or "collection," not "gargoyle" [(]500[)][.]$/);
     done();
   });
 
   it('should allow specifying instance or collection middleware', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
+    var controller = baucis.Controller('store');
     var register = function () {
       controller.request('collection', 'get put head del post', function () {});
       controller.request('instance', 'get put head del post', function () {});
@@ -421,14 +458,14 @@ describe('Controllers', function () {
   });
 
   it('should allow registering query middleware for other verbs', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
+    var controller = baucis.Controller('store');
     var register = function () { controller.query('get put head del', function () {}) };
     expect(register).not.to.throwException();
     done();
   });
 
   it('should allow registering POST middleware for other stages', function (done) {
-    var controller = baucis.rest({ singular: 'store', publish: false });
+    var controller = baucis.Controller('store');
     var register = function () {
       controller.request('post', function () {});
       controller.query('post', function () {});
@@ -439,24 +476,16 @@ describe('Controllers', function () {
   });
 
   it('should correctly set the deselected paths property', function (done) {
-    var doozle = new mongoose.Schema({ a: { type: String, select: false }, b: String, c: String, d: String });
-    mongoose.model('doozle', doozle);
-    var controller = baucis.rest({ singular: 'doozle', select: '-d c -a b', publish: false });
-    expect(controller.get('deselected paths')).eql([ 'a', 'd' ]);
-    done();
-  });
-
-  it('should err when X-Baucis-Push is used (deprecated)', function (done) {
-    var options = {
-      url: 'http://localhost:8012/api/stores/Westlake',
-      headers: { 'X-Baucis-Push': true },
-    };
-    request.put(options, function (error, response, body) {
-      if (error) return done(error);
-      expect(response.statusCode).to.be(400);
-      expect(body).to.be('Bad Request: The `X-Baucis-Push` header is deprecated.  Use `X-Baucis-Update-Operator: $push` instead (400).');
-      done();
+    var doozle = new mongoose.Schema({
+      a: { type: String, select: false },
+      b: String,
+      c: String,
+      d: String
     });
+    mongoose.model('doozle', doozle);
+    var controller = baucis.Controller('doozle').select('-d c -a b');
+    expect(controller.deselected()).eql([ 'a', 'd' ]);
+    done();
   });
 
   it('should disallow push mode by default', function (done) {
@@ -736,7 +765,7 @@ describe('Controllers', function () {
     });
   });
 
-  it ('should allow setting plural collection name to non-default', function (done) {
+  it ('should allow setting path to non-default', function (done) {
     var options = {
       url: 'http://localhost:8012/api/baloo/?sort=name',
       json: true
@@ -786,4 +815,16 @@ describe('Controllers', function () {
     });
   });
 
+  it('should allow setting path apart from plural', function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/linseed/oil',
+      json: true
+    };
+    request.get(options, function (err, response, body) {
+      if (err) return done(err);
+      expect(response.statusCode).to.be(200);
+      expect(body).to.have.property('length', 2);
+      done();
+    });
+  });
 });

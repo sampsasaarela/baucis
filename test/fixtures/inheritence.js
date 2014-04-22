@@ -29,7 +29,7 @@ var fixture = module.exports = {
     mongoose.connect(config.mongo.url);
 
     baucis.rest('liqueur');
-    baucis.rest({ singular: 'amaro', plural: 'amari' });
+    baucis.rest('amaro').plural('amari');
     app = express();
     app.use('/api', baucis());
 
