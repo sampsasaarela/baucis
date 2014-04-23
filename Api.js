@@ -67,17 +67,22 @@ var Api = module.exports = deco(function (options) {
     var releaseControllers;
     var controllersForRelease = {};
 
+    function populateChildren(controller) {
+      if(controller.children) {
+        controller.children.forEach(function(child) {
+          populateChildren(child);
+          child.activated(true);
+          controller.use(child);
+        });
+      }
+    }
+
     apiControllers.forEach(function (controller) {
       var range = controller.versions();
       // Create an array for this range if it hasn't been registered yet.
       if (!controllersFor[range]) controllersFor[range] = [];
       // Add the controller to the controllers to be published.
-      if(controller.childs) {
-        controller.childs.forEach(function(child) {
-          child.activated(true);
-          controller.use(child);
-        });
-      }
+      populateChildren(controller);
       controllersFor[range].push(controller);
     });
 
