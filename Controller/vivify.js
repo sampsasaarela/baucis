@@ -8,8 +8,8 @@ var decorator = module.exports = function () {
   var controller = this;
 
   controller.embed = function (child) {
-    child.activated(true);
-    controller.use(child);
+    if(!controller.childs) controller.childs = [];
+    controller.childs.push(child);
     return controller;
   };
 

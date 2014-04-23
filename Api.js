@@ -72,6 +72,12 @@ var Api = module.exports = deco(function (options) {
       // Create an array for this range if it hasn't been registered yet.
       if (!controllersFor[range]) controllersFor[range] = [];
       // Add the controller to the controllers to be published.
+      if(controller.childs) {
+        controller.childs.forEach(function(child) {
+          child.activated(true);
+          controller.use(child);
+        });
+      }
       controllersFor[range].push(controller);
     });
 
