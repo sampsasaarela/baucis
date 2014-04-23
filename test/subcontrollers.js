@@ -26,17 +26,13 @@ describe('Subcontrollers', function () {
     });
   });
 
-  it("should use subcontroller middleware", function (done) {
+  it("should use sub-controller middleware", function (done) {
     var options = {
       url: 'http://localhost:8012/api/users',
       json: true
     };
     request.get(options, function (error, response, body) {
       if (error) return done(error);
-      expect(response.statusCode).to.be(200);
-      expect(body).to.have.property('length', 2);
-      expect(body[0]).to.have.property('name', 'Alice');
-
       var options = {
         url: 'http://localhost:8012/api/users/'+body[0]._id+"/tasks",
         json: true
@@ -50,4 +46,37 @@ describe('Subcontrollers', function () {
 
     });
   });
+
+  it("should use sub-sub-controller middleware", function (done) {
+    var options = {
+      url: 'http://localhost:8012/api/users',
+      json: true
+    };
+    request.get(options, function (error, response, body) {
+      if (error) return done(error);
+
+      var userid = body[0]._id;
+      var options = {
+        url: 'http://localhost:8012/api/users/'+userid+"/tasks",
+        json: true
+      };
+      request.get(options, function (error, response, body) {
+        if (error) return done(error);
+
+        var options = {
+          url: 'http://localhost:8012/api/users/'+userid+"/tasks/"+body[0]._id+"/comments",
+          json: true
+        };
+        request.get(options, function (error, response, body) {
+          if (error) return done(error);
+          expect(response.statusCode).to.be(200);
+          expect(body[0]).to.have.property('name', 'middleware');
+          done();
+        });
+
+      });
+
+    });
+  });
+
 });
