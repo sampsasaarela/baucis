@@ -1,4 +1,4 @@
-# baucis v0.20.0
+# baucis v0.20.1
 
 Baucis enables you to build scalable REST APIs using the open source tools and standards you and your team already know.
 
@@ -307,17 +307,14 @@ To apply middleware to all API routes, just pass the function or array to the me
     });
 
     controller.query(function (request, response, next) {
-      if (typeof request.baucis.documents === 'number') return next();
-      if (!Array.isArray(request.baucis.documents)) return next();
-
-      request.baucis.documents.pop();
+      request.baucis.query.populate('fences');
       next();
     });
 
 To add middleware that applies only to specific HTTP methods, use the second form.  It adds a paramater that must contain a space delimted list of HTTP methods that the middleware should be applied to.
 
     controller.query('head get', function (request, response, next) {
-      request.baucis.query.sort('-created');
+      request.baucis.query.limit(5);
       next();
     });
 
@@ -327,7 +324,6 @@ The final form is the most specific.  The first argument lets you specify whethe
     controller.request('collection', 'post', middleware);
 
 ## Swagger
-
 
 Here's how to use swagger.  First, install the plugin:
 
@@ -381,17 +377,16 @@ To customize the swagger definition, simply alter the controler's swagger data d
 
 ## Query Options
 
-Use query options from the client to make dynamic requests:
-
-    GET /api/cats?sort=-name&limit=1&conditions={ "features": "stripes" }
-    DELETE /api/people?conditions={ "name": { "$regex": "^Bob W", $flags: "i" } }
+Use query options from the client to make dynamic requests.
 
 ### conditions
 
 Set the Mongoose query's `find` or `remove` arguments.  This can take full advtange of the MongoDB query syntax, using geolocation, regular expressions, or full text search.
 
-    GET /api/people?conditions={ "location": { "$near": []44, -97] } }
+    GET /api/people?conditions={ "location": { "$near": [44, -97] } }
     GET /api/people?articles={ "summary": { "$text": "dog bites man" } }
+    GET /api/cats?sort=-name&limit=1&conditions={ "features": "stripes" }
+    DELETE /api/people?conditions={ "name": { "$regex": "^Bob W", $flags: "i" } }
 
 ### skip
 
@@ -426,7 +421,7 @@ Set which fields should be populated for response documents.  See the Mongoose [
 
 ### count
 
-May be set to true for GET requests to specify that a count should be returned instead of documents 
+May be set to true for GET requests to specify that a count should be returned instead of documents
 
     GET /api/stereos?count=true
 
@@ -447,8 +442,8 @@ Add an index hint to the query (must be enabled per controller).
 Add a comment to a query (must be enabled per controller).
 
     GET /api/wrenches?comment=Something informative
-    
-    
+
+
 ----------
 
 It is not permitted to use the `select` query option to select deselected paths.  This is to allow a mechanism for hiding fields from client software.

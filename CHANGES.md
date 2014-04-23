@@ -1,6 +1,10 @@
 Baucis Change Log
 =================
 
+v0.20.1
+-------
+Fix publish and some typos.
+
 v0.20.0
 -------
 Add `controller.vivify` method for embedding subcontrollers.  Deprecate `basePath` controller option.  Update configuration to "methods over values."  Move baucis errors from `baucis.errors` to `baucis.Error`.  Enable relations by default.  Improve & update README.
