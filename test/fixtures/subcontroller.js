@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var express = require('express');
 var baucis = require('../..');
+var es = require('event-stream');
 var config = require('./config');
 
 var app;
@@ -40,6 +41,14 @@ var fixture = module.exports = {
       next(new Error('request.baucis.controller set incorrectly!'));
     });
 
+    tasks.request(function (request, response, next) {
+      request.baucis.outgoing(es.map(function (context, callback) {
+        context.doc.name = 'middleware';
+        callback(null, context);
+      }));
+      next();
+    });
+
     tasks.query(function (request, response, next) {
       request.baucis.query.where('user', request.params._id);
       next();
@@ -67,12 +76,16 @@ var fixture = module.exports = {
 
         mongoose.model('user').create(
           ['Alice', 'Bob'].map(function (name) { return { name: name } }),
-          function (error) {
+          function (error,user) {
             if (error) return done(error);
 
             mongoose.model('task').create(
               ['Mow the Lawn', 'Make the Bed', 'Darn the Socks'].map(function (name) { return { name: name } }),
-              done
+              function (error,task) {
+                if (error) return done(error);
+                task.user = user._id;
+                task.save(done)
+              }
             );
           }
         );
